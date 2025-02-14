@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Allow access to uploads directory
+    <FilesMatch "\.(jpg|jpeg|png|gif)$">
+        Order Allow,Deny
+        Allow from all
+    </FilesMatch>
+</IfModule>
