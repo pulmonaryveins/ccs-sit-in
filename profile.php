@@ -28,8 +28,10 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Student Information</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -47,20 +49,20 @@ $conn->close();
 
             <!-- Center - Navigation -->
             <nav class="nav-links">
-                <a href="dashboard.php" class="nav-link active">
-                    <i class="fas fa-th-large"></i>
+                <a href="dashboard.php" class="nav-link">
+                    <i class="ri-dashboard-line"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="nav-link">
-                    <i class="fas fa-calendar"></i>
+                <a href="reservation.php" class="nav-link">
+                    <i class="ri-calendar-line"></i>
                     <span>Reservation</span>
                 </a>
-                <a href="#" class="nav-link">
-                    <i class="fas fa-history"></i>
+                <a href="history.php" class="nav-link">
+                    <i class="ri-history-line"></i>
                     <span>History</span>
                 </a>
-                <a href="profile.php" class="nav-link">
-                    <i class="fas fa-user"></i>
+                <a href="profile.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : ''; ?>">
+                    <i class="ri-user-3-line"></i>
                     <span>Profile</span>
                 </a>
             </nav>
@@ -76,6 +78,83 @@ $conn->close();
             </div>
         </div>
     </div>
+
+    <!-- Add these elements -->
+    <div class="backdrop" id="backdrop"></div>
+
+    <div class="profile-panel" id="profile-panel">
+        <div class="profile-content">
+            <div class="profile-header">
+                <h3>STUDENT INFORMATION</h3>
+            </div>
+            <div class="profile-body">
+                <div class="profile-image-container">
+                    <div class="profile-image">
+                        <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : 'default-avatar.png'; ?>" 
+                             alt="Profile Picture">
+                    </div>
+                    <div class="profile-name">
+                        <div class="user-info">
+                            <h3><?php echo htmlspecialchars($user['lastname'] . ', ' . $user['firstname']); ?></h3>
+                        </div>  
+                    </div>
+                </div>
+
+                <div class="student-info-grid">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-profile-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Student ID</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['idno']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-user-3-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Full Name</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['fullname']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-graduation-cap-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Course</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['course']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-expand-up-down-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Year Level</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['year_level']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-mail-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['email']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-home-9-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Address</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['address']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-time-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Session</div>
+                            <div class="detail-value">30</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="profile-page-container">
         <div class="profile-card">
             <div class="profile-header">
@@ -113,6 +192,11 @@ $conn->close();
                         <div class="form-group">
                             <label>Email Address</label>
                             <input type="email" name="email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
                         </div>
 
                         <div class="form-group">
@@ -172,6 +256,47 @@ $conn->close();
     </div>
 
     <script>
+        // Replace the existing DOMContentLoaded event handler with this:
+        document.addEventListener('DOMContentLoaded', function() {
+            const profilePanel = document.getElementById('profile-panel');
+            const backdrop = document.getElementById('backdrop');
+            const profileTrigger = document.getElementById('profile-trigger');
+
+            // Function to toggle profile panel
+            function toggleProfile(show) {
+                profilePanel.classList.toggle('active', show);
+                backdrop.classList.toggle('active', show);
+                document.body.style.overflow = show ? 'hidden' : '';
+            }
+
+            // Auto open the panel
+            setTimeout(() => toggleProfile(true), 100);
+
+            // Close panel when clicking backdrop
+            backdrop.addEventListener('click', () => toggleProfile(false));
+
+            // Toggle panel when clicking profile trigger
+            profileTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleProfile(!profilePanel.classList.contains('active'));
+            });
+
+            // Close panel when clicking outside
+            document.addEventListener('click', (e) => {
+                if (profilePanel.classList.contains('active') && 
+                    !profilePanel.contains(e.target) && 
+                    !profileTrigger.contains(e.target)) {
+                    toggleProfile(false);
+                }
+            });
+
+            // Prevent panel close when clicking inside
+            profilePanel.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+
         // Profile image upload handling
         const profileUpload = document.getElementById('profile-upload');
         const profilePreview = document.getElementById('profile-preview');
@@ -206,7 +331,7 @@ $conn->close();
             }
         });
 
-        // Update form submission handling
+        // Update form submission handling with SweetAlert2
         document.getElementById('profile-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -221,15 +346,56 @@ $conn->close();
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('Profile updated successfully!');
+                    // Show success message with SweetAlert2
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'Profile successfully updated',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#7556cc',
+                        position: 'top-end', // Position in top-right corner
+                        width: '300px', // Smaller width
+                        showConfirmButton: false, // Remove confirm button
+                        timer: 3000, // Auto close after 2 seconds
+                        toast: true, // Enable toast mode
+                        customClass: {
+                            popup: 'small-toast' // Custom class for additional styling
+                        }
+                    });
                     // Refresh the page to show updated data
-                    window.location.reload();
+                    setTimeout(() => window.location.reload(), 2000);
                 } else {
-                    alert(data.message || 'Error updating profile');
+                    // Show error message with SweetAlert2
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Error updating profile',
+                        icon: 'error',
+                        position: 'top-end',
+                        width: '300px',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        toast: true,
+                        customClass: {
+                            popup: 'small-toast'
+                        }
+                    });
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error updating profile');
+                // Show error message with SweetAlert2
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'An unexpected error occurred',
+                    icon: 'error',
+                    position: 'top-end',
+                    width: '300px',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    toast: true,
+                    customClass: {
+                        popup: 'small-toast'
+                    }
+                });
             }
         });
     </script>

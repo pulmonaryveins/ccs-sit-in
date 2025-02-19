@@ -3,6 +3,7 @@ session_start();
 require_once 'db_connect.php';
 
 if (!isset($_SESSION['username'])) {
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Not logged in']);
     exit();
 }
@@ -10,14 +11,28 @@ if (!isset($_SESSION['username'])) {
 $response = ['success' => false, 'message' => 'No changes made'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_SESSION['username'];
-    
-    // Get all form data
-    $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
-    $address = htmlspecialchars($_POST['address'] ?? '');
-    $course = htmlspecialchars($_POST['course'] ?? '');
-    $year = intval($_POST['year'] ?? 1);
-    
+    $current_username = $_SESSION['username'];
+    $new_username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $course = $_POST['course'];
+    $year = $_POST['year'];
+    $address = trim($_POST['address']);
+
+    // Check if new username is already taken (if username was changed)
+    if ($new_username !== $current_username) {
+        $check_sql = "SELECT username FROM users WHERE username = ? AND username != ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("ss", $new_username, $current_username);
+        $check_stmt->execute();
+        $result = $check_stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            echo json_encode(['success' => false, 'message' => 'Username already taken']);
+            exit();
+        }
+        $check_stmt->close();
+    }
+
     // Validate year
     if ($year < 1 || $year > 4) {
         $year = 1;
@@ -30,19 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ($year == 3 ? 'rd' : 'th'))
     ) . ' Year';
 
-    // Update database with course
-    $sql = "UPDATE users SET 
-            email = ?, 
-            address = ?, 
-            course = ?, 
-            year = ?
-            WHERE username = ?";
-
+    // Update user information
+    $sql = "UPDATE users SET username = ?, email = ?, course = ?, year = ?, address = ? WHERE username = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssis", $email, $address, $course, $year, $username);
+    $stmt->bind_param("ssssss", $new_username, $email, $course, $year, $address, $current_username);
 
     if ($stmt->execute()) {
         // Update session variables including course
+        $_SESSION['username'] = $new_username;
         $_SESSION['email'] = $email;
         $_SESSION['address'] = $address;
         $_SESSION['course'] = $course;
@@ -53,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'success' => true, 
             'message' => 'Profile updated successfully',
             'data' => [
+                'username' => $new_username,
                 'email' => $email,
                 'address' => $address,
                 'course' => $course,
@@ -70,3 +81,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $conn->close();
 header('Content-Type: application/json');
 echo json_encode($response);
+?>

@@ -73,20 +73,20 @@ $conn->close();
 
             <!-- Center - Navigation -->
             <nav class="nav-links">
-                <a href="#" class="nav-link active">
-                <i class="ri-dashboard-line"></i>
+                <a href="dashboard.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'dashboard.php' ? 'active' : ''; ?>">
+                    <i class="ri-dashboard-line"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="nav-link">
-                <i class="ri-calendar-line"></i>
+                <a href="reservation.php" class="nav-link">
+                    <i class="ri-calendar-line"></i>
                     <span>Reservation</span>
                 </a>
-                <a href="#" class="nav-link">
-                <i class="ri-history-line"></i>
+                <a href="history.php" class="nav-link">
+                    <i class="ri-history-line"></i>
                     <span>History</span>
                 </a>
                 <a href="profile.php" class="nav-link">
-                <i class="ri-user-3-line"></i>
+                    <i class="ri-user-3-line"></i>
                     <span>Profile</span>
                 </a>
             </nav>
@@ -110,7 +110,7 @@ $conn->close();
     <div class="profile-panel" id="profile-panel">
         <div class="profile-content">
             <div class="profile-header">
-                <h2>STUDENT INFORMATION</h2>
+                <h3>STUDENT INFORMATION</h3>
             </div>
             <div class="profile-body">
                 <div class="profile-image-container">

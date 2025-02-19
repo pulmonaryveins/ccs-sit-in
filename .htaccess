@@ -6,4 +6,11 @@
         Order Allow,Deny
         Allow from all
     </FilesMatch>
+    
+    # Prevent caching of CSS files
+    <FilesMatch "\.css$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </FilesMatch>
 </IfModule>
