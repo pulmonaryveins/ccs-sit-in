@@ -356,7 +356,7 @@ $conn->close();
                         position: 'top-end', // Position in top-right corner
                         width: '300px', // Smaller width
                         showConfirmButton: false, // Remove confirm button
-                        timer: 3000, // Auto close after 2 seconds
+                        timer: 1000, // Auto close after 2 seconds
                         toast: true, // Enable toast mode
                         customClass: {
                             popup: 'small-toast' // Custom class for additional styling

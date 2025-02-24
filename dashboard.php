@@ -56,6 +56,7 @@ $conn->close();
     <link rel="stylesheet" href="styles.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -186,11 +187,122 @@ $conn->close();
         </div>
     </div>
 
-    <!-- Welcome Section -->
-    <div class="welcome-section">
-        <h1>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
-        <p>to the College of Computer Studies Sit-in Monitoring System</p>
+    <!-- Dashboard Grid Container -->
+    <div class="dashboard-grid" style="margin-top: 80px;">
+        <!-- Left Column - Announcements -->
+        <div class="dashboard-column">
+            <div class="profile-card">
+                <div class="profile-header centered-header">
+                    <h2>CCS Announcements</h2>
+                </div>
+                <div class="profile-content">
+                    <div class="announcement-list">
+                        <div class="announcement-item">
+                            <div class="announcement-title">
+                            <i class="ri-notification-3-fill"></i>
+                                <h3>CCS Admin</h3>
+                            </div>
+                            <div class="announcement-details">
+                                <p>Extended laboratory hours will be available during Midterm examination week. The labs will be open until 8:00 PM.</p>
+                                <span class="timestamp">Posted: February 20, 2025</span>
+                            </div>
+                        </div>
+
+                        <div class="announcement-item">
+                            <div class="announcement-title">
+                                <i class="ri-notification-3-fill"></i>
+                                <h3>CCS Admin</h3>
+                            </div>
+                            <div class="announcement-details">
+                                <p>Extended laboratory hours will be available during Prelim examination week. The labs will be open until 8:00 PM.</p>
+                                <span class="timestamp">Posted: February 19, 2025</span>
+                            </div>
+                        </div>
+                        <div class="announcement-item">
+                            <div class="announcement-title">
+                                <i class="ri-notification-3-fill"></i>
+                                <h3>CCS Admin</h3>
+                            </div>
+                            <div class="announcement-details">
+                                <p>The Computer Laboratory will be closed for maintenance from December 20-22, 2023. All sit-in sessions during these dates will be rescheduled.</p>
+                                <span class="timestamp">Posted: February 15, 2025</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Rules -->
+        <div class="dashboard-column">
+            <div class="profile-card">
+                <div class="profile-header centered-header">
+                    <h2>Laboratory Rules and Regulations</h2>
+                </div>
+                <div class="profile-content">
+                    <div class="rules-container">
+                        <div class="rules-header">
+                            <h3>UNIVERSITY OF CEBU</h3>
+                            <h4>COLLEGE OF INFORMATION & COMPUTER STUDIES</h4>
+                        </div>
+
+                        <div class="rules-content">
+                            <p class="rules-intro">To avoid embarrassment and maintain camaraderie with your friends and superiors at our laboratories, please observe the following:</p>
+                            
+                            <ol class="rules-list">
+                                <li>Maintain silence, proper decorum, and discipline inside the laboratory. Mobile phones, walkmans and other personal pieces of equipment must be switched off.</li>
+                                <li>Games are not allowed inside the lab. This includes computer-related games, card games and other games that may disturb the operation of the lab.</li>
+                                <li>Surfing the Internet is allowed only with the permission of the instructor. Downloading and installing of software are strictly prohibited.</li>
+                                <li>Getting access to other websites not related to the course (especially pornographic and illicit sites) is strictly prohibited.</li>
+                                <li>Deleting computer files and changing the set-up of the computer is a major offense.</li>
+                                <li>Observe computer time usage carefully. A fifteen-minute allowance is given for each use. Otherwise, the unit will be given to those who wish to "sit-in".</li>
+                                <li>Observe proper decorum while inside the laboratory.
+                                    <ul>
+                                        <li>Do not get inside the lab unless the instructor is present.</li>
+                                        <li>All bags, knapsacks, and the likes must be deposited at the counter.</li>
+                                        <li>Follow the seating arrangement of your instructor.</li>
+                                        <li>At the end of class, all software programs must be closed.</li>
+                                        <li>Return all chairs to their proper places after using.</li>
+                                    </ul>
+                                </li>
+                                <li>Chewing gum, eating, drinking, smoking, and other forms of vandalism are prohibited inside the lab.</li>
+                                <li>Anyone causing a continual disturbance will be asked to leave the lab. Acts or gestures offensive to the members of the community, including public display of physical intimacy, are not tolerated.</li>
+                                <li>Persons exhibiting hostile or threatening behavior such as yelling, swearing, or disregarding requests made by lab personnel will be asked to leave the lab.</li>
+                                <li>For serious offense, the lab personnel may call the Civil Security Office (CSU) for assistance.</li>
+                                <li>Any technical problem or difficulty must be addressed to the laboratory supervisor, student assistant or instructor immediately.</li>
+                            </ol>
+
+                            <div class="disciplinary-section">
+                                <h4>DISCIPLINARY ACTION</h4>
+                                <ul>
+                                    <li><strong>First Offense</strong> - The Head or the Dean or OIC recommends to the Guidance Center for a suspension from classes for each offender.</li>
+                                    <li><strong>Second and Subsequent Offenses</strong> - A recommendation for a heavier sanction will be endorsed to the Guidance Center.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    <style>
+        /* Update card height */
+        .dashboard-column .profile-card {
+            height: 750px; /* Increased from 700px */
+        }
+
+        .announcement-container {
+            height: 750px; /* Match container height */
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Ensure consistent scrolling behavior */
+        .rules-container {
+            height: 700px;
+        }
+    </style>
+
 
     <script>
         // Profile panel functionality

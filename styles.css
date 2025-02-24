@@ -80,7 +80,7 @@ body {
 
 /* Updated Navigation Styles */
 .nav-wrapper {
-    max-width: 1200px;
+    max-width: 1650px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -174,37 +174,259 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.welcome-section {
+.announcement-list {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    gap: 1.5rem;
+}
+
+.announcement-item {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.announcement-title {
+    display: flex;
     align-items: center;
-    min-height: 100vh;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: #7556cc;
+}
+
+.announcement-title i {
+    font-size: 1.5rem;
+}
+
+.announcement-title h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.announcement-details p {
+    color: #555;
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+
+.rules-container {
+    padding: 1rem;
+    height: 600px; /* Fixed height */
+    max-height: 600px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.rules-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.rules-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.rules-container::-webkit-scrollbar-thumb {
+    background: #7556cc;
+    border-radius: 3px;
+}
+
+.rules-container::-webkit-scrollbar-thumb:hover {
+    background: #5b43a3;
+}
+
+.rules-header {
     text-align: center;
-    padding: 20px;
-    margin-top: -100px; /* Move section up */
+    margin-bottom: 1.5rem;
+    top: 0;
+    background: white;
+    padding: 1rem 0;
+    z-index: 1;
+    border-bottom: 1px solid #eee;
 }
 
-.welcome-section h1 {
-    font-size: 4.5rem; /* Increased from 3.5rem */
-    font-weight: 700;
-    margin-bottom: 20px; /* Increased from 10px */
-    color: var(--primary-color);
-    background: linear-gradient(135deg, rgba(117,86,204,1) 0%, rgba(213,105,167,1) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: fadeInDown 0.6s ease-out;
+.rules-header h3 {
+    font-size: 1.5rem;
+    color: #7556cc;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
 }
 
-.welcome-section p {
-    font-size: 2rem; /* Increased from 1.5rem */
-    max-width: 1000px; /* Increased from 800px */
-    line-height: 1.8; /* Increased from 1.6 */
-    margin-top: 10px;
+.rules-header h4 {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.rules-intro {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    padding: 0 0.5rem;
+    font-style: italic;
     color: #666;
-    animation: fadeInUp 0.6s ease-out 0.2s backwards;
-    font-weight: 400;
+}
+
+.rules-list {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.rules-list li {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #444;
+}
+
+.rules-list ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+.rules-list ul li {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.disciplinary-section {
+    background: #f8f8f8;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+}
+
+.disciplinary-section h4 {
+    color: #7556cc;
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+}
+
+.disciplinary-section ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.disciplinary-section li {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.disciplinary-section strong {
+    color: #7556cc;
+}
+
+/* Add these new styles for the grid layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.dashboard-column {
+    min-width: 0; /* Prevents overflow */
+}
+
+.dashboard-column .profile-card {
+    height: 800px; /* Fixed height for the card */
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-column .profile-content {
+    flex: 1;
+    overflow: hidden; /* Hide overflow at this level */
+    position: relative;
+}
+
+.rules-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+/* Improve scrollbar styling */
+.rules-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.rules-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+    margin: 4px;
+}
+
+.rules-container::-webkit-scrollbar-thumb {
+    background: #7556cc;
+    border-radius: 4px;
+}
+
+.rules-container::-webkit-scrollbar-thumb:hover {
+    background: #5b43a3;
+}
+
+
+
+/* Keep the header visible while scrolling */
+.rules-header {
+    top: 0;
+    background: white;
+    z-index: 2;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+}
+
+
+/* Adjust existing container styles */
+.profile-page-container {
+    padding: 0;
+    margin: 0;
+}
+
+/* Ensure rules container takes full height */
+.rules-container {
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 800px)); /* Set maximum width per column */
+    gap: 2rem;
+    padding: 2rem;
+    justify-content: center; /* Center the grid horizontally */
+    margin: 80px auto 2rem; /* Add top margin to account for fixed navbar */
+    max-width: 2000px; /* Limit maximum width of the grid */
+}
+
+.dashboard-column .profile-card {
+    height: 700px; /* Adjust height as needed */
+}
+
+/* Adjust responsive layout */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: minmax(0, 800px); /* Single column on smaller screens */
+        padding: 1rem;
+    }
+}
+
+.timestamp {
+    display: block;
+    font-size: 0.85rem;
+    color: #888;
 }
 
 @keyframes fadeInDown {
@@ -839,13 +1061,13 @@ input[type="submit"]:active {
 
 /* Edit Profile Styles */
 .edit-controls {
-    width: 89%;
-    margin-top: 1rem;  /* added small top margin */
-    margin-bottom: 1rem;
+    width: 100%;
+    margin-top: 2rem;  /* added small top margin */
 }
 
 .edit-btn {
     width: 100%;
+    height: 90%;
     padding: 1rem;
     border-radius: 12px;
     font-size: 0.95rem;
@@ -947,7 +1169,7 @@ input[type="submit"]:active {
 .profile-card {
     background: white;
     border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.0);
     overflow: hidden;
     animation: fadeInUp 0.6s ease-out 0.2s backwards;
 }
