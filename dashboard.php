@@ -204,7 +204,7 @@ $conn->close();
                             </div>
                             <div class="announcement-details">
                                 <p>Extended laboratory hours will be available during Midterm examination week. The labs will be open until 8:00 PM.</p>
-                                <span class="timestamp">Posted: February 20, 2025</span>
+                                <span class="timestamp">February 20, 2025</span>
                             </div>
                         </div>
 
@@ -215,7 +215,7 @@ $conn->close();
                             </div>
                             <div class="announcement-details">
                                 <p>Extended laboratory hours will be available during Prelim examination week. The labs will be open until 8:00 PM.</p>
-                                <span class="timestamp">Posted: February 19, 2025</span>
+                                <span class="timestamp">February 19, 2025</span>
                             </div>
                         </div>
                         <div class="announcement-item">
@@ -225,7 +225,7 @@ $conn->close();
                             </div>
                             <div class="announcement-details">
                                 <p>The Computer Laboratory will be closed for maintenance from December 20-22, 2023. All sit-in sessions during these dates will be rescheduled.</p>
-                                <span class="timestamp">Posted: February 15, 2025</span>
+                                <span class="timestamp">February 15, 2025</span>
                             </div>
                         </div>
                     </div>

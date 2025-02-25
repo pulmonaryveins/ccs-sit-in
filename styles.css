@@ -181,10 +181,17 @@ body {
 }
 
 .announcement-item {
-    background: #fff;
-    border-radius: 10px;
+    background: white;
+    /*background-olor: rgba(174, 0, 255, 0.075);*/
+    border-radius: 0px;
+    border-bottom: 1px solid #00000031;
     padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+
+}
+
+.announcement-item:hover {
+    transform: translateY(-3px);
 }
 
 .announcement-title {
@@ -303,6 +310,7 @@ body {
     color: #7556cc;
     font-size: 1.2rem;
     margin-bottom: 0.75rem;
+    font-weight: 700;
 }
 
 .disciplinary-section ul {
@@ -314,10 +322,12 @@ body {
     font-size: 0.95rem;
     margin-bottom: 0.75rem;
     line-height: 1.6;
+    color: #444;
 }
 
 .disciplinary-section strong {
     color: #7556cc;
+    font-weight: 600;
 }
 
 /* Add these new styles for the grid layout */
@@ -426,7 +436,7 @@ body {
 .timestamp {
     display: block;
     font-size: 0.85rem;
-    color: #888;
+    color: #7556cc;
 }
 
 @keyframes fadeInDown {
