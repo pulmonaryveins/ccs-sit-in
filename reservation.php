@@ -105,6 +105,150 @@ $conn->close();
         </div>
     </div>
 
+    <!-- Main Content Container -->
+    <div class="dashboard-grid">
+        <!-- Left Column - Reservation Form -->
+        <div class="dashboard-column">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <h3>Make a Reservation</h3>
+                </div>
+                <div class="profile-content" style="padding: 0;">
+                    <form action="process_reservation.php" method="POST" class="reservation-form">
+                        <div class="student-info-grid">
+                            <!-- ID Number -->
+                            <div class="info-card">
+                                <div class="info-icon"><i class="ri-profile-fill"></i></div>
+                                <div class="info-content">
+                                    <div class="detail-label">Student ID</div>
+                                    <div class="detail-value">
+                                        <input type="text" name="idno" value="<?php echo htmlspecialchars($_SESSION['idno']); ?>" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Full Name -->
+                            <div class="info-card">
+                                <div class="info-icon"><i class="ri-user-3-fill"></i></div>
+                                <div class="info-content">
+                                    <div class="detail-label">Full Name</div>
+                                    <div class="detail-value">
+                                        <input type="text" name="fullname" value="<?php echo htmlspecialchars($_SESSION['fullname']); ?>" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Course and Year -->
+                            <div class="info-card">
+                                <div class="info-icon"><i class="ri-book-fill"></i></div>
+                                <div class="info-content">
+                                    <div class="detail-label">Course & Year</div>
+                                    <div class="detail-value">
+                                        <input type="text" value="<?php echo htmlspecialchars($_SESSION['course'] . ' - ' . $_SESSION['year_level']); ?>" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Purpose -->
+                            <div class="info-card">
+                                <div class="info-icon"><i class="ri-code-box-fill"></i></div>
+                                <div class="info-content">
+                                    <div class="detail-label">Purpose</div>
+                                    <div class="detail-value">
+                                        <select name="purpose" required>
+                                            <option value="">Select Purpose</option>
+                                            <option value="c_programming">C Programming</option>
+                                            <option value="java_programming">Java Programming</option>
+                                            <option value="csharp">C#</option>
+                                            <option value="php">PHP</option>
+                                            <option value="aspnet">ASP.Net</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Laboratory -->
+                            <div class="info-card">
+                                <div class="info-icon"><i class="ri-computer-fill"></i></div>
+                                <div class="info-content">
+                                    <div class="detail-label">Laboratory</div>
+                                    <div class="detail-value">
+                                        <select name="laboratory" required>
+                                            <option value="">Select Laboratory</option>
+                                            <option value="524">524</option>
+                                            <option value="526">526</option>
+                                            <option value="528">528</option>
+                                            <option value="530">530</option>
+                                            <option value="542">542</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Date -->
+                            <div class="info-card">
+                                <div class="info-icon"><i class="ri-calendar-fill"></i></div>
+                                <div class="info-content">
+                                    <div class="detail-label">Date</div>
+                                    <div class="detail-value">
+                                        <input type="date" name="date" required min="<?php echo date('Y-m-d'); ?>">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Time In -->
+                            <div class="info-card">
+                                <div class="info-icon"><i class="ri-time-fill"></i></div>
+                                <div class="info-content">
+                                    <div class="detail-label">Time In</div>
+                                    <div class="detail-value">
+                                        <input type="time" name="time_in" required min="07:00" max="17:00">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Remaining Sessions -->
+                            <div class="info-card">
+                                <div class="info-icon"><i class="ri-timer-fill"></i></div>
+                                <div class="info-content">
+                                    <div class="detail-label">Remaining Sessions</div>
+                                    <div class="detail-value sessions-count">
+                                        <?php echo isset($_SESSION['remaining_sessions']) ? $_SESSION['remaining_sessions'] : '30'; ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Submit Button -->
+                            <div class="edit-controls" style="grid-column: span 2;">
+                                <button type="submit" class="edit-btn">
+                                    <i class="ri-check-line"></i>
+                                    <span>Confirm Reservation</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Laboratory Schedule -->
+        <div class="dashboard-column">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <h3>Laboratory Schedule</h3>
+                </div>
+                <div class="profile-content">
+                    <div class="schedule-container" id="schedule-container">
+                        <div class="schedule-info" id="schedule-info">
+                            <p>Select a laboratory and date to view available time slots</p>
+                        </div>
+                        <div id="schedule-grid" class="schedule-grid" style="display: none;">
+                            <!-- Schedule will be dynamically populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Backdrop -->
     <div class="backdrop" id="backdrop"></div>
 
@@ -127,128 +271,34 @@ $conn->close();
                         </div>  
                     </div>
                 </div>
-
-                <div class="student-info-grid">
-                    <div class="info-card">
-                        <div class="info-icon"><i class="ri-profile-fill"></i></div>
-                        <div class="info-content">
-                            <div class="detail-label">Student ID</div>
-                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['idno']); ?></div>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="ri-user-3-fill"></i></div>
-                        <div class="info-content">
-                            <div class="detail-label">Full Name</div>
-                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['fullname']); ?></div>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="ri-graduation-cap-fill"></i></div>
-                        <div class="info-content">
-                            <div class="detail-label">Course</div>
-                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['course']); ?></div>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="ri-expand-up-down-fill"></i></div>
-                        <div class="info-content">
-                            <div class="detail-label">Year Level</div>
-                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['year_level']); ?></div>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="ri-mail-fill"></i></div>
-                        <div class="info-content">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['email']); ?></div>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="ri-home-9-fill"></i></div>
-                        <div class="info-content">
-                            <div class="detail-label">Address</div>
-                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['address']); ?></div>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="ri-time-fill"></i></div>
-                        <div class="info-content">
-                            <div class="detail-label">Session</div>
-                            <div class="detail-value">30</div>
-                        </div>
-                    </div>
-                    <div class="edit-controls">
-                        <a href="profile.php" class="edit-btn">
-                            <span>Edit Profile</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
+    <!-- Add JavaScript for dynamic schedule loading -->
     <script>
-        // Profile panel functionality
-        const profilePanel = document.getElementById('profile-panel');
-        const backdrop = document.getElementById('backdrop');
-        const profileTrigger = document.getElementById('profile-trigger');
+        document.querySelector('select[name="laboratory"]').addEventListener('change', loadSchedule);
+        document.querySelector('input[name="date"]').addEventListener('change', loadSchedule);
 
-        function toggleProfile(show) {
-            profilePanel.classList.toggle('active', show);
-            backdrop.classList.toggle('active', show);
-            document.body.style.overflow = show ? 'hidden' : '';
-        }
-
-        profileTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleProfile(true);
-        });
-
-        // Close profile panel when clicking outside
-        document.addEventListener('click', (e) => {
-            if (profilePanel.classList.contains('active') && 
-                !profilePanel.contains(e.target) && 
-                !profileTrigger.contains(e.target)) {
-                toggleProfile(false);
-            }
-        });
-
-        // Prevent clicks inside panel from closing it
-        profilePanel.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // Close on backdrop click
-        backdrop.addEventListener('click', () => toggleProfile(false));
-
-        // Profile data update function
-        async function updateProfilePanel() {
-            try {
-                const response = await fetch('get_profile_data.php');
-                const data = await response.json();
-                
-                // Update profile image
-                const profileImages = document.querySelectorAll('.profile-image img');
-                profileImages.forEach(img => {
-                    img.src = data.profile_image + '?t=' + new Date().getTime();
-                });
-
-                // Update info
-                document.querySelector('.user-info h3').textContent = data.fullname;
-                
-                // Update info cards
-                const detailValues = document.querySelectorAll('.info-card .detail-value');
-                detailValues[0].textContent = data.idno;
-                detailValues[1].textContent = data.fullname;
-                detailValues[2].textContent = data.course;
-                detailValues[3].textContent = data.year_level;
-            } catch (error) {
-                console.error('Error updating profile:', error);
+        function loadSchedule() {
+            const lab = document.querySelector('select[name="laboratory"]').value;
+            const date = document.querySelector('input[name="date"]').value;
+            
+            if (lab && date) {
+                // Add AJAX call to fetch schedule
+                fetch(`get_schedule.php?lab=${lab}&date=${date}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateScheduleDisplay(data);
+                    });
             }
         }
 
-        // Update profile when panel is opened
-        profileTrigger.addEventListener('click', updateProfilePanel);
+        function updateScheduleDisplay(scheduleData) {
+            const scheduleInfo = document.getElementById('schedule-info');
+            const scheduleGrid = document.getElementById('schedule-grid');
+            
+            // Update display logic here
+        }
     </script>
+</body>
+</html>
