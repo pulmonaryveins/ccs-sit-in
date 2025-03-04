@@ -118,7 +118,7 @@ $conn->close();
                     <div class="info-card">
                         <div class="info-icon"><i class="ri-graduation-cap-fill"></i></div>
                         <div class="info-content">
-                            <div class="detail-label">Course</div>
+                            <div class="detail-label">Course/Department</div>
                             <div class="detail-value"><?php echo htmlspecialchars($_SESSION['course']); ?></div>
                         </div>
                     </div>
@@ -200,20 +200,20 @@ $conn->close();
                         </div>
 
                         <div class="form-group">
-                            <label>Course</label>
+                            <label>Course/Department</label>
                             <select name="course">
                                 <?php
                                 $courses = [
                                     "BS-Information Technology",
                                     "BS-Computer Science",
-                                    "College of Engineering",
-                                    "College of Arts and Sciences",
-                                    "College of Hospitality Management",
-                                    "College of Education",
-                                    "College of Customes Administration",
-                                    "College of Business and Accountancy",
-                                    "College of Criminal Justice",
-                                    "College of Nursing"
+                                    "COE",
+                                    "CAS",
+                                    "SJH",
+                                    "CTE",
+                                    "CCA",
+                                    "CBA",
+                                    "CCJ",
+                                    "CON"
                                 ];
                                 
                                 foreach ($courses as $courseOption) {

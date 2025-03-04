@@ -142,7 +142,7 @@ $conn->close();
                             <div class="info-card">
                                 <div class="info-icon"><i class="ri-book-fill"></i></div>
                                 <div class="info-content">
-                                    <div class="detail-label">Course & Year</div>
+                                    <div class="detail-label">Course/Depart. & Year</div>
                                     <div class="detail-value">
                                         <input type="text" value="<?php echo htmlspecialchars($_SESSION['course'] . ' - ' . $_SESSION['year_level']); ?>" readonly>
                                     </div>

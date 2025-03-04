@@ -38,7 +38,7 @@ if ($row = $result->fetch_assoc()) {
         ($year == 3 ? 'rd' : 'th'))
     ) . ' Year';
     
-    $_SESSION['profile_image'] = $row['profile_image'] ?? 'default-avatar.png';
+    $_SESSION['profile_image'] = $row['profile_image'] ?? 'logo/AVATAR.png';
     $_SESSION['email'] = $row['email'];
     $_SESSION['address'] = $row['address'];
 }
@@ -75,7 +75,7 @@ $conn->close();
             <!-- Left side - Profile -->
             <div class="nav-profile">
                 <div class="profile-trigger" id="profile-trigger">
-                    <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : 'default-avatar.png'; ?>" 
+                    <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : 'logo/AVATAR.png'; ?>" 
                          alt="Profile">
                     <span class="username"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
                     <i class="fas fa-chevron-down"></i>
@@ -126,7 +126,7 @@ $conn->close();
             <div class="profile-body">
                 <div class="profile-image-container">
                     <div class="profile-image">
-                        <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : 'default-avatar.png'; ?>" 
+                        <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : 'logo/AVATAR.png'; ?>" 
                              alt="Profile Picture" 
                              id="profile-preview">
                     </div>

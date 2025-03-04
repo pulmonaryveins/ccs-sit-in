@@ -65,7 +65,7 @@ if ($result) {
             <!-- Left side - Profile -->
             <div class="nav-profile">
                 <div class="profile-trigger" id="profile-trigger">
-                    <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : 'default-avatar.png'; ?>" 
+                    <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : 'logo/AVATAR.png'; ?>" 
                          alt="Profile">
                     <span class="username"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
                     <i class="fas fa-chevron-down"></i>
@@ -78,16 +78,16 @@ if ($result) {
                     <i class="ri-dashboard-line"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="reservation.php" class="nav-link">
-                    <i class="ri-calendar-line"></i>
+                <a href="request.php" class="nav-link">
+                    <i class="ri-mail-check-line"></i>
                     <span>Request</span>
                 </a>
-                <a href="history.php" class="nav-link">
-                    <i class="ri-history-line"></i>
+                <a href="records.php" class="nav-link">
+                    <i class="ri-bar-chart-line"></i>
                     <span>Records</span>
                 </a>
-                <a href="profile.php" class="nav-link">
-                    <i class="ri-user-3-line"></i>
+                <a href="reports.php" class="nav-link">
+                    <i class="ri-file-text-line"></i>
                     <span>Reports</span>
                 </a>
             </nav>

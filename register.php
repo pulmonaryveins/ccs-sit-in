@@ -64,14 +64,14 @@
                     <option value="" disabled selected>Select Course / Department</option>
                     <option value="BS-Information Technology">BS-Information Technology</option>
                     <option value="BS-Computer Science">BS-Computer Science</option>
-                    <option value="College of Engineering">College of Engineering</option>
-                    <option value="College of Arts and Sciences">College of Arts and Sciences</option>
-                    <option value="College of Hospitality Management">College of Hospitality Management</option>
-                    <option value="College of Education">College of Education</option>
-                    <option value="College of Customes Administration">College of Customes Administration</option>
-                    <option value="College of Business and Accountancy">College of Business and Accountancy</option>
-                    <option value="College of Criminal Justice">College of Criminal Justice</option>
-                    <option value="College of Nursing">College of Nursing</option>
+                    <option value="COE">COE</option>
+                    <option value="CAS">CASs</option>
+                    <option value="SJH">SJH</option>
+                    <option value="CTE">CTE</option>
+                    <option value="CCA">CCA</option>
+                    <option value="CBA">CBA</option>
+                    <option value="CCJ">CCJ</option>
+                    <option value="CON">CON</option>
                 </select>
             </div>
             <div class="input-group">
