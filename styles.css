@@ -218,6 +218,45 @@ body {
     line-height: 1.6;
 }
 
+.announcement-form {
+    padding: 1rem;
+}
+
+.announcement-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.announcement-form input,
+.announcement-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.announcement-form input:focus,
+.announcement-form textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(117,86,204,0.1);
+    outline: none;
+}
+
+.delete-announcement {
+    margin-left: auto;
+    padding: 0.5rem;
+    color: #ef4444;
+    border: none;
+    background: none;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.delete-announcement:hover {
+    opacity: 1;
+}
 
 .rules-container {
     padding: 1rem;
@@ -1106,6 +1145,38 @@ input[type="submit"]:active {
 .edit-btn i {
     font-size: 1.1rem;
 }
+
+.edit-btn2 {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, rgba(117,86,204,0.95) 0%, rgba(213,105,167,0.95) 100%);
+    color: white;
+    text-decoration: none;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(117,86,204,0.2);
+}
+
+.edit-btn2:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(117,86,204,0.3);
+}
+
+.edit-btn2:active {
+    transform: translateY(0);
+}
+
+.edit-btn2 i {
+    font-size: 1.1rem;
+}
+
 
 .save-cancel-btns {
     display: flex;

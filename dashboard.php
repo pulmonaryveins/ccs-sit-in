@@ -43,6 +43,16 @@ if ($row = $result->fetch_assoc()) {
     $_SESSION['address'] = $row['address'];
 }
 
+// Fetch announcements
+$announcements = [];
+$query = "SELECT * FROM announcements ORDER BY created_at DESC";
+$result = $conn->query($query);
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $announcements[] = $row;
+    }
+}
+
 $stmt->close();
 $conn->close();
 ?>
@@ -197,37 +207,30 @@ $conn->close();
                 </div>
                 <div class="profile-content">
                     <div class="announcement-list">
-                        <div class="announcement-item">
-                            <div class="announcement-title">
-                            <i class="ri-notification-3-fill"></i>
-                                <h3>CCS Admin</h3>
+                        <?php if (empty($announcements)): ?>
+                            <div class="announcement-item">
+                                <div class="announcement-title">
+                                    <i class="ri-information-line"></i>
+                                    <h3>No Announcements</h3>
+                                </div>
+                                <div class="announcement-details">
+                                    <p>There are no announcements at this time.</p>
+                                </div>
                             </div>
-                            <div class="announcement-details">
-                                <p>Extended laboratory hours will be available during Midterm examination week. The labs will be open until 8:00 PM.</p>
-                                <span class="timestamp">February 20, 2025</span>
-                            </div>
-                        </div>
-
-                        <div class="announcement-item">
-                            <div class="announcement-title">
-                                <i class="ri-notification-3-fill"></i>
-                                <h3>CCS Admin</h3>
-                            </div>
-                            <div class="announcement-details">
-                                <p>Extended laboratory hours will be available during Prelim examination week. The labs will be open until 8:00 PM.</p>
-                                <span class="timestamp">February 19, 2025</span>
-                            </div>
-                        </div>
-                        <div class="announcement-item">
-                            <div class="announcement-title">
-                                <i class="ri-notification-3-fill"></i>
-                                <h3>CCS Admin</h3>
-                            </div>
-                            <div class="announcement-details">
-                                <p>The Computer Laboratory will be closed for maintenance from December 20-22, 2023. All sit-in sessions during these dates will be rescheduled.</p>
-                                <span class="timestamp">February 15, 2025</span>
-                            </div>
-                        </div>
+                        <?php else: ?>
+                            <?php foreach ($announcements as $announcement): ?>
+                                <div class="announcement-item">
+                                    <div class="announcement-title">
+                                        <i class="ri-notification-3-fill"></i>
+                                        <h3><?php echo htmlspecialchars($announcement['title']); ?></h3>
+                                    </div>
+                                    <div class="announcement-details">
+                                        <p><?php echo htmlspecialchars($announcement['content']); ?></p>
+                                        <span class="timestamp"><?php echo date('F d, Y', strtotime($announcement['created_at'])); ?></span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
