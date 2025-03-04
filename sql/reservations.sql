@@ -65,6 +65,10 @@ ALTER TABLE `reservations`
 --
 ALTER TABLE `reservations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+ALTER TABLE `reservations` 
+ADD `status` varchar(20) NOT NULL DEFAULT 'pending' AFTER `created_at`;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -114,7 +114,7 @@ $conn->close();
                     <h3>Make a Reservation</h3>
                 </div>
                 <div class="profile-content" style="padding: 0;">
-                    <form action="process_reservation.php" method="POST" class="reservation-form">
+                    <form action="../controllers/process_reservation.php" method="POST" class="reservation-form">
                         <div class="student-info-grid">
                             <!-- ID Number -->
                             <div class="info-card">
@@ -233,8 +233,8 @@ $conn->close();
         <div class="dashboard-column">
             <div class="profile-card">
                 <div class="profile-header">
-                    <h3>PC Availability</h3>
-                    <select id="labSelect" class="lab-select">
+                    <h3>Select a PC</h3>
+                    <select id="labSelect" class="lab-select" name="laboratory">
                         <option value="">Select Laboratory</option>
                         <option value="524">Laboratory 524</option>
                         <option value="526">Laboratory 526</option>
@@ -245,9 +245,8 @@ $conn->close();
                 </div>
                 <div class="profile-content">
                     <div class="computer-grid" id="computerGrid">
-                        <!-- PCs will be loaded dynamically -->
                         <div class="initial-message">
-                            Please select a laboratory to view PC availability
+                            Please select a laboratory to view available PCs
                         </div>
                     </div>
                 </div>
@@ -328,18 +327,34 @@ $conn->close();
             background: #fed7d7;
             color: #c53030;
         }
+        
+        .computer-unit.selected {
+            border: 2px solid #7556cc;
+            background: #f0f0ff;
+        }
+        
+        .computer-unit.available {
+            cursor: pointer;
+        }
+        
+        .computer-unit.in-use {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 
     <script>
         document.getElementById('labSelect').addEventListener('change', function() {
             loadComputerStatus(this.value);
+            // Update the laboratory field in the form
+            document.querySelector('select[name="laboratory"]').value = this.value;
         });
 
         function loadComputerStatus(laboratory) {
             if (!laboratory) {
                 document.getElementById('computerGrid').innerHTML = `
                     <div class="initial-message">
-                        Please select a laboratory to view PC availability
+                        Please select a laboratory to view available PCs
                     </div>`;
                 return;
             }
@@ -357,10 +372,12 @@ $conn->close();
                                 <div class="computer-icon">
                                     <i class="ri-computer-line"></i>
                                 </div>
-                                <span class="pc-number">PC ${i}</span>
-                                <span class="status ${status}">
-                                    ${status === 'available' ? 'Available' : 'In Use'}
-                                </span>
+                                <div class="computer-info">
+                                    <span class="pc-number">PC ${i}</span>
+                                    <span class="status ${status}">
+                                        ${status === 'available' ? 'Available' : 'In Use'}
+                                    </span>
+                                </div>
                             </div>
                         `;
                     }
@@ -368,9 +385,15 @@ $conn->close();
                     // Add click handlers for selecting a PC
                     document.querySelectorAll('.computer-unit.available').forEach(unit => {
                         unit.addEventListener('click', function() {
-                            // Update the laboratory select in the reservation form
-                            document.querySelector('select[name="laboratory"]').value = laboratory;
-                            // Add PC number to a hidden input in the form
+                            // Remove selection from other PCs
+                            document.querySelectorAll('.computer-unit').forEach(pc => {
+                                pc.classList.remove('selected');
+                            });
+                            
+                            // Select this PC
+                            this.classList.add('selected');
+                            
+                            // Update hidden input for PC number
                             let pcInput = document.querySelector('input[name="pc_number"]');
                             if (!pcInput) {
                                 pcInput = document.createElement('input');
@@ -380,15 +403,40 @@ $conn->close();
                             }
                             pcInput.value = this.dataset.pc;
                             
-                            // Highlight selected PC
-                            document.querySelectorAll('.computer-unit').forEach(pc => {
-                                pc.classList.remove('selected');
-                            });
-                            this.classList.add('selected');
+                            // Enable submit button if everything is selected
+                            validateForm();
                         });
                     });
                 });
         }
+
+        // Add validation function
+        function validateForm() {
+            const requiredFields = [
+                'purpose',
+                'laboratory',
+                'date',
+                'time_in',
+                'pc_number'
+            ];
+            
+            const submitButton = document.querySelector('.edit-btn');
+            const allFieldsFilled = requiredFields.every(field => {
+                const element = document.querySelector(`[name="${field}"]`);
+                return element && element.value;
+            });
+            
+            submitButton.disabled = !allFieldsFilled;
+            submitButton.style.opacity = allFieldsFilled ? '1' : '0.5';
+        }
+
+        // Add validation listeners to all form inputs
+        document.querySelectorAll('.reservation-form select, .reservation-form input').forEach(input => {
+            input.addEventListener('change', validateForm);
+        });
+
+        // Initial validation
+        validateForm();
     </script>
 
     <!-- Backdrop -->

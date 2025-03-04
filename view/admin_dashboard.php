@@ -22,10 +22,12 @@ if ($result) {
 }
 
 // Get current sit-in count (today)
-$query = "SELECT COUNT(*) as count FROM reservations WHERE DATE(date) = CURDATE()";
+$query = "SELECT count FROM current_sessions WHERE date = CURDATE()";
 $result = $conn->query($query);
-if ($result) {
-    $stats['current_sitin'] = $result->fetch_assoc()['count'];
+if ($result && $row = $result->fetch_assoc()) {
+    $stats['current_sitin'] = $row['count'];
+} else {
+    $stats['current_sitin'] = 0;
 }
 
 // Get total sit-in count

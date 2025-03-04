@@ -44,7 +44,9 @@ if ($row = $result->fetch_assoc()) {
 }
 
 $stmt->close();
-$conn->close();
+
+// Keep connection open for later use
+// Remove the $conn->close() from here
 ?>
 
 <!DOCTYPE html>
@@ -98,7 +100,7 @@ $conn->close();
                 <a href="#" class="action-link">
                     <i class="fas fa-bell"></i>
                 </a>
-                <a href="logout.php" class="action-link">
+                <a href="../auth/logout.php" class="action-link">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
             </div>
@@ -252,3 +254,103 @@ $conn->close();
         // Update profile when panel is opened
         profileTrigger.addEventListener('click', updateProfilePanel);
     </script>
+
+    <!-- History Page Content -->
+    <div class="history-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <h3>Sit-In History</h3>
+            </div>
+            <div class="profile-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Laboratory</th>
+                            <th>PC Number</th>
+                            <th>Time In</th>
+                            <th>Time Out</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Fetch history data from reservations table
+                        $sql = "SELECT * FROM reservations WHERE idno = ? ORDER BY created_at DESC";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param("s", $_SESSION['idno']);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+
+                        while ($row = $result->fetch_assoc()) {
+                            echo '<tr>';
+                            echo '<td>' . htmlspecialchars(date('M d, Y', strtotime($row['date']))) . '</td>';
+                            echo '<td>Laboratory ' . htmlspecialchars($row['laboratory']) . '</td>';
+                            echo '<td>PC ' . htmlspecialchars($row['pc_number']) . '</td>';
+                            echo '<td>' . htmlspecialchars($row['time_in']) . '</td>';
+                            echo '<td>' . (isset($row['time_out']) ? htmlspecialchars($row['time_out']) : '-') . '</td>';
+                            echo '<td>' . htmlspecialchars($row['purpose']) . '</td>';
+                            echo '<td><span class="status-badge ' . htmlspecialchars($row['status']) . '">' 
+                                . ucfirst(htmlspecialchars($row['status'])) . '</span></td>';
+                            echo '</tr>';
+                        }
+                        $stmt->close();
+                        // Close the connection here, after all database operations are done
+                        $conn->close();
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .history-table th,
+    .history-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .history-table th {
+        background-color: #f7fafc;
+        font-weight: 600;
+        color: #4a5568;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-badge.pending {
+        background-color: #feebc8;
+        color: #c05621;
+    }
+
+    .status-badge.approved {
+        background-color: #c6f6d5;
+        color: #2f855a;
+    }
+
+    .status-badge.rejected {
+        background-color: #fed7d7;
+        color: #c53030;
+    }
+
+    .status-badge.completed {
+        background-color: #e2e8f0;
+        color: #2d3748;
+    }
+    </style>
+</body>
+</html>

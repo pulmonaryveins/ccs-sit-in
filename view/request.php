@@ -44,6 +44,16 @@ if ($result) {
         $announcements[] = $row;
     }
 }
+
+// Get pending reservations
+$sql = "SELECT * FROM reservations WHERE status = 'pending' ORDER BY created_at DESC";
+$result = $conn->query($sql);
+$pending_reservations = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $pending_reservations[] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -136,73 +146,54 @@ if ($result) {
                 </div>
                 <div class="profile-content">
                     <div class="requests-list">
-                        <!-- Sample Reservation Request -->
-                        <div class="request-item">
-                            <div class="request-header">
-                                <span class="student-name">John Doe</span>
-                                <span class="request-status pending">Pending</span>
+                        <?php if (empty($pending_reservations)): ?>
+                            <div class="no-requests">
+                                No pending reservation requests
                             </div>
-                            <div class="request-details">
-                                <div class="detail-row">
-                                    <span class="label">ID Number:</span>
-                                    <span class="value">2021-0001</span>
+                        <?php else: ?>
+                            <?php foreach ($pending_reservations as $reservation): ?>
+                                <div class="request-item">
+                                    <div class="request-header">
+                                        <span class="student-name"><?php echo htmlspecialchars($reservation['fullname']); ?></span>
+                                        <span class="request-status pending">Pending</span>
+                                    </div>
+                                    <div class="request-details">
+                                        <div class="detail-row">
+                                            <span class="label">ID Number:</span>
+                                            <span class="value"><?php echo htmlspecialchars($reservation['idno']); ?></span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="label">Laboratory:</span>
+                                            <span class="value"><?php echo htmlspecialchars($reservation['laboratory']); ?></span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="label">PC Number:</span>
+                                            <span class="value"><?php echo htmlspecialchars($reservation['pc_number']); ?></span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="label">Date:</span>
+                                            <span class="value"><?php echo htmlspecialchars($reservation['date']); ?></span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="label">Time:</span>
+                                            <span class="value"><?php echo htmlspecialchars($reservation['time_in']); ?></span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="label">Purpose:</span>
+                                            <span class="value"><?php echo htmlspecialchars($reservation['purpose']); ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="request-actions">
+                                        <button class="action-btn approve" onclick="processReservation(<?php echo $reservation['id']; ?>, 'approve')">
+                                            <i class="ri-check-line"></i> Approve
+                                        </button>
+                                        <button class="action-btn reject" onclick="processReservation(<?php echo $reservation['id']; ?>, 'reject')">
+                                            <i class="ri-close-line"></i> Reject
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="detail-row">
-                                    <span class="label">Laboratory:</span>
-                                    <span class="value">524</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="label">Date:</span>
-                                    <span class="value">2024-01-20</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="label">Time:</span>
-                                    <span class="value">13:00 - 15:00</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="label">Purpose:</span>
-                                    <span class="value">C Programming</span>
-                                </div>
-                            </div>
-                            <div class="request-actions">
-                                <button class="action-btn approve">
-                                    <i class="ri-check-line"></i> Approve
-                                </button>
-                                <button class="action-btn reject">
-                                    <i class="ri-close-line"></i> Reject
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- More sample requests -->
-                        <div class="request-item">
-                            <div class="request-header">
-                                <span class="student-name">Jane Smith</span>
-                                <span class="request-status approved">Approved</span>
-                            </div>
-                            <div class="request-details">
-                                <div class="detail-row">
-                                    <span class="label">ID Number:</span>
-                                    <span class="value">2021-0002</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="label">Laboratory:</span>
-                                    <span class="value">526</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="label">Date:</span>
-                                    <span class="value">2024-01-21</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="label">Time:</span>
-                                    <span class="value">09:00 - 11:00</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="label">Purpose:</span>
-                                    <span class="value">Java Programming</span>
-                                </div>
-                            </div>
-                        </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -212,18 +203,16 @@ if ($result) {
     <style>
         .lab-select {
             padding: 0.5rem;
-            border-radius: 6px;
             border: 1px solid #e2e8f0;
+            border-radius: 6px;
             margin-left: 1rem;
         }
-
         .computer-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
             padding: 1rem;
         }
-
         .computer-unit {
             background: white;
             border: 1px solid #e2e8f0;
@@ -232,109 +221,89 @@ if ($result) {
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .computer-unit:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
         .computer-icon {
             font-size: 1.5rem;
             color: #7556cc;
             margin-bottom: 0.5rem;
         }
-
         .computer-info {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .pc-number {
             font-weight: 600;
             color: #2d3748;
         }
-
         .status {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
             border-radius: 12px;
             margin-top: 0.25rem;
         }
-
         .status.available {
             background: #c6f6d5;
             color: #2f855a;
         }
-
         .status.in-use {
             background: #fed7d7;
             color: #c53030;
         }
-
         .requests-list {
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            padding: 1rem;
         }
-
         .request-item {
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 1rem;
         }
-
         .request-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
         }
-
         .student-name {
             font-weight: 600;
             color: #2d3748;
         }
-
         .request-status {
             padding: 0.25rem 0.75rem;
             border-radius: 12px;
             font-size: 0.75rem;
         }
-
         .request-status.pending {
             background: #feebc8;
             color: #c05621;
         }
-
         .request-status.approved {
             background: #c6f6d5;
             color: #2f855a;
         }
-
         .detail-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.5rem;
         }
-
         .label {
             color: #718096;
         }
-
         .value {
             font-weight: 500;
             color: #2d3748;
         }
-
         .request-actions {
             display: flex;
             gap: 0.5rem;
             margin-top: 1rem;
         }
-
         .action-btn {
             flex: 1;
             padding: 0.5rem;
@@ -348,16 +317,12 @@ if ($result) {
             gap: 0.25rem;
             transition: all 0.3s ease;
         }
-
         .action-btn.approve {
             background: #38a169;
-    
         }
-
         .action-btn.reject {
             background: #e53e3e;
         }
-
         .action-btn:hover {
             transform: translateY(-1px);
             filter: brightness(110%);
@@ -388,7 +353,7 @@ if ($result) {
 
         function loadComputerStatus(laboratory) {
             if (!laboratory) return;
-            
+
             fetch(`../controllers/get_computer_status.php?lab=${laboratory}`)
                 .then(response => response.json())
                 .then(data => {
@@ -409,7 +374,7 @@ if ($result) {
                             </div>
                         `;
                     }
-                    
+
                     // Add click handlers to new elements
                     attachComputerClickHandlers();
                 });
@@ -422,7 +387,7 @@ if ($result) {
                     const laboratory = this.dataset.lab;
                     const status = this.querySelector('.status');
                     const newStatus = status.classList.contains('available') ? 'in-use' : 'available';
-                    
+
                     // Update status in database
                     fetch('../controllers/update_computer_status.php', {
                         method: 'POST',
@@ -444,6 +409,33 @@ if ($result) {
                         }
                     });
                 });
+            });
+        }
+
+        function processReservation(id, action) {
+            if (!confirm(`Are you sure you want to ${action} this reservation?`)) {
+                return;
+            }
+
+            fetch('../controllers/process_approval.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `reservation_id=${id}&action=${action}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload(); // Refresh to show updated status
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error processing request');
+                console.error('Error:', error);
             });
         }
     </script>
