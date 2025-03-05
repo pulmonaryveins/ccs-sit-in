@@ -257,12 +257,19 @@ $stmt->close();
 
     <!-- History Page Content -->
     <div class="history-container">
-        <div class="profile-card">
-            <div class="profile-header">
-                <h3>Sit-In History</h3>
+        <div class="table-wrapper">
+            <div class="table-header">
+                <h2>Sit-In History</h2>
+                <div class="table-actions">
+                    <div class="search-box">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="searchInput" placeholder="Search history...">
+                    </div>
+                </div>
             </div>
-            <div class="profile-content">
-                <table class="history-table">
+            
+            <div class="table-container">
+                <table class="modern-table">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -270,87 +277,62 @@ $stmt->close();
                             <th>PC Number</th>
                             <th>Time In</th>
                             <th>Time Out</th>
+                            <th>Duration</th>
                             <th>Purpose</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                        // Fetch history data from reservations table
-                        $sql = "SELECT * FROM reservations WHERE idno = ? ORDER BY created_at DESC";
+                        $sql = "SELECT * FROM reservations WHERE idno = ? ORDER BY date DESC, time_in DESC";
                         $stmt = $conn->prepare($sql);
                         $stmt->bind_param("s", $_SESSION['idno']);
                         $stmt->execute();
                         $result = $stmt->get_result();
 
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>';
-                            echo '<td>' . htmlspecialchars(date('M d, Y', strtotime($row['date']))) . '</td>';
-                            echo '<td>Laboratory ' . htmlspecialchars($row['laboratory']) . '</td>';
-                            echo '<td>PC ' . htmlspecialchars($row['pc_number']) . '</td>';
-                            echo '<td>' . htmlspecialchars($row['time_in']) . '</td>';
-                            echo '<td>' . (isset($row['time_out']) ? htmlspecialchars($row['time_out']) : '-') . '</td>';
-                            echo '<td>' . htmlspecialchars($row['purpose']) . '</td>';
-                            echo '<td><span class="status-badge ' . htmlspecialchars($row['status']) . '">' 
-                                . ucfirst(htmlspecialchars($row['status'])) . '</span></td>';
-                            echo '</tr>';
-                        }
-                        $stmt->close();
-                        // Close the connection here, after all database operations are done
-                        $conn->close();
+                        if ($result->num_rows == 0): ?>
+                            <tr>
+                                <td colspan="8" class="empty-state">
+                                    <div class="empty-state-content">
+                                        <i class="ri-history-line"></i>
+                                        <p>No history records found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php else:
+                            while ($row = $result->fetch_assoc()):
+                                $duration = '-';
+                                if (!empty($row['time_in']) && !empty($row['time_out'])) {
+                                    $time_in = new DateTime($row['time_in']);
+                                    $time_out = new DateTime($row['time_out']);
+                                    $interval = $time_in->diff($time_out);
+                                    $duration = $interval->format('%H:%I');
+                                }
+                        ?>
+                            <tr>
+                                <td>
+                                    <div class="date-cell">
+                                        <span class="date"><?php echo date('M d, Y', strtotime($row['date'])); ?></span>
+                                    </div>
+                                </td>
+                                <td>Laboratory <?php echo htmlspecialchars($row['laboratory']); ?></td>
+                                <td>PC <?php echo htmlspecialchars($row['pc_number']); ?></td>
+                                <td><?php echo $row['time_in'] ? date('h:i A', strtotime($row['time_in'])) : '-'; ?></td>
+                                <td><?php echo $row['time_out'] ? date('h:i A', strtotime($row['time_out'])) : '-'; ?></td>
+                                <td><?php echo $duration; ?></td>
+                                <td><span class="purpose-badge"><?php echo htmlspecialchars($row['purpose']); ?></span></td>
+                                <td><span class="status-badge <?php echo htmlspecialchars($row['status']); ?>">
+                                    <?php echo ucfirst(htmlspecialchars($row['status'])); ?>
+                                </span></td>
+                            </tr>
+                        <?php 
+                            endwhile;
+                        endif;
                         ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
-    <style>
-    .history-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1rem;
-    }
-
-    .history-table th,
-    .history-table td {
-        padding: 0.75rem 1rem;
-        text-align: left;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .history-table th {
-        background-color: #f7fafc;
-        font-weight: 600;
-        color: #4a5568;
-    }
-
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    .status-badge.pending {
-        background-color: #feebc8;
-        color: #c05621;
-    }
-
-    .status-badge.approved {
-        background-color: #c6f6d5;
-        color: #2f855a;
-    }
-
-    .status-badge.rejected {
-        background-color: #fed7d7;
-        color: #c53030;
-    }
-
-    .status-badge.completed {
-        background-color: #e2e8f0;
-        color: #2d3748;
-    }
-    </style>
 </body>
 </html>

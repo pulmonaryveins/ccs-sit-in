@@ -92,6 +92,10 @@ if ($result) {
                     <i class="ri-mail-check-line"></i>
                     <span>Request</span>
                 </a>
+                <a href="sit-in.php" class="nav-link">
+                    <i class="ri-map-pin-user-line"></i>
+                    <span>Sit-in</span>
+                </a>
                 <a href="records.php" class="nav-link">
                     <i class="ri-bar-chart-line"></i>
                     <span>Records</span>

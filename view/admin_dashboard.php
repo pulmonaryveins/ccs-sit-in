@@ -21,8 +21,12 @@ if ($result) {
     $stats['total_students'] = $result->fetch_assoc()['count'];
 }
 
-// Get current sit-in count (today)
-$query = "SELECT count FROM current_sessions WHERE date = CURDATE()";
+// Get current sit-in count (currently in the laboratory and approved)
+$query = "SELECT COUNT(*) as count FROM reservations 
+          WHERE DATE(date) = CURDATE() 
+          AND time_in IS NOT NULL 
+          AND time_out IS NULL
+          AND status = 'approved'";
 $result = $conn->query($query);
 if ($result && $row = $result->fetch_assoc()) {
     $stats['current_sitin'] = $row['count'];
@@ -84,6 +88,10 @@ if ($result) {
                     <i class="ri-mail-check-line"></i>
                     <span>Request</span>
                 </a>
+                <a href="sit-in.php" class="nav-link">
+                    <i class="ri-map-pin-user-line"></i>
+                    <span>Sit-in</span>
+                </a>
                 <a href="records.php" class="nav-link">
                     <i class="ri-bar-chart-line"></i>
                     <span>Records</span>
@@ -113,7 +121,7 @@ if ($result) {
                 <div class="stat-value"><?php echo $stats['total_students']; ?></div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">Current Sit-In</div>
+                <div class="stat-title">Current Students in Lab</div>
                 <div class="stat-value"><?php echo $stats['current_sitin']; ?></div>
             </div>
             <div class="stat-card">

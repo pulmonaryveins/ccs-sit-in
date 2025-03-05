@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 04, 2025 at 05:29 PM
+-- Generation Time: Mar 05, 2025 at 03:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -60,9 +60,8 @@ CREATE TABLE `announcements` (
 --
 
 INSERT INTO `announcements` (`id`, `title`, `content`, `created_at`, `created_by`) VALUES
-(8, 'CSS ADMIN', 'Important Announcement We are excited to announce the launch of our new website! 🎉 Explore our latest products and services now!', '2025-03-04 15:11:20', 'admin'),
-(9, ' CSS ADMIN', 'Important Announcement We are excited to announce the launch of our new website! 🎉 Explore our latest products and services now!', '2025-03-04 15:11:29', 'admin'),
-(10, 'CCS ADMIN', 'Important Announcement We are excited to announce the launch of our new website! 🎉 Explore our latest products and services now!', '2025-03-04 15:11:41', 'admin');
+(10, 'CCS ADMIN', 'Important Announcement We are excited to announce the launch of our new website! 🎉 Explore our latest products and services now!', '2025-03-04 15:11:41', 'admin'),
+(11, 'CSS ADMIN', 'CAT CAT CAT MIMING', '2025-03-05 14:32:16', 'admin');
 
 -- --------------------------------------------------------
 
@@ -116,7 +115,8 @@ INSERT INTO `computer_status` (`id`, `laboratory`, `pc_number`, `status`, `last_
 (32, '524', 3, 'in-use', '2025-03-04 15:46:46'),
 (33, '524', 7, 'in-use', '2025-03-04 16:10:00'),
 (34, '530', 2, 'in-use', '2025-03-04 16:12:03'),
-(35, '526', 1, 'in-use', '2025-03-04 16:24:03');
+(35, '526', 1, 'in-use', '2025-03-04 16:24:03'),
+(36, '530', 10, 'in-use', '2025-03-05 14:34:58');
 
 -- --------------------------------------------------------
 
@@ -134,7 +134,8 @@ CREATE TABLE `current_sessions` (
 --
 
 INSERT INTO `current_sessions` (`date`, `count`) VALUES
-('2025-03-04', 4);
+('2025-03-04', 4),
+('2025-03-05', 0);
 
 -- --------------------------------------------------------
 
@@ -170,7 +171,8 @@ INSERT INTO `reservations` (`id`, `idno`, `fullname`, `purpose`, `laboratory`, `
 (7, '20983134', 'Tormis, Francine', 'c_programming', '524', 3, '08:49:00', '23:48:40', '2025-03-04', '2025-03-04 15:46:19', 'completed'),
 (8, '20983134', 'Tormis, Francine', 'aspnet', '524', 7, '13:08:00', '00:10:37', '2025-03-05', '2025-03-04 16:08:55', 'completed'),
 (9, '20010012', 'Tudtud, Daphne', 'csharp', '530', 2, '16:11:00', NULL, '2025-03-05', '2025-03-04 16:11:42', 'approved'),
-(10, '20952503', 'Cabunilas, Vince Bryant N.', 'c_programming', '526', 1, '15:22:00', NULL, '2025-03-05', '2025-03-04 16:22:46', 'approved');
+(10, '20952503', 'Cabunilas, Vince Bryant N.', 'c_programming', '526', 1, '15:22:00', '22:22:21', '2025-03-05', '2025-03-04 16:22:46', 'completed'),
+(11, '20952503', 'Cabunilas, Vince Bryant N.', 'php', '530', 10, '10:00:00', '22:35:29', '2025-03-05', '2025-03-05 14:34:11', 'completed');
 
 -- --------------------------------------------------------
 
@@ -202,7 +204,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `idno`, `lastname`, `firstname`, `middlename`, `course`, `year`, `username`, `password`, `email`, `address`, `remaining_sessions`, `role`, `profile_image`, `created_at`) VALUES
 (1, '20183201', 'Monreal', 'Jeff', '', 'BS-Information Techn', 3, 'Jeffrey', '$2y$10$lBOdbK0MqdTvgzVKMUnSEOdzCo7Ai8fmIr8IyE76OJ8pe5coHy8J.', NULL, NULL, 30, '', 'uploads/profile_67ad71220ee12.jpg', '2025-02-13 04:10:38'),
-(2, '20952503', 'Cabunilas', 'Vince Bryant', 'N.', 'BS-Computer Science', 3, 'Vince', '$2y$10$twPu7cUcwWDXkPE3SlQR6.NLRybSZvvfEo2nBG6mGXx9NqxaXmmR6', 'vincebryant42@gmail.com', 'Cebu, City', 30, '', '../uploads/profile_67c6ec0d2164c.png', '2025-02-13 04:14:38'),
+(2, '20952503', 'Cabunilas', 'Vince Bryant', 'N.', 'BS-Information Techn', 3, 'Vince', '$2y$10$twPu7cUcwWDXkPE3SlQR6.NLRybSZvvfEo2nBG6mGXx9NqxaXmmR6', 'vincebryant42@gmail.com', 'Cebu, City', 30, '', '../uploads/profile_67c6ec0d2164c.png', '2025-02-13 04:14:38'),
 (3, '20934721', 'Escoton', 'Julius', '', 'BS-Information Techn', 2, 'Joboy', '$2y$10$Ebzkn9jgH7A70vxKyJyyjuSkRgyHc49YsRl0AQaZinQCDmMnnWfLW', NULL, NULL, 30, '', 'uploads/profile_67ad7301f18d0.jpg', '2025-02-13 04:20:03'),
 (4, '20983134', 'Tormis', 'Francine', '', 'SJH', 4, 'pransin_noob', '$2y$10$hkZsRiyxNGlIGIbjTVNfVO6be.T1LStWe1qlOgvVWxasbTLHqvREm', 'pransin@gmail.com', 'Digos noob', 30, '', '../uploads/profile_67c6e9a9e2535.jpg', '2025-02-13 14:08:20'),
 (5, '20010012', 'Tudtud', 'Daphne', '', 'BS-Computer Science', 1, 'Sashimi', '$2y$10$Jad4spx3QyWBnw2WaeICReNb1ERgN9xC2qIDPV7ZtgVeQZkt7iDnW', 'sashimi@gmail.com', 'Tisa noob', 30, '', '../uploads/profile_67c7261dbfbda.jpg', '2025-02-14 02:44:15'),
@@ -268,19 +270,19 @@ ALTER TABLE `admin_users`
 -- AUTO_INCREMENT for table `announcements`
 --
 ALTER TABLE `announcements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `computer_status`
 --
 ALTER TABLE `computer_status`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `users`
