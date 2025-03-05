@@ -87,6 +87,167 @@ if ($result) {
         </div>
     </div>
 
+    <style>
+        .content-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: calc(100vh - var(--nav-height));
+            padding: 2rem;
+            margin-top: var(--nav-height);
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 1600px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table-header h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+        }
+
+        .search-box {
+            position: relative;
+            width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(117,86,204,0.1);
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .modern-table th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modern-table td {
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #4a5568;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modern-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem !important;
+        }
+
+        .empty-state-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            color: #a0aec0;
+        }
+
+        .empty-state-content i {
+            font-size: 2.5rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-badge.approved {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .status-badge.completed {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .action-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-button.danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+
     <div class="content-wrapper">
         <div class="table-wrapper">
             <div class="table-header">
@@ -108,9 +269,8 @@ if ($result) {
                             <th>Purpose</th>
                             <th>Laboratory</th>
                             <th>PC Number</th>
-                            <th>Time In</th>
+                            <th>Time</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -127,21 +287,12 @@ if ($result) {
                             <?php foreach ($current_students as $student): ?>
                                 <tr>
                                     <td class="font-mono"><?php echo htmlspecialchars($student['idno']); ?></td>
-                                    <td>
-                                        <div class="user-info-cell">
-                                            <?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>
-                                        </div>
-                                    </td>
+                                    <td><?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?></td>
                                     <td><span class="purpose-badge"><?php echo htmlspecialchars($student['purpose']); ?></span></td>
                                     <td>Laboratory <?php echo htmlspecialchars($student['laboratory']); ?></td>
                                     <td>PC <?php echo htmlspecialchars($student['pc_number']); ?></td>
                                     <td><?php echo date('h:i A', strtotime($student['time_in'])); ?></td>
                                     <td><span class="status-badge active">Active</span></td>
-                                    <td>
-                                        <button class="action-button danger" onclick="recordTimeOut('<?php echo $student['idno']; ?>')">
-                                            <i class="ri-logout-box-line"></i> Time Out
-                                        </button>
-                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
