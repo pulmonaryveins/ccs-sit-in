@@ -45,8 +45,40 @@ if ($row = $result->fetch_assoc()) {
 
 $stmt->close();
 
-// Keep connection open for later use
-// Remove the $conn->close() from here
+// Fetch history data from both reservations and sit_ins tables
+$history_records = [];
+
+// Fetch from reservations table
+$sql = "SELECT *, 'reservation' as source FROM reservations WHERE idno = ? ORDER BY date DESC, time_in DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $_SESSION['idno']);
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $history_records[] = $row;
+}
+$stmt->close();
+
+// Fetch from sit_ins table
+$sql = "SELECT *, 'sit_in' as source FROM sit_ins WHERE idno = ? ORDER BY date DESC, time_in DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $_SESSION['idno']);
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $history_records[] = $row;
+}
+$stmt->close();
+
+// Sort all records by date and time (newest first)
+usort($history_records, function($a, $b) {
+    $a_datetime = strtotime($a['date'] . ' ' . $a['time_in']);
+    $b_datetime = strtotime($b['date'] . ' ' . $b['time_in']);
+    return $b_datetime - $a_datetime; // Descending order
+});
+
+// Close the connection here, after all database operations are done
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -55,7 +87,7 @@ $stmt->close();
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Activity History | CCS Sit-in</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
@@ -259,48 +291,72 @@ $stmt->close();
     <div class="history-container">
         <div class="profile-card">
             <div class="profile-header">
-                <h3>Sit-In History</h3>
+                <h3>Activity History</h3>
+                <div class="filter-controls">
+                    <select id="historyFilter" class="filter-select">
+                        <option value="all">All Activities</option>
+                        <option value="reservation">Reservations</option>
+                        <option value="sit_in">Sit-ins</option>
+                    </select>
+                </div>
             </div>
             <div class="profile-content">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Laboratory</th>
-                            <th>PC Number</th>
-                            <th>Time In</th>
-                            <th>Time Out</th>
-                            <th>Purpose</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        // Fetch history data from reservations table
-                        $sql = "SELECT * FROM reservations WHERE idno = ? ORDER BY created_at DESC";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param("s", $_SESSION['idno']);
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>';
-                            echo '<td>' . htmlspecialchars(date('M d, Y', strtotime($row['date']))) . '</td>';
-                            echo '<td>Laboratory ' . htmlspecialchars($row['laboratory']) . '</td>';
-                            echo '<td>PC ' . htmlspecialchars($row['pc_number']) . '</td>';
-                            echo '<td>' . htmlspecialchars($row['time_in']) . '</td>';
-                            echo '<td>' . (isset($row['time_out']) ? htmlspecialchars($row['time_out']) : '-') . '</td>';
-                            echo '<td>' . htmlspecialchars($row['purpose']) . '</td>';
-                            echo '<td><span class="status-badge ' . htmlspecialchars($row['status']) . '">' 
-                                . ucfirst(htmlspecialchars($row['status'])) . '</span></td>';
-                            echo '</tr>';
-                        }
-                        $stmt->close();
-                        // Close the connection here, after all database operations are done
-                        $conn->close();
-                        ?>
-                    </tbody>
-                </table>
+                <?php if (empty($history_records)): ?>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="ri-history-line"></i>
+                        </div>
+                        <div class="empty-state-message">
+                            <h4>No Activity Records</h4>
+                            <p>You haven't made any reservations or used the laboratory yet.</p>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Laboratory</th>
+                                <th>PC Number</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Purpose</th>
+                                <th>Activity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($history_records as $record): ?>
+                                <tr data-type="<?php echo htmlspecialchars($record['source']); ?>">
+                                    <td><?php echo htmlspecialchars(date('M d, Y', strtotime($record['date']))); ?></td>
+                                    <td>Laboratory <?php echo htmlspecialchars($record['laboratory']); ?></td>
+                                    <td>PC <?php echo htmlspecialchars($record['pc_number']); ?></td>
+                                    <td><?php echo date('h:i A', strtotime($record['time_in'])); ?></td>
+                                    <td><?php echo $record['time_out'] ? date('h:i A', strtotime($record['time_out'])) : 'Not yet'; ?></td>
+                                    <td><?php echo htmlspecialchars($record['purpose']); ?></td>
+                                    <td>
+                                        <span class="activity-badge <?php echo htmlspecialchars($record['source']); ?>">
+                                            <?php echo $record['source'] === 'reservation' ? 'Reservation' : 'Sit-in'; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if ($record['time_out']): ?>
+                                            <span class="status-badge completed">Completed</span>
+                                        <?php elseif ($record['status'] == 'approved'): ?>
+                                            <span class="status-badge approved">Approved</span>
+                                        <?php elseif ($record['status'] == 'active'): ?>
+                                            <span class="status-badge active">Active</span>
+                                        <?php elseif ($record['status'] == 'rejected'): ?>
+                                            <span class="status-badge rejected">Rejected</span>
+                                        <?php else: ?>
+                                            <span class="status-badge pending">Pending</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -331,6 +387,21 @@ $stmt->close();
             overflow: hidden;
         }
 
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 0.875rem;
+            color: #4a5568;
+        }
+
         .history-table {
             width: 100%;
             border-collapse: collapse;
@@ -353,10 +424,27 @@ $stmt->close();
             white-space: nowrap; /* Ensures text stays in a single line */
         }
 
+        .activity-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .activity-badge.reservation {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        
+        .activity-badge.sit_in {
+            background-color: #ddd6fe;
+            color: #6d28d9;
+        }
+
         .status-badge {
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 500;
         }
 
@@ -366,6 +454,11 @@ $stmt->close();
         }
 
         .status-badge.approved {
+            background-color: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-badge.active {
             background-color: #c6f6d5;
             color: #2f855a;
         }
@@ -379,6 +472,45 @@ $stmt->close();
             background-color: #e2e8f0;
             color: #2d3748;
         }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+            color: #a0aec0;
+        }
+        
+        .empty-state-icon i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state-message h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
     </style>
+
+    <script>
+        // Filter functionality for history table
+        document.getElementById('historyFilter').addEventListener('change', function() {
+            const filterValue = this.value;
+            const tableRows = document.querySelectorAll('.history-table tbody tr');
+            
+            tableRows.forEach(row => {
+                const type = row.getAttribute('data-type');
+                if (filterValue === 'all' || type === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

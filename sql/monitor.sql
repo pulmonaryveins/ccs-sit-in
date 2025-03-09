@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 05, 2025 at 03:38 PM
+-- Generation Time: Mar 09, 2025 at 05:02 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -83,40 +83,81 @@ CREATE TABLE `computer_status` (
 
 INSERT INTO `computer_status` (`id`, `laboratory`, `pc_number`, `status`, `last_updated`) VALUES
 (1, '524', 15, 'available', '2025-03-04 12:58:51'),
-(3, '524', 1, 'in-use', '2025-03-04 12:58:57'),
-(4, '526', 2, 'in-use', '2025-03-04 12:58:59'),
-(5, '528', 3, 'in-use', '2025-03-04 12:59:01'),
-(6, '542', 4, 'in-use', '2025-03-04 12:59:03'),
-(7, '524', 9, 'in-use', '2025-03-04 13:08:54'),
-(8, '524', 16, 'in-use', '2025-03-04 13:08:55'),
-(9, '524', 20, 'in-use', '2025-03-04 13:08:56'),
-(10, '526', 33, 'in-use', '2025-03-04 13:09:01'),
-(11, '526', 26, 'in-use', '2025-03-04 13:09:02'),
-(12, '526', 30, 'in-use', '2025-03-04 13:09:02'),
-(13, '528', 11, 'in-use', '2025-03-04 13:09:05'),
-(14, '528', 23, 'in-use', '2025-03-04 13:09:05'),
-(15, '528', 26, 'in-use', '2025-03-04 13:09:06'),
-(16, '528', 38, 'in-use', '2025-03-04 13:09:08'),
-(17, '528', 30, 'in-use', '2025-03-04 13:09:09'),
-(18, '530', 15, 'in-use', '2025-03-04 13:09:11'),
-(19, '530', 18, 'in-use', '2025-03-04 13:09:11'),
-(20, '530', 16, 'in-use', '2025-03-04 13:09:12'),
-(21, '530', 33, 'in-use', '2025-03-04 13:09:13'),
-(22, '530', 31, 'in-use', '2025-03-04 13:09:13'),
-(23, '542', 25, 'in-use', '2025-03-04 13:09:15'),
-(24, '542', 21, 'in-use', '2025-03-04 13:09:16'),
-(25, '542', 27, 'in-use', '2025-03-04 13:09:16'),
-(26, '542', 34, 'in-use', '2025-03-04 13:09:17'),
-(27, '542', 36, 'in-use', '2025-03-04 13:09:17'),
-(28, '526', 10, 'in-use', '2025-03-04 14:28:57'),
-(29, '530', 1, 'in-use', '2025-03-04 14:48:05'),
-(30, '524', 2, 'in-use', '2025-03-04 15:04:33'),
-(31, '526', 12, 'in-use', '2025-03-04 15:35:14'),
-(32, '524', 3, 'in-use', '2025-03-04 15:46:46'),
-(33, '524', 7, 'in-use', '2025-03-04 16:10:00'),
-(34, '530', 2, 'in-use', '2025-03-04 16:12:03'),
-(35, '526', 1, 'in-use', '2025-03-04 16:24:03'),
-(36, '530', 10, 'in-use', '2025-03-05 14:34:58');
+(3, '524', 1, 'in-use', '2025-03-09 13:19:36'),
+(4, '526', 2, 'in-use', '2025-03-09 13:19:43'),
+(5, '528', 3, 'in-use', '2025-03-09 13:22:20'),
+(6, '542', 4, 'in-use', '2025-03-09 13:19:55'),
+(7, '524', 9, 'in-use', '2025-03-09 13:19:39'),
+(8, '524', 16, 'available', '2025-03-09 09:44:38'),
+(9, '524', 20, 'available', '2025-03-09 09:44:37'),
+(10, '526', 33, 'available', '2025-03-09 09:44:47'),
+(11, '526', 26, 'available', '2025-03-09 09:44:46'),
+(12, '526', 30, 'available', '2025-03-09 09:44:47'),
+(13, '528', 11, 'in-use', '2025-03-09 13:22:23'),
+(14, '528', 23, 'available', '2025-03-09 09:44:52'),
+(15, '528', 26, 'available', '2025-03-09 09:44:52'),
+(16, '528', 38, 'available', '2025-03-09 09:44:53'),
+(17, '528', 30, 'available', '2025-03-09 09:44:53'),
+(18, '530', 15, 'available', '2025-03-09 09:44:56'),
+(19, '530', 18, 'available', '2025-03-09 09:44:57'),
+(20, '530', 16, 'available', '2025-03-09 09:44:57'),
+(21, '530', 33, 'available', '2025-03-09 09:44:58'),
+(22, '530', 31, 'available', '2025-03-09 09:44:59'),
+(23, '542', 25, 'available', '2025-03-09 09:45:04'),
+(24, '542', 21, 'available', '2025-03-09 09:45:04'),
+(25, '542', 27, 'available', '2025-03-09 09:45:04'),
+(26, '542', 34, 'available', '2025-03-09 09:45:05'),
+(27, '542', 36, 'available', '2025-03-09 09:45:06'),
+(28, '526', 10, 'in-use', '2025-03-09 13:19:45'),
+(29, '530', 1, 'in-use', '2025-03-09 13:19:48'),
+(30, '524', 2, 'in-use', '2025-03-09 13:19:36'),
+(31, '526', 12, 'available', '2025-03-09 09:44:45'),
+(32, '524', 3, 'in-use', '2025-03-09 13:19:36'),
+(33, '524', 7, 'in-use', '2025-03-09 13:19:38'),
+(34, '530', 2, 'in-use', '2025-03-09 13:19:50'),
+(35, '526', 1, 'in-use', '2025-03-09 13:19:43'),
+(36, '530', 10, 'in-use', '2025-03-09 13:19:49'),
+(71, '524', 13, 'available', '2025-03-09 11:09:50'),
+(72, '524', 11, 'in-use', '2025-03-09 16:01:46'),
+(73, '528', 28, 'available', '2025-03-09 11:21:37'),
+(75, '530', 8, 'in-use', '2025-03-09 13:19:52'),
+(77, '542', 5, 'in-use', '2025-03-09 13:19:54'),
+(83, '524', 40, 'available', '2025-03-09 13:19:34'),
+(84, '524', 39, 'available', '2025-03-09 13:19:34'),
+(90, '524', 4, 'in-use', '2025-03-09 13:19:37'),
+(93, '524', 5, 'in-use', '2025-03-09 13:19:38'),
+(94, '524', 6, 'in-use', '2025-03-09 13:19:38'),
+(96, '524', 8, 'in-use', '2025-03-09 13:19:39'),
+(98, '524', 10, 'in-use', '2025-03-09 13:19:39'),
+(101, '526', 3, 'in-use', '2025-03-09 13:19:44'),
+(102, '526', 4, 'in-use', '2025-03-09 13:19:44'),
+(103, '526', 5, 'in-use', '2025-03-09 13:19:44'),
+(105, '526', 9, 'in-use', '2025-03-09 13:19:45'),
+(106, '526', 8, 'in-use', '2025-03-09 13:19:45'),
+(107, '526', 6, 'in-use', '2025-03-09 13:19:46'),
+(108, '526', 7, 'in-use', '2025-03-09 13:19:46'),
+(112, '530', 3, 'in-use', '2025-03-09 13:19:50'),
+(113, '530', 5, 'in-use', '2025-03-09 13:19:51'),
+(114, '530', 4, 'in-use', '2025-03-09 13:19:51'),
+(115, '530', 9, 'in-use', '2025-03-09 13:19:52'),
+(117, '530', 7, 'in-use', '2025-03-09 13:19:52'),
+(118, '530', 6, 'in-use', '2025-03-09 13:19:52'),
+(121, '542', 3, 'in-use', '2025-03-09 13:19:55'),
+(122, '542', 2, 'in-use', '2025-03-09 13:19:56'),
+(123, '542', 1, 'in-use', '2025-03-09 13:19:56'),
+(124, '542', 6, 'in-use', '2025-03-09 13:19:56'),
+(125, '542', 10, 'in-use', '2025-03-09 13:19:57'),
+(126, '542', 9, 'in-use', '2025-03-09 13:19:57'),
+(127, '542', 7, 'in-use', '2025-03-09 13:19:58'),
+(128, '528', 1, 'in-use', '2025-03-09 13:22:19'),
+(129, '528', 2, 'in-use', '2025-03-09 13:22:20'),
+(131, '528', 4, 'in-use', '2025-03-09 13:22:20'),
+(132, '528', 5, 'in-use', '2025-03-09 13:22:21'),
+(133, '528', 15, 'in-use', '2025-03-09 13:22:21'),
+(134, '528', 14, 'in-use', '2025-03-09 13:22:21'),
+(135, '528', 13, 'in-use', '2025-03-09 13:22:22'),
+(136, '528', 12, 'in-use', '2025-03-09 13:22:22'),
+(138, '524', 25, 'in-use', '2025-03-09 14:41:14');
 
 -- --------------------------------------------------------
 
@@ -135,7 +176,8 @@ CREATE TABLE `current_sessions` (
 
 INSERT INTO `current_sessions` (`date`, `count`) VALUES
 ('2025-03-04', 4),
-('2025-03-05', 0);
+('2025-03-05', 0),
+('2025-03-09', 13);
 
 -- --------------------------------------------------------
 
@@ -157,22 +199,35 @@ CREATE TABLE `reservations` (
   `status` varchar(20) NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `reservations`
+-- Table structure for table `sit_ins`
 --
 
-INSERT INTO `reservations` (`id`, `idno`, `fullname`, `purpose`, `laboratory`, `pc_number`, `time_in`, `time_out`, `date`, `created_at`, `status`) VALUES
-(1, '20952503', 'Cabunilas, Vince Bryant N.', 'java_programming', '524', 0, '18:55:00', NULL, '2025-03-17', '2025-03-03 08:55:16', 'approved'),
-(2, '20952503', 'Cabunilas, Vince Bryant N.', 'php', '524', 2, '15:00:00', NULL, '2025-03-05', '2025-03-04 13:40:46', 'rejected'),
-(3, '20952503', 'Cabunilas, Vince Bryant N.', 'csharp', '526', 10, '10:00:00', NULL, '2025-03-06', '2025-03-04 14:22:11', 'approved'),
-(4, '20952503', 'Cabunilas, Vince Bryant N.', 'aspnet', '530', 1, '15:00:00', NULL, '2025-03-15', '2025-03-04 14:47:43', 'approved'),
-(5, '20983134', 'Tormis, Francine', 'c_programming', '524', 2, '16:04:00', '23:05:49', '2025-03-04', '2025-03-04 15:04:06', 'completed'),
-(6, '20983134', 'Tormis, Francine', 'php', '526', 12, '15:00:00', '23:37:17', '2025-03-04', '2025-03-04 15:34:49', 'completed'),
-(7, '20983134', 'Tormis, Francine', 'c_programming', '524', 3, '08:49:00', '23:48:40', '2025-03-04', '2025-03-04 15:46:19', 'completed'),
-(8, '20983134', 'Tormis, Francine', 'aspnet', '524', 7, '13:08:00', '00:10:37', '2025-03-05', '2025-03-04 16:08:55', 'completed'),
-(9, '20010012', 'Tudtud, Daphne', 'csharp', '530', 2, '16:11:00', NULL, '2025-03-05', '2025-03-04 16:11:42', 'approved'),
-(10, '20952503', 'Cabunilas, Vince Bryant N.', 'c_programming', '526', 1, '15:22:00', '22:22:21', '2025-03-05', '2025-03-04 16:22:46', 'completed'),
-(11, '20952503', 'Cabunilas, Vince Bryant N.', 'php', '530', 10, '10:00:00', '22:35:29', '2025-03-05', '2025-03-05 14:34:11', 'completed');
+CREATE TABLE `sit_ins` (
+  `id` int(11) NOT NULL,
+  `idno` varchar(20) NOT NULL,
+  `fullname` varchar(100) NOT NULL,
+  `purpose` varchar(50) NOT NULL,
+  `laboratory` varchar(10) NOT NULL,
+  `pc_number` int(11) NOT NULL,
+  `time_in` time NOT NULL,
+  `time_out` time DEFAULT NULL,
+  `date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` varchar(20) NOT NULL DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sit_ins`
+--
+
+INSERT INTO `sit_ins` (`id`, `idno`, `fullname`, `purpose`, `laboratory`, `pc_number`, `time_in`, `time_out`, `date`, `created_at`, `status`) VALUES
+(1, '20952503', 'Cabunilas, Vince Bryant N.', 'C Programming', '524', 3, '21:07:00', '14:09:34', '2025-03-09', '2025-03-09 13:07:50', 'completed'),
+(2, '20983134', 'Tormis, Francine', 'C Programming', '524', 11, '21:10:00', '14:17:17', '2025-03-09', '2025-03-09 13:10:50', 'completed'),
+(3, '20952503', 'Cabunilas, Vince Bryant N.', 'C Programming', '524', 25, '22:41:00', NULL, '2025-03-09', '2025-03-09 14:41:14', 'active'),
+(4, '20983134', 'Tormis, Francine', 'Java Programming', '524', 11, '00:01:00', NULL, '2025-03-10', '2025-03-09 16:01:46', 'active');
 
 -- --------------------------------------------------------
 
@@ -211,7 +266,8 @@ INSERT INTO `users` (`id`, `idno`, `lastname`, `firstname`, `middlename`, `cours
 (6, '20914241', 'McArthur', 'Newbie', '', 'College of Education', 4, 'Newbie', '$2y$10$TZyAGn9J4LT1hQRFkhMaCueHcRkgqu2nD6K0y9pK5peHVqasjS1VG', '', '', 30, '', 'uploads/profile_67b602449f3d5.jpg', '2025-02-19 16:09:03'),
 (7, '20019922', 'Stalin', 'Joseph', 'R.', 'College of Criminal ', 4, 'MotherRussia', '$2y$10$2ilyiu9/P94FeowL12mia.jQAv/BGDaeSvGihD6XGMzOON6zYtWc2', NULL, NULL, 30, '', NULL, '2025-03-03 10:01:52'),
 (8, '11111111', 'Putin', 'Vladimir', '', 'BS-Computer Science', 4, 'Vodka', '$2y$10$unQMQb8AwVxwBnl92N1eU.WVpKCGimKEPothWhQWkP/BrFFshQqVy', '', '', 30, '', 'uploads/profile_67c65840c9f6c.png', '2025-03-04 01:12:13'),
-(9, '20873192', 'userx', 'userp', '', 'CCJ', 1, 'Littlenoob', '$2y$10$/SRO5uuRCEXe0SbQ0xLfbOdZRNT5BNcmfz9Rx5pYiS0Cg9ZXnWIdu', 'noob@gmail.com', 'newbville', 30, '', NULL, '2025-03-04 11:57:23');
+(9, '20873192', 'userx', 'userp', '', 'CCJ', 1, 'Littlenoob', '$2y$10$/SRO5uuRCEXe0SbQ0xLfbOdZRNT5BNcmfz9Rx5pYiS0Cg9ZXnWIdu', 'noob@gmail.com', 'newbville', 30, '', NULL, '2025-03-04 11:57:23'),
+(10, '29892812', 'Musk', 'Elon', '', 'BS-Computer Science', 2, 'tesla', '$2y$10$mPVy4vWCndHRim5pLLgWz.qIi/DUfIrlaalhvSDKlR9gqQNUtZK7i', NULL, NULL, 30, '', NULL, '2025-03-09 08:59:45');
 
 --
 -- Indexes for dumped tables
@@ -250,6 +306,12 @@ ALTER TABLE `reservations`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `sit_ins`
+--
+ALTER TABLE `sit_ins`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -276,19 +338,25 @@ ALTER TABLE `announcements`
 -- AUTO_INCREMENT for table `computer_status`
 --
 ALTER TABLE `computer_status`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=139;
 
 --
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `sit_ins`
+--
+ALTER TABLE `sit_ins`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -21,7 +21,8 @@ if ($result) {
     $stats['total_students'] = $result->fetch_assoc()['count'];
 }
 
-// Get current sit-in count (currently in the laboratory and approved)
+// Get current sit-in count (combined from both reservations and sit_ins tables)
+// First, count current students from reservations
 $query = "SELECT COUNT(*) as count FROM reservations 
           WHERE DATE(date) = CURDATE() 
           AND time_in IS NOT NULL 
@@ -34,11 +35,28 @@ if ($result && $row = $result->fetch_assoc()) {
     $stats['current_sitin'] = 0;
 }
 
-// Get total sit-in count
+// Next, add current students from sit_ins
+$query = "SELECT COUNT(*) as count FROM sit_ins 
+          WHERE time_out IS NULL 
+          AND status = 'active'";
+$result = $conn->query($query);
+if ($result && $row = $result->fetch_assoc()) {
+    $stats['current_sitin'] += $row['count'];
+}
+
+// Get total sit-in count from both tables
+// First from reservations
 $query = "SELECT COUNT(*) as count FROM reservations";
 $result = $conn->query($query);
 if ($result) {
     $stats['total_sitin'] = $result->fetch_assoc()['count'];
+}
+
+// Add count from sit_ins
+$query = "SELECT COUNT(*) as count FROM sit_ins";
+$result = $conn->query($query);
+if ($result && $row = $result->fetch_assoc()) {
+    $stats['total_sitin'] += $row['count'];
 }
 
 // Fetch announcements
