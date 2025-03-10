@@ -1,119 +1,46 @@
 <?php
 session_start();
+if (!isset($_SESSION['admin_logged_in'])) {
+    header('HTTP/1.1 401 Unauthorized');
+    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
+    exit();
+}
+
 require_once '../config/db_connect.php';
 
-header('Content-Type: application/json');
+// Set timezone to Manila (GMT+8)
+date_default_timezone_set('Asia/Manila');
 
-// Check if user is logged in as admin
-if (!isset($_SESSION['admin_logged_in'])) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
-    exit;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sit_in_id'])) {
+    $sit_in_id = intval($_POST['sit_in_id']);
+    
+    // Get current date and time in GMT+8
+    $current_time = date('H:i:s'); // Current time in 24-hour format
+    
+    // Update the sit-in record with time_out and status
+    $stmt = $conn->prepare("UPDATE sit_ins SET time_out = ?, status = 'completed' WHERE id = ?");
+    $stmt->bind_param("si", $current_time, $sit_in_id);
+    
+    if ($stmt->execute()) {
+        // Get PC details to update availability
+        $stmt2 = $conn->prepare("SELECT laboratory, pc_number FROM sit_ins WHERE id = ?");
+        $stmt2->bind_param("i", $sit_in_id);
+        $stmt2->execute();
+        $result = $stmt2->get_result();
+        
+        if ($row = $result->fetch_assoc()) {
+            // Update PC status to available
+            $stmt3 = $conn->prepare("UPDATE computer_status SET status = 'available' WHERE laboratory = ? AND pc_number = ?");
+            $stmt3->bind_param("si", $row['laboratory'], $row['pc_number']);
+            $stmt3->execute();
+        }
+        
+        echo json_encode(['success' => true, 'message' => 'Time out recorded successfully']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Error updating record: ' . $stmt->error]);
+    }
+    
+} else {
+    echo json_encode(['success' => false, 'message' => 'Invalid request']);
 }
-
-// For debugging
-error_log('POST data: ' . print_r($_POST, true));
-
-// Check if any ID parameter is provided
-if (empty($_POST['reservation_id']) && empty($_POST['sit_in_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Missing ID parameter']);
-    exit;
-}
-
-// Begin transaction
-$conn->begin_transaction();
-
-try {
-    $current_time = date('H:i:s');
-    $id = null;
-    $laboratory = null;
-    $pc_number = null;
-    $table_type = null;
-
-    // Handle reservation time out
-    if (!empty($_POST['reservation_id'])) {
-        $id = $_POST['reservation_id'];
-        $table_type = 'reservation';
-        
-        // Get laboratory and PC number
-        $query = "SELECT laboratory, pc_number FROM reservations WHERE id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows === 0) {
-            throw new Exception("Reservation not found");
-        }
-        
-        $row = $result->fetch_assoc();
-        $laboratory = $row['laboratory'];
-        $pc_number = $row['pc_number'];
-        
-        // Update reservation status
-        $updateQuery = "UPDATE reservations SET time_out = ?, status = 'completed' WHERE id = ?";
-        $stmt = $conn->prepare($updateQuery);
-        $stmt->bind_param('si', $current_time, $id);
-        
-        if (!$stmt->execute()) {
-            throw new Exception("Failed to update reservation: " . $stmt->error);
-        }
-    }
-    // Handle sit-in time out
-    else if (!empty($_POST['sit_in_id'])) {
-        $id = $_POST['sit_in_id'];
-        $table_type = 'sit_in';
-        
-        // Get laboratory and PC number
-        $query = "SELECT laboratory, pc_number FROM sit_ins WHERE id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows === 0) {
-            throw new Exception("Sit-in record not found");
-        }
-        
-        $row = $result->fetch_assoc();
-        $laboratory = $row['laboratory'];
-        $pc_number = $row['pc_number'];
-        
-        // Update sit_in status
-        $updateQuery = "UPDATE sit_ins SET time_out = ?, status = 'completed' WHERE id = ?";
-        $stmt = $conn->prepare($updateQuery);
-        $stmt->bind_param('si', $current_time, $id);
-        
-        if (!$stmt->execute()) {
-            throw new Exception("Failed to update sit-in record: " . $stmt->error);
-        }
-    }
-    else {
-        throw new Exception("Invalid request: No valid ID provided");
-    }
-
-    // Update PC status to available
-    $updatePcQuery = "UPDATE computer_status SET status = 'available' WHERE laboratory = ? AND pc_number = ?";
-    $stmt = $conn->prepare($updatePcQuery);
-    $stmt->bind_param('si', $laboratory, $pc_number);
-    
-    if (!$stmt->execute()) {
-        throw new Exception("Failed to update PC status: " . $stmt->error);
-    }
-    
-    // Commit transaction
-    $conn->commit();
-    
-    echo json_encode([
-        'success' => true, 
-        'message' => ucfirst($table_type) . ' completed successfully',
-        'time_out' => $current_time
-    ]);
-    
-} catch (Exception $e) {
-    // Rollback transaction on error
-    $conn->rollback();
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-}
-
-$conn->close();
 ?>

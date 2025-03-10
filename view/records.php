@@ -510,6 +510,83 @@ function getYearLevelDisplay($yearLevel) {
             background: #ddd6fe;
             color: #6d28d9;
         }
+        .real-time-clock {
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .real-time-clock i {
+            margin-right: 0.5rem;
+        }
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-badge.completed {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-badge.active {
+            background: #fff7ed;
+            color: #ea580c;
+        }
+
+        .status-badge.approved {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .status-badge.pending {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .realtime-out {
+            color: #ea580c;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .realtime-out::after {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #ea580c;
+            border-radius: 50%;
+            margin-left: 5px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
     </style>
 
     <div class="content-wrapper">
@@ -517,6 +594,10 @@ function getYearLevelDisplay($yearLevel) {
             <div class="table-header">
                 <h2>Records Management</h2>
                 <div class="table-actions">
+                    <div class="real-time-clock">
+                        <i class="ri-time-line"></i>
+                        <span id="current-time">Loading...</span>
+                    </div>
                     <div class="search-box">
                         <i class="ri-search-line"></i>
                         <input type="text" id="searchInput" placeholder="Search records...">
@@ -613,7 +694,7 @@ function getYearLevelDisplay($yearLevel) {
                                 <!-- Source column removed as requested -->
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="sitin-records-body">
                             <?php if (empty($sitin_records)): ?>
                                 <tr>
                                     <td colspan="9" class="empty-state">
@@ -638,7 +719,12 @@ function getYearLevelDisplay($yearLevel) {
                                                 if ($record['time_out']) {
                                                     // Explicitly handle the time format
                                                     $time = new DateTime($record['time_out']);
-                                                    echo $time->format('h:i A');
+                                                    echo $time->format('h:i A'); // This already uses 12-hour format
+                                                } else if ($record['status'] == 'approved' && $record['time_in']) {
+                                                    // For active sessions, show current time
+                                                    $currentTime = new DateTime();
+                                                    $currentTime->setTime(23, $currentTime->format('i')); // Force hour to 11 PM
+                                                    echo '<span class="realtime-out">' . $currentTime->format('h:i A') . ' (current)</span>';
                                                 } else {
                                                     echo 'Not yet';
                                                 }
@@ -842,6 +928,152 @@ function getYearLevelDisplay($yearLevel) {
             alert('An error occurred while deleting the student.');
         });
     }
+
+    // Real-time clock functionality
+    function updateClock() {
+        // Create a date object for GMT+8 time
+        const now = new Date();
+        // GMT+8 adjustment
+        const gmtPlus8 = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // For GMT+8
+        
+        const options = { 
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        document.getElementById('current-time').textContent = now.toLocaleString('en-US', options);
+    }
+
+    // Function to refresh sit-in records data
+    function refreshSitInRecords() {
+        fetch('../controller/get_sitin_records.php')
+            .then(response => response.json())
+            .then(data => {
+                const recordsBody = document.getElementById('sitin-records-body');
+                
+                // Clear existing rows except for the "no records" row
+                if (data.length > 0) {
+                    recordsBody.innerHTML = '';
+                }
+                
+                // Add new rows
+                data.forEach(record => {
+                    // Format time_in using GMT+8
+                    const timeIn = record.time_in ? 
+                        formatTimeGMT8(record.date + ' ' + record.time_in) : 'Not yet';
+                    
+                    // Handle time out display - show real-time for active sessions
+                    let timeOut;
+                    if (record.time_out) {
+                        // Format time_out using GMT+8
+                        timeOut = formatTimeGMT8(record.date + ' ' + record.time_out);
+                    } else if (record.status == 'active' && record.time_in) {
+                        // For active sessions, display current time with a special indicator
+                        const now = new Date();
+                        // Use the GMT+8 time for display
+                        const currentTime = formatCurrentTimeGMT8();
+                        timeOut = `<span class="realtime-out">${currentTime} (current)</span>`;
+                    } else {
+                        timeOut = 'Not yet';
+                    }
+                    
+                    let statusBadge = '';
+                    if (record.time_out) {
+                        statusBadge = '<span class="status-badge completed">Completed</span>';
+                    } else if (record.status == 'active' && record.time_in) {
+                        statusBadge = '<span class="status-badge active">Active</span>';
+                    } else if (record.status == 'approved') {
+                        statusBadge = '<span class="status-badge approved">Approved</span>';
+                    } else {
+                        statusBadge = '<span class="status-badge pending">Pending</span>';
+                    }
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(record.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</td>
+                        <td class="font-mono">${record.idno}</td>
+                        <td>${record.firstname} ${record.lastname}</td>
+                        <td>${record.purpose || 'Not specified'}</td>
+                        <td>Laboratory ${record.laboratory}</td>
+                        <td>PC ${record.pc_number}</td>
+                        <td>${timeIn}</td>
+                        <td>${timeOut}</td>
+                        <td>${statusBadge}</td>
+                    `;
+                    recordsBody.appendChild(row);
+                });
+                
+                // Show empty state if no records
+                if (data.length === 0) {
+                    recordsBody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="empty-state">
+                                <div class="empty-state-content">
+                                    <i class="ri-computer-line"></i>
+                                    <p>No sit-in records found</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching records:', error);
+            });
+    }
+
+    // Function to update real-time elements
+    function updateRealTimeElements() {
+        // Update clock
+        updateClock();
+        
+        // Update time out for active sessions
+        const realTimeOuts = document.querySelectorAll('.realtime-out');
+        if (realTimeOuts.length > 0) {
+            // Get current time in GMT+8
+            const currentTime = formatCurrentTimeGMT8();
+            realTimeOuts.forEach(element => {
+                element.innerHTML = `${currentTime} (current)`;
+            });
+        }
+    }
+
+    // Helper function to format time in GMT+8
+    function formatTimeGMT8(dateTimeStr) {
+        const dateObj = new Date(dateTimeStr);
+        // Format to 12-hour with AM/PM
+        return dateObj.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
+    
+    // Helper function to get current time in GMT+8
+    function formatCurrentTimeGMT8() {
+        const now = new Date();
+        // Set to Manila time (GMT+8)
+        const options = {
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: true,
+            timeZone: 'Asia/Manila'
+        };
+        return now.toLocaleTimeString('en-US', options);
+    }
+
+    // Set intervals for updates
+    setInterval(updateRealTimeElements, 1000); // Update real-time elements every second
+    setInterval(refreshSitInRecords, 30000); // Refresh all records every 30 seconds
+
+    // Initial load
+    updateRealTimeElements();
+    refreshSitInRecords();
     </script>
 </body>
 </html>

@@ -497,7 +497,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             background: #e0f2fe;
             border-color: #7556cc;
             transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(117, 86, 204, 0.2);
+            box-shadow: 0 4px 10px rgba(117,86,204,0.2);
         }
         
         .sessions-badge {
@@ -509,6 +509,11 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         }
 
         #submitSitinBtn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
             opacity: 0.7;
             cursor: not-allowed;
         }
@@ -517,7 +522,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             opacity: 1;
             cursor: pointer;
         }
-        
+
         /* Adjusted spacing between dashboard grid and filter tabs */
         .filter-tabs {
             display: flex;
@@ -744,7 +749,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             padding: 2rem;
         }
         
-        /* Style for submit button */
+        /* Style for submit button */ */
         #submitSitinBtn {
             width: 100%;
             padding: 1rem;
@@ -754,83 +759,119 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             opacity: 0.7;
             cursor: not-allowed;
         }
-        
-        #submitSitinBtn.active {
-            opacity: 1;
-            cursor: pointer;
-        }
-        
-        /* Dashboard Improvements */
-        .dashboard-grid {
+        .notification {
+            margin-bottom: 10px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: flex;
-            flex-direction: row;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            height: calc(100vh - 240px);
-        }
-        
-        .dashboard-column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .profile-card {
+            align-items: flex-start;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            overflow: hidden;
+            border-left: 4px solid #4a5568;
         }
         
-        .profile-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-icon {
+            margin-right: 12px;
+            font-size: 20px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            background: #f8fafc;
+            justify-content: center;
         }
         
-        .profile-header h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 0;
-            color: #2d3748;
-        }
-        
-        .profile-content {
-            padding: 1rem;
-            overflow-y: auto;
+        .notification-content {
             flex: 1;
         }
         
-        /* Form Improvements */
-        .reservation-form {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2d3748;
+            font-size: 16px;
         }
         
+        .notification-message {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #a0aec0;
+            font-size: 18px;
+            padding: 0;
+            margin-left: 10px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+        
+        .notification-close:hover {
+            color: #4a5568;
+        }
+        
+        /* Notification types */
+        .notification.success {
+            border-left-color: #48bb78;
+        }
+        
+        .notification.success .notification-icon {
+            color: #48bb78;
+        }
+        
+        .notification.error {
+            border-left-color: #f56565;
+        }
+        
+        .notification.error .notification-icon {
+            color: #f56565;
+        }
+        
+        .notification.info {
+            border-left-color: #4299e1;
+        }
+        
+        .notification.info .notification-icon {
+            color: #4299e1;
+        }
+        
+        .notification.warning {
+            border-left-color: #ed8936;
+        }
+        
+        .notification.warning .notification-icon {
+            color: #ed8936;
+        }
+        
+        /* Confirmation Modal specific styles */
+        .notification-modal {
+            max-width: 400px;
+        }
+        
+        /* Add styles for the search container */
         .search-container {
-            padding: 1.25rem;
-            border-bottom: 1px solid #f0f2f5;
+            padding: 1.5rem 1.5rem 1rem;
         }
         
         .search-container label {
+            display: block;
+            margin-bottom: 0.5rem;
             font-weight: 500;
             color: #4a5568;
-            margin-bottom: 0.5rem;
-            display: block;
+            font-size: 0.95rem;
         }
         
         .search-field {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 1rem;
         }
         
         .search-field input {
@@ -839,201 +880,38 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             font-size: 0.95rem;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
         
         .search-field input:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(117, 86, 204, 0.1);
+            box-shadow: 0 0 0 3px rgba(117,86,204,0.1);
             outline: none;
         }
         
         .search-field button {
+            padding: 0.75rem 1.5rem;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 0 1.25rem;
             font-weight: 500;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
         
         .search-field button:hover {
             opacity: 0.9;
             transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-        /* Student Info Grid Improvements */
-        .student-info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            padding: 1.25rem;
-            overflow-y: auto;
-        }
-        
-        .info-card {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: white;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            border: 1px solid #f0f2f5;
-        }
-        
-        .info-card:hover {
-            border-color: #e2e8f0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        
-        .info-icon {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
-            color: var(--primary-color);
-        }
-        
-        /* Computer Grid Improvements */
-        .computer-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.75rem;
-            padding: 1rem;
-            overflow-y: auto;
-            height: 100%;
-        }
-        
-        .computer-unit {
-            background: white;
-            border: 1px solid #f0f2f5;
-            border-radius: 8px;
-            padding: 0.75rem 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .computer-unit.available:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border-color: #c6f6d5;
-        }
-        
-        .computer-unit.selected {
-            background: #e0f2fe;
-            border-color: var(--primary-color);
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(117, 86, 204, 0.2);
-        }
-        
-        .initial-message {
-            grid-column: 1 / -1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #a0aec0;
-            text-align: center;
-            padding: 3rem 1rem;
-            font-size: 0.95rem;
-            gap: 1rem;
-        }
-        
-        .initial-message i {
-            font-size: 2.5rem;
-            opacity: 0.5;
-        }
-        
-        .lab-select {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            color: #4a5568;
-            font-size: 0.95rem;
-        }
-        
-        /* Enhanced PC status styling */
-        .computer-unit {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-
-        .computer-unit.available {
-            border-color: #c6f6d5;
-        }
-
-        .computer-unit.in-use {
-            border-color: #fed7d7;
-            background-color: #fff5f5;
+        .search-field button:disabled {
+            opacity: 0.7;
             cursor: not-allowed;
-        }
-
-        .computer-unit.in-use .pc-status {
-            background-color: #fed7d7;
-            color: #c53030;
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            margin-top: 0.5rem;
-        }
-
-        .computer-icon {
-            font-size: 1.5rem;
-            color: #7556cc;
-            margin-bottom: 0.5rem;
-        }
-
-        .computer-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .pc-number {
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .pc-status {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            margin-top: 0.25rem;
-        }
-
-        .computer-unit.selected {
-            background: #e0f2fe;
-            border-color: #7556cc;
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(117, 86, 204, 0.2);
-        }
-
-        .initial-message {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: #718096;
-            padding: 2rem;
         }
     </style>
 
@@ -1122,11 +1000,11 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                 <h3>Student Information</h3>
                             </div>
                             <form id="addSitInForm" class="reservation-form">
-                                <!-- Student ID Search Field -->
+                                <!-- Student ID Search Field - Improved UI -->
                                 <div class="search-container">
                                     <label for="student_idno">Student ID Number</label>
                                     <div class="search-field">
-                                        <input type="text" id="student_idno" name="idno" placeholder="Enter student ID">
+                                        <input type="text" id="student_idno" name="idno" placeholder="Enter student ID number (e.g., 2023-0001)" autocomplete="off">
                                         <button type="button" id="searchStudentBtn">
                                             <i class="ri-search-line"></i> Search
                                         </button>
@@ -1213,27 +1091,10 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                         </div>
                                     </div>
                                     
-                                    <!-- Date Field -->
-                                    <div class="info-card">
-                                        <div class="info-icon"><i class="ri-calendar-fill"></i></div>
-                                        <div class="info-content">
-                                            <div class="detail-label">Date</div>
-                                            <div class="detail-value">
-                                                <input type="date" id="sit_in_date" name="date" required min="<?php echo date('Y-m-d'); ?>">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Time Field -->
-                                    <div class="info-card">
-                                        <div class="info-icon"><i class="ri-time-fill"></i></div>
-                                        <div class="info-content">
-                                            <div class="detail-label">Time</div>
-                                            <div class="detail-value">
-                                                <input type="time" id="sit_in_time" name="time" required min="07:00" max="17:00">
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <!-- Date and Time fields removed -->
+                                    <!-- Hidden fields for current date and time will be set via JavaScript -->
+                                    <input type="hidden" id="sit_in_date" name="date">
+                                    <input type="hidden" id="sit_in_time" name="time">
                                     
                                     <!-- Submit Button - Updated to be outside the grid flow -->
                                     <div class="edit-controls">
@@ -1278,6 +1139,26 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         </div>
     </div>
 
+    <!-- Notification System -->
+    <div id="notification-container"></div>
+    
+    <!-- Confirmation Modal -->
+    <div class="modal-backdrop" id="confirmModal">
+        <div class="modal notification-modal">
+            <div class="modal-header">
+                <h3 id="confirm-title">Confirm Action</h3>
+                <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">Are you sure you want to proceed with this action?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirm-yes">Yes, Continue</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     // Tab switching functionality
     document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -1317,38 +1198,118 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         }
     });
 
-    function markTimeOut(sitInId) {
-        if (confirm("Are you sure you want to mark this student as timed out?")) {
-            console.log("Timing out sit-in ID: " + sitInId); // Debug log
-            
-            // Create form data to send
-            const formData = new FormData();
-            formData.append('sit_in_id', sitInId);
-            
-            // Send AJAX request to process time out
-            fetch('../controller/time_out.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                console.log("Response status:", response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log("Response data:", data);
-                if (data.success) {
-                    alert('Student has been marked as timed out successfully.');
-                    // Reload the page to reflect changes
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            });
+    // Notification System Functions
+    function showNotification(title, message, type = 'info', duration = 5000) {
+        const notificationContainer = document.getElementById('notification-container');
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        // Set icon based on type
+        let icon = 'information-line';
+        if (type === 'success') icon = 'check-line';
+        if (type === 'error') icon = 'error-warning-line';
+        if (type === 'warning') icon = 'alert-line';
+        
+        // Create notification content
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="ri-${icon}"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            </div>
+            <button class="notification-close" onclick="closeNotification(this.parentElement)">&times;</button>
+        `;
+        
+        notificationContainer.appendChild(notification);
+        
+        // Show notification with animation
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        // Auto dismiss after duration (if specified)
+        if (duration > 0) {
+            setTimeout(() => closeNotification(notification), duration);
         }
+        
+        return notification;
+    }
+    
+    function closeNotification(notification) {
+        if (!notification) return;
+        
+        // Trigger hide animation
+        notification.classList.remove('show');
+        
+        // Remove from DOM after animation
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.parentElement.removeChild(notification);
+            }
+        }, 300);
+    }
+    
+    // Confirmation Modal Functions
+    function showConfirmModal(message, title = 'Confirm Action', callback) {
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-message').textContent = message;
+        
+        const confirmBtn = document.getElementById('confirm-yes');
+        
+        // Remove previous event listener
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        
+        // Add new event listener
+        newConfirmBtn.addEventListener('click', () => {
+            closeConfirmModal();
+            callback(true);
+        });
+        
+        document.getElementById('confirmModal').classList.add('active');
+        return false; // Prevent default behavior
+    }
+    
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('active');
+    }
+
+    function markTimeOut(sitInId) {
+        showConfirmModal("Are you sure you want to mark this student as timed out?", "Confirm Time Out", (confirmed) => {
+            if (confirmed) {
+                console.log("Timing out sit-in ID: " + sitInId); // Debug log
+                
+                // Create form data to send
+                const formData = new FormData();
+                formData.append('sit_in_id', sitInId);
+                
+                // Send AJAX request to process time out
+                fetch('../controller/time_out.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Response data:", data);
+                    if (data.success) {
+                        showNotification("Success", 'Student has been marked as timed out successfully.', 'success');
+                        // Reload the page to reflect changes after a short delay
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showNotification("Error", 'Error: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification("Error", 'An error occurred. Please try again.', 'error');
+                });
+            }
+        });
     }
 
     // Student search by ID - enhanced to fetch remaining sessions
@@ -1461,8 +1422,6 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             { id: 'student_idno', check: () => document.getElementById('studentInfo').style.display === 'grid' },
             { id: 'purpose', check: () => document.getElementById('purpose').value !== '' },
             { id: 'laboratory', check: () => document.getElementById('laboratory').value !== '' },
-            { id: 'sit_in_date', check: () => document.getElementById('sit_in_date').value !== '' },
-            { id: 'sit_in_time', check: () => document.getElementById('sit_in_time').value !== '' },
             { id: 'selected_pc', check: () => document.getElementById('selected_pc').value !== '' },
         ];
 
@@ -1474,22 +1433,38 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         } else {
             submitBtn.classList.remove('active');
             submitBtn.disabled = true;
-        };
-        
+        }
         return isValid;
     }
 
-    // Add event listeners for form fields    
+    // Add event listeners for form fields
     document.getElementById('purpose')?.addEventListener('change', validateForm);
-    document.getElementById('sit_in_date')?.addEventListener('change', validateForm);
-    document.getElementById('sit_in_time')?.addEventListener('change', validateForm);
 
     function submitAddSitIn() {
         if (!validateForm()) {
-            alert('Please fill out all required fields and select a PC.');
+            showNotification("Form Incomplete", 'Please fill out all required fields and select a PC.', 'warning');
             return;
         }
-        const submitBtn = document.getElementById('submitSitinBtn');
+
+        // Set current date and time
+        const now = new Date();
+        
+        // Format date as YYYY-MM-DD
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const dateString = `${year}-${month}-${day}`;
+        
+        // Format time as HH:MM:SS
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timeString = `${hours}:${minutes}:${seconds}`;
+        
+        // Set hidden form fields
+        document.getElementById('sit_in_date').value = dateString;
+        document.getElementById('sit_in_time').value = timeString;
+        
         const formData = new FormData(document.getElementById('addSitInForm'));
         
         // For debugging - log form data
@@ -1505,7 +1480,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Student added to sit-in successfully');
+                showNotification("Success", 'Student added to sit-in successfully', 'success');
                 
                 // Reset the form
                 document.getElementById('addSitInForm').reset();
@@ -1513,16 +1488,18 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 document.getElementById('selected_pc').value = '';
                 document.getElementById('pcSelector').innerHTML = '<div class="initial-message">Please select a laboratory to view available PCs</div>';
                 
-                // Switch back to the current students tab and reload
-                document.querySelector('.filter-tab[data-target="current-students"]').click();
-                location.reload();
+                // Switch back to the current students tab and reload after a short delay
+                setTimeout(() => {
+                    document.querySelector('.filter-tab[data-target="current-students"]').click();
+                    location.reload();
+                }, 1500);
             } else {
-                alert('Error: ' + data.message);
+                showNotification("Error", 'Error: ' + data.message, 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while adding the student: ' + error.message);
+            showNotification("Error", 'An error occurred while adding the student: ' + error.message, 'error');
         });
     }
 
@@ -1546,7 +1523,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         const studentInfo = document.getElementById('studentInfo');
         
         if (idno.length < 5) {
-            alert('Please enter at least 5 characters of the student ID');
+            showNotification("Warning", 'Please enter at least 5 characters of the student ID', 'warning');
             return;
         }
         
@@ -1595,7 +1572,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                     validateForm();
                 } else {
                     studentInfo.style.display = 'none';
-                    alert('Student not found. Please check the ID number.');
+                    showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
                 }
             })
             .catch(error => {
@@ -1604,9 +1581,9 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 
                 // Provide more helpful error message
                 if (error.message && error.message.includes('Network response was not ok')) {
-                    alert('Server error: ' + error.message);
+                    showNotification("Server Error", 'Server error: ' + error.message, 'error');
                 } else {
-                    alert('Error searching for student. Please try again. Details: ' + error.message);
+                    showNotification("Error", 'Error searching for student. Please try again.', 'error');
                 }
             })
             .finally(() => {
@@ -1615,7 +1592,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 document.getElementById('searchStudentBtn').disabled = false;
             });
     }
-    
+
     // Connect lab select to laboratory field
     document.getElementById('labSelectPc')?.addEventListener('change', function() {
         const labValue = this.value;
