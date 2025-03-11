@@ -1004,7 +1004,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                 <div class="search-container">
                                     <label for="student_idno">Student ID Number</label>
                                     <div class="search-field">
-                                        <input type="text" id="student_idno" name="idno" placeholder="Enter student ID number (e.g., 2023-0001)" autocomplete="off">
+                                        <input type="text" id="student_idno" name="idno" placeholder="Enter student ID number" autocomplete="off">
                                         <button type="button" id="searchStudentBtn">
                                             <i class="ri-search-line"></i> Search
                                         </button>

@@ -81,6 +81,144 @@ if ($result) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Modal styles - enhanced and consistent with site design */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            animation: modalFade 0.3s ease;
+        }
+        
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .close {
+            color: #999;
+            float: right;
+            font-size: 28px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 0.8;
+        }
+        
+        .close:hover {
+            color: #7556cc;
+        }
+        
+        .announcement-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        
+        .edit-announcement, .delete-announcement {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #555;
+            transition: color 0.2s;
+            padding: 4px;
+        }
+        
+        .edit-announcement:hover {
+            color: #7556cc;
+        }
+        
+        .delete-announcement:hover {
+            color: #ff5555;
+        }
+        
+        /* Form styling in modal */
+        #editAnnouncementForm .form-group {
+            margin-bottom: 20px;
+        }
+        
+        #editAnnouncementForm label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        #editAnnouncementForm textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.2s;
+        }
+        
+        #editAnnouncementForm textarea:focus {
+            border-color: #7556cc;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(117, 86, 204, 0.2);
+        }
+        
+        /* Button styling - consistent with other buttons */
+        #editAnnouncementForm button.edit-btn2 {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            color: white;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        #editAnnouncementForm button.edit-btn2:hover {
+            background: linear-gradient(135deg, #6445b8 0%, #8445b8 100%);
+            box-shadow: 0 4px 12px rgba(117, 86, 204, 0.3);
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -162,10 +300,8 @@ if ($result) {
                     </div>
                     <div class="profile-content">
                         <form id="announcementForm" class="announcement-form">
-                            <div class="form-group">
-                                <label for="title">Title</label>
-                                <input type="text" id="title" name="title" required>
-                            </div>
+                            <!-- Hidden input with fixed title -->
+                            <input type="hidden" id="title" name="title" value="CCS ADMIN">
                             <div class="form-group">
                                 <label for="content">Content</label>
                                 <textarea id="content" name="content" rows="4" required></textarea>
@@ -192,9 +328,14 @@ if ($result) {
                                     <div class="announcement-title">
                                         <i class="ri-notification-3-fill"></i>
                                         <h3><?php echo htmlspecialchars($announcement['title']); ?></h3>
-                                        <button class="delete-announcement" onclick="deleteAnnouncement(<?php echo $announcement['id']; ?>)">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
+                                        <div class="announcement-actions">
+                                            <button class="edit-announcement" onclick="editAnnouncement(<?php echo $announcement['id']; ?>, '<?php echo addslashes(htmlspecialchars($announcement['title'])); ?>', '<?php echo addslashes(htmlspecialchars($announcement['content'])); ?>')">
+                                                <i class="ri-edit-line"></i>
+                                            </button>
+                                            <button class="delete-announcement" onclick="deleteAnnouncement(<?php echo $announcement['id']; ?>)">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="announcement-details">
                                         <p><?php echo htmlspecialchars($announcement['content']); ?></p>
@@ -206,6 +347,28 @@ if ($result) {
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Edit Announcement Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Announcement</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="editAnnouncementForm">
+                <input type="hidden" id="edit_id" name="id">
+                <input type="hidden" id="edit_title" name="title" value="CCS ADMIN">
+                <div class="form-group">
+                    <label for="edit_content">Content</label>
+                    <textarea id="edit_content" name="content" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="edit-btn2">
+                    <i class="ri-save-line"></i>
+                    <span>Update Announcement</span>
+                </button>
+            </form>
         </div>
     </div>
 
@@ -282,6 +445,58 @@ if ($result) {
                 }
             } catch (error) {
                 console.error('Error:', error);
+            }
+        }
+
+        // Modal Functions
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function editAnnouncement(id, title, content) {
+            // Populate the form
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_content').value = content;
+            
+            // Show the modal
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Edit Announcement Form Handler
+        document.getElementById('editAnnouncementForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                id: formData.get('id'),
+                title: formData.get('title'),
+                content: formData.get('content')
+            };
+            
+            try {
+                const response = await fetch('../admin/update_announcement.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Error updating announcement');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeModal();
             }
         }
     </script>

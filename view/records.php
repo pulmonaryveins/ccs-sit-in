@@ -594,10 +594,6 @@ function getYearLevelDisplay($yearLevel) {
             <div class="table-header">
                 <h2>Records Management</h2>
                 <div class="table-actions">
-                    <div class="real-time-clock">
-                        <i class="ri-time-line"></i>
-                        <span id="current-time">Loading...</span>
-                    </div>
                     <div class="search-box">
                         <i class="ri-search-line"></i>
                         <input type="text" id="searchInput" placeholder="Search records...">
