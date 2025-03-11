@@ -12,91 +12,56 @@ require_once '../config/db_connect.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Get the student ID from query string
-if (!isset($_GET['idno']) || empty($_GET['idno'])) {
-    echo json_encode(['success' => false, 'message' => 'Student ID is required']);
-    exit();
-}
-
-$idno = trim($_GET['idno']);
-
-try {
-    // Query to find the student with all necessary fields
-    // Use a simpler query first to ensure it works
-    $query = "SELECT * FROM users WHERE idno = ? LIMIT 1";
+// Check if ID number was provided
+if (isset($_GET['idno']) && !empty($_GET['idno'])) {
+    $idno = $_GET['idno'];
+    
+    // Prepare the SQL query to search for students
+    $query = "SELECT 
+                id, idno, firstname, lastname, course, year, 
+                CASE 
+                    WHEN year = 1 THEN '1st Year'
+                    WHEN year = 2 THEN '2nd Year'
+                    WHEN year = 3 THEN '3rd Year'
+                    WHEN year = 4 THEN '4th Year'
+                    ELSE CONCAT(year, 'th Year')
+                END as year_level_display,
+                remaining_sessions
+              FROM users 
+              WHERE idno LIKE ?";
+    
+    // Prepare statement
     $stmt = $conn->prepare($query);
-    
-    if (!$stmt) {
-        throw new Exception("Database prepare error: " . $conn->error);
-    }
-    
-    $stmt->bind_param('s', $idno);
-    
-    if (!$stmt->execute()) {
-        throw new Exception("Database execute error: " . $stmt->error);
-    }
-    
+    $search_param = $idno . '%'; // Allow partial search from beginning of ID
+    $stmt->bind_param('s', $search_param);
+    $stmt->execute();
     $result = $stmt->get_result();
-
+    
+    // Check if we found a student
     if ($result->num_rows > 0) {
         $student = $result->fetch_assoc();
-        
-        // Format year level display text
-        $yearLevel = isset($student['year_level']) ? $student['year_level'] : 
-                    (isset($student['year']) ? $student['year'] : 1);
-        
-        switch (intval($yearLevel)) {
-            case 1: $yearLevelDisplay = '1st Year'; break;
-            case 2: $yearLevelDisplay = '2nd Year'; break;
-            case 3: $yearLevelDisplay = '3rd Year'; break;
-            case 4: $yearLevelDisplay = '4th Year'; break;
-            default: $yearLevelDisplay = 'Not specified';
-        }
-        
-        // Get course name
-        $courseName = 'Not specified';
-        if (!empty($student['course'])) {
-            $courseName = $student['course'];
-        } else if (!empty($student['course_id'])) {
-            $courseId = intval($student['course_id']);
-            switch ($courseId) {
-                case 1: $courseName = 'BS Computer Science'; break;
-                case 2: $courseName = 'BS Information Technology'; break;
-                case 3: $courseName = 'BS Information Systems'; break;
-                case 4: $courseName = 'BS Computer Engineering'; break;
-                default: $courseName = 'Unknown Course #' . $courseId;
-            }
-        }
-        
-        // Build response data
-        $responseData = [
-            'id' => $student['id'],
-            'idno' => $student['idno'],
-            'firstname' => $student['firstname'] ?? '',
-            'lastname' => $student['lastname'] ?? '',
-            'course' => $courseName,
-            'year_level' => intval($yearLevel),
-            'year_level_display' => $yearLevelDisplay,
-            'remaining_sessions' => 30
-        ];
-        
-        echo json_encode(['success' => true, 'student' => $responseData]);
+        echo json_encode([
+            'success' => true, 
+            'student' => $student
+        ]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Student not found']);
+        // No student found
+        echo json_encode([
+            'success' => false, 
+            'message' => 'No student found with that ID number'
+        ]);
     }
-
+    
+    // Close statement
     $stmt->close();
-    
-} catch (Exception $e) {
-    // Log the error
-    error_log("Error in search_student.php: " . $e->getMessage());
-    
-    // Return a friendly error message to the client
+} else {
+    // No ID number provided
     echo json_encode([
         'success' => false, 
-        'message' => 'An error occurred while searching for the student',
-        'debug' => $e->getMessage()
+        'message' => 'Please provide an ID number'
     ]);
 }
 
+// Close connection
 $conn->close();
+?>

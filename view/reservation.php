@@ -1,6 +1,17 @@
 <?php
 session_start();
 
+// Define htmlspecialchars if it doesn't exist
+if (!function_exists('htmlspecialchars')) {
+    function htmlspecialchars($string, $flags = ENT_COMPAT | ENT_HTML401, $encoding = 'UTF-8', $double_encode = true) {
+        $string = str_replace('&', '&amp;', $string);
+        $string = str_replace('<', '&lt;', $string);
+        $string = str_replace('>', '&gt;', $string);
+        $string = str_replace('"', '&quot;', $string);
+        return $string;
+    }
+}
+
 // Check if user is not logged in
 if (!isset($_SESSION['username'])) {
     header("Location: ../auth/login.php");

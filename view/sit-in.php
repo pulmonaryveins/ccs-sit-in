@@ -503,6 +503,32 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         .sessions-badge {
             background-color: #dcfce7;
             color: #16a34a;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 2.5rem;
+            text-align: center;
+        }
+        
+        .sessions-badge.low-sessions {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .sessions-badge.medium-sessions {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        .sessions-badge.high-sessions {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .sessions-badge {
+            background-color: #dcfce7;
+            color: #16a34a;
             padding: 0.25rem 0.5rem;
             border-radius: 9999px;
             font-weight: bold;
@@ -1091,20 +1117,18 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                         </div>
                                     </div>
                                     
-                                    <!-- Date and Time fields removed -->
                                     <!-- Hidden fields for current date and time will be set via JavaScript -->
                                     <input type="hidden" id="sit_in_date" name="date">
                                     <input type="hidden" id="sit_in_time" name="time">
+                                    <input type="hidden" id="selected_pc" name="pc_number" value="">
                                     
-                                    <!-- Submit Button - Updated to be outside the grid flow -->
+                                    <!-- Submit Button -->
                                     <div class="edit-controls">
                                         <button type="button" class="edit-btn" id="submitSitinBtn" onclick="submitAddSitIn()">
                                             <i class="ri-check-line"></i>
                                             <span>Add Student Sit-in</span>
                                         </button>
                                     </div>
-                                    
-                                    <input type="hidden" id="selected_pc" name="pc_number" value="">
                                 </div>
                             </form>
                         </div>
@@ -1176,7 +1200,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             // Show the target container
             const targetId = this.getAttribute('data-target');
             document.getElementById(targetId).classList.add('active');
-
+            
             // Clear search input when switching tabs
             document.getElementById('searchInput').value = '';
         });
@@ -1186,7 +1210,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
     document.getElementById('searchInput')?.addEventListener('keyup', function() {
         let searchText = this.value.toLowerCase();
         let activeView = document.querySelector('.view-container.active');
-
+        
         if (activeView.id === 'current-students') {
             let tableRows = activeView.querySelectorAll('.modern-table tbody tr');
             tableRows.forEach(row => {
@@ -1197,7 +1221,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             });
         }
     });
-
+    
     // Notification System Functions
     function showNotification(title, message, type = 'info', duration = 5000) {
         const notificationContainer = document.getElementById('notification-container');
@@ -1290,16 +1314,16 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                     method: 'POST',
                     body: formData
                 })
-                .then(response => {
-                    console.log("Response status:", response.status);
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     console.log("Response data:", data);
                     if (data.success) {
-                        showNotification("Success", 'Student has been marked as timed out successfully.', 'success');
+                        // Show success message with remaining sessions
+                        const message = `Student has been marked as timed out successfully. \nRemaining sessions: ${data.remaining_sessions}`;
+                        showNotification("Success", message, 'success');
+                        
                         // Reload the page to reflect changes after a short delay
-                        setTimeout(() => location.reload(), 1500);
+                        setTimeout(() => location.reload(), 2000);
                     } else {
                         showNotification("Error", 'Error: ' + data.message, 'error');
                     }
@@ -1322,22 +1346,46 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 .then(data => {
                     if (data.success) {
                         // Display student information
-                        document.getElementById('studentName').textContent = data.student.firstname + ' ' + data.student.lastname;
-                        document.getElementById('studentCourse').textContent = data.student.course || 'No course information';
-                        document.getElementById('student_id').value = data.student.id;
-                        document.getElementById('remainingSessions').textContent = data.student.remaining_sessions || '30';
-                        document.getElementById('studentInfo').classList.add('active');
+                        document.getElementById('display_idno').value = data.student.idno || '';
+                        document.getElementById('display_fullname').value = 
+                            `${data.student.lastname || ''}, ${data.student.firstname || ''}`;
+                        document.getElementById('display_course_year').value = 
+                            `${data.student.course || 'Not specified'} - ${data.student.year_level_display || 'Not specified'}`;
+                        document.getElementById('remainingSessions').textContent = 
+                            data.student.remaining_sessions || '30';
+                        
+                        // Store the student ID for form submission
+                        const hiddenIdField = document.createElement('input');
+                        hiddenIdField.type = 'hidden';
+                        hiddenIdField.name = 'student_id';
+                        hiddenIdField.value = data.student.id;
+                        
+                        // Remove any existing hidden field before adding a new one
+                        const existingField = document.querySelector('input[name="student_id"]');
+                        if (existingField) existingField.remove();
+                        document.getElementById('addSitInForm').appendChild(hiddenIdField);
+                        
+                        // Show the student info section
+                        document.getElementById('studentInfo').style.display = 'grid';
                         validateForm();
                     } else {
-                        document.getElementById('studentInfo').classList.remove('active');
+                        document.getElementById('studentInfo').style.display = 'none';
+                        showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('studentInfo').classList.remove('active');
+                    document.getElementById('studentInfo').style.display = 'none';
+                    
+                    // Provide more helpful error message
+                    if (error.message && error.message.includes('Network response was not ok')) {
+                        showNotification("Server Error", 'Server error: ' + error.message, 'error');
+                    } else {
+                        showNotification("Error", 'Error searching for student. Please try again.', 'error');
+                    }
                 });
         } else {
-            document.getElementById('studentInfo').classList.remove('active');
+            document.getElementById('studentInfo').style.display = 'none';
         }
     });
 
@@ -1379,7 +1427,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                     const pcUnit = document.createElement('div');
                     pcUnit.className = `computer-unit ${pcClass}`;
                     pcUnit.dataset.pcNumber = pc.pc_number;
-
+  
                     pcUnit.innerHTML = `
                         <div class="computer-icon">
                             <i class="ri-computer-${isAvailable ? 'line' : 'fill'}"></i>
@@ -1389,7 +1437,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                             <span class="pc-status ${pcClass}">${pcStatus}</span>
                         </div>
                     `;
-
+           
                     if (isAvailable) {
                         pcUnit.addEventListener('click', function() {
                             document.querySelectorAll('.computer-unit.selected').forEach(unit => {
@@ -1445,7 +1493,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             showNotification("Form Incomplete", 'Please fill out all required fields and select a PC.', 'warning');
             return;
         }
-
+        
         // Set current date and time
         const now = new Date();
         
@@ -1508,7 +1556,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         e.preventDefault(); // Prevent form submission
         searchStudent();
     });
-    
+
     // Add enter key support for search
     document.getElementById('student_idno')?.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
@@ -1516,7 +1564,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             searchStudent();
         }
     });
-    
+
     // Separate search functionality into its own function
     function searchStudent() {
         let idno = document.getElementById('student_idno').value.trim();
