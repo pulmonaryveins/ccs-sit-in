@@ -28,11 +28,41 @@ if ($result) {
     }
 }
 
+// Function to count used sessions for a student - keeping for reference but not using it
+function countUsedSessions($idno, $conn) {
+    $used_sessions = 0;
+    
+    // Count reservations
+    $query = "SELECT COUNT(*) as count FROM reservations WHERE idno = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $idno);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        $used_sessions += $row['count'];
+    }
+    
+    // Count direct sit-ins
+    $query = "SELECT COUNT(*) as count FROM sit_ins WHERE idno = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $idno);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        $used_sessions += $row['count'];
+    }
+    
+    return $used_sessions;
+}
+
+// Total allowed sessions per student
+$total_allowed_sessions = 30;
+
 // Fetch sit-in records from both reservations and sit_ins tables
 $sitin_records = [];
 
-// Fetch reservation records
-$query_reservations = "SELECT r.*, u.firstname, u.lastname, u.idno, 'reservation' as source 
+// Fetch reservation records with remaining_sessions
+$query_reservations = "SELECT r.*, u.firstname, u.lastname, u.idno, u.remaining_sessions, 'reservation' as source 
                        FROM reservations r
                        JOIN users u ON r.idno = u.idno
                        ORDER BY r.date DESC, r.time_in DESC";
@@ -44,8 +74,8 @@ if ($result) {
     }
 }
 
-// Fetch direct sit-in records
-$query_sitins = "SELECT s.*, u.firstname, u.lastname, u.idno, 'sit_in' as source
+// Fetch direct sit-in records with remaining_sessions
+$query_sitins = "SELECT s.*, u.firstname, u.lastname, u.idno, u.remaining_sessions, 'sit_in' as source
                 FROM sit_ins s
                 JOIN users u ON s.idno = u.idno
                 ORDER BY s.date DESC, s.time_in DESC";
@@ -322,6 +352,17 @@ function getYearLevelDisplay($yearLevel) {
             background: #dcfce7;
             color: #16a34a;
         }
+        
+        /* Add new styles for different session counts */
+        .sessions-low {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .sessions-medium {
+            background: #fff7ed;
+            color: #ea580c;
+        }
 
         /* Modal styles */
         .modal-backdrop {
@@ -587,6 +628,40 @@ function getYearLevelDisplay($yearLevel) {
                 opacity: 1;
             }
         }
+
+        .action-button.reset {
+            background: #e9e9ff;
+            color: #4f46e5;
+        }
+
+        .action-button-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .action-button-tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.7rem;
+            pointer-events: none;
+        }
+
+        .action-button-tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 
     <div class="content-wrapper">
@@ -634,6 +709,18 @@ function getYearLevelDisplay($yearLevel) {
                             <?php else: ?>
                                 <?php foreach ($students as $student): ?>
                                     <?php if (isset($student['idno']) && !empty($student['idno'])): ?>
+                                    <?php 
+                                        // Get remaining sessions directly from the database
+                                        $remaining_sessions = $student['remaining_sessions'] ?? $total_allowed_sessions;
+                                        
+                                        // Set CSS class based on remaining sessions
+                                        $sessionsClass = 'sessions-badge';
+                                        if ($remaining_sessions <= 5) {
+                                            $sessionsClass .= ' sessions-low';
+                                        } else if ($remaining_sessions <= 10) {
+                                            $sessionsClass .= ' sessions-medium';
+                                        }
+                                    ?>
                                     <tr>
                                         <td class="font-mono"><?php echo htmlspecialchars($student['idno'] ?? 'N/A'); ?></td>
                                         <td><?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?></td>
@@ -652,7 +739,7 @@ function getYearLevelDisplay($yearLevel) {
                                                 echo htmlspecialchars(getCourseNameById($courseInfo)); 
                                             ?>
                                         </td>
-                                        <td><span class="sessions-badge">30 sessions</span></td>
+                                        <td><span class="<?php echo $sessionsClass; ?>"><?php echo $remaining_sessions; ?> sessions</span></td>
                                         <td>
                                             <div class="action-buttons">
                                                 <button class="action-button edit" onclick="openEditModal(<?php echo json_encode($student); ?>)">
@@ -661,6 +748,12 @@ function getYearLevelDisplay($yearLevel) {
                                                 <button class="action-button delete" onclick="confirmDelete('<?php echo $student['id']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
                                                     <i class="ri-delete-bin-line"></i>
                                                 </button>
+                                                <div class="action-button-tooltip">
+                                                    <button class="action-button reset" onclick="confirmResetSessions('<?php echo $student['idno']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
+                                                        <i class="ri-refresh-line"></i>
+                                                    </button>
+                                                    <span class="tooltiptext">Reset to 30 sessions</span>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -687,13 +780,13 @@ function getYearLevelDisplay($yearLevel) {
                                 <th>Time In</th>
                                 <th>Time Out</th>
                                 <th>Status</th>
-                                <!-- Source column removed as requested -->
+                                <th>Remaining Sessions</th> <!-- Added new column -->
                             </tr>
                         </thead>
                         <tbody id="sitin-records-body">
                             <?php if (empty($sitin_records)): ?>
                                 <tr>
-                                    <td colspan="9" class="empty-state">
+                                    <td colspan="10" class="empty-state"> <!-- Updated colspan from 9 to 10 -->
                                         <div class="empty-state-content">
                                             <i class="ri-computer-line"></i>
                                             <p>No sit-in records found</p>
@@ -702,6 +795,18 @@ function getYearLevelDisplay($yearLevel) {
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($sitin_records as $record): ?>
+                                    <?php 
+                                        // Get remaining sessions directly from the database (from the JOIN we did in the query)
+                                        $remaining_sessions = $record['remaining_sessions'] ?? $total_allowed_sessions;
+                                        
+                                        // Set CSS class based on remaining sessions
+                                        $sessionsClass = 'sessions-badge';
+                                        if ($remaining_sessions <= 5) {
+                                            $sessionsClass .= ' sessions-low';
+                                        } else if ($remaining_sessions <= 10) {
+                                            $sessionsClass .= ' sessions-medium';
+                                        }
+                                    ?>
                                     <tr>
                                         <td><?php echo date('M d, Y', strtotime($record['date'])); ?></td>
                                         <td class="font-mono"><?php echo htmlspecialchars($record['idno']); ?></td>
@@ -713,13 +818,12 @@ function getYearLevelDisplay($yearLevel) {
                                         <td>
                                             <?php 
                                                 if ($record['time_out']) {
-                                                    // Explicitly handle the time format
-                                                    $time = new DateTime($record['time_out']);
-                                                    echo $time->format('h:i A'); // This already uses 12-hour format
+                                                    // Explicitly handle the time format with Manila timezone (GMT+8)
+                                                    $time = new DateTime($record['time_out'], new DateTimeZone('Asia/Manila'));
+                                                    echo $time->format('h:i A'); // This uses 12-hour format with Manila timezone
                                                 } else if ($record['status'] == 'approved' && $record['time_in']) {
-                                                    // For active sessions, show current time
-                                                    $currentTime = new DateTime();
-                                                    $currentTime->setTime(23, $currentTime->format('i')); // Force hour to 11 PM
+                                                    // For active sessions, show current time in Manila timezone
+                                                    $currentTime = new DateTime('now', new DateTimeZone('Asia/Manila'));
                                                     echo '<span class="realtime-out">' . $currentTime->format('h:i A') . ' (current)</span>';
                                                 } else {
                                                     echo 'Not yet';
@@ -737,6 +841,7 @@ function getYearLevelDisplay($yearLevel) {
                                                 <span class="status-badge pending">Pending</span>
                                             <?php endif; ?>
                                         </td>
+                                        <td><span class="<?php echo $sessionsClass; ?>"><?php echo $remaining_sessions; ?> sessions</span></td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -809,6 +914,23 @@ function getYearLevelDisplay($yearLevel) {
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
                 <button class="btn btn-danger" onclick="deleteStudent()">Delete</button>
+            </div>
+        </div>
+    </div>
+    <!-- Reset Sessions Confirmation Modal -->
+    <div class="modal-backdrop" id="resetSessionsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Reset Sessions</h3>
+                <button class="modal-close" onclick="closeResetModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reset <span id="resetStudentName"></span>'s sessions back to 30?</p>
+                <input type="hidden" id="resetStudentIdno">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeResetModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="resetSessions()">Reset Sessions</button>
             </div>
         </div>
     </div>
@@ -978,6 +1100,14 @@ function getYearLevelDisplay($yearLevel) {
                         timeOut = 'Not yet';
                     }
                     
+                    // Handle session count display
+                    let remainingClass = 'sessions-badge';
+                    if (record.remaining_sessions <= 5) {
+                        remainingClass += ' sessions-low';
+                    } else if (record.remaining_sessions <= 10) {
+                        remainingClass += ' sessions-medium';
+                    }
+
                     let statusBadge = '';
                     if (record.time_out) {
                         statusBadge = '<span class="status-badge completed">Completed</span>';
@@ -1000,6 +1130,7 @@ function getYearLevelDisplay($yearLevel) {
                         <td>${timeIn}</td>
                         <td>${timeOut}</td>
                         <td>${statusBadge}</td>
+                        <td><span class="${remainingClass}">${record.remaining_sessions} sessions</span></td>
                     `;
                     recordsBody.appendChild(row);
                 });
@@ -1008,7 +1139,7 @@ function getYearLevelDisplay($yearLevel) {
                 if (data.length === 0) {
                     recordsBody.innerHTML = `
                         <tr>
-                            <td colspan="9" class="empty-state">
+                            <td colspan="10" class="empty-state">
                                 <div class="empty-state-content">
                                     <i class="ri-computer-line"></i>
                                     <p>No sit-in records found</p>
@@ -1042,11 +1173,12 @@ function getYearLevelDisplay($yearLevel) {
     // Helper function to format time in GMT+8
     function formatTimeGMT8(dateTimeStr) {
         const dateObj = new Date(dateTimeStr);
-        // Format to 12-hour with AM/PM
+        // Format to 12-hour with AM/PM specifically using Manila timezone (GMT+8)
         return dateObj.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: true
+            hour12: true,
+            timeZone: 'Asia/Manila'
         });
     }
     
@@ -1070,6 +1202,43 @@ function getYearLevelDisplay($yearLevel) {
     // Initial load
     updateRealTimeElements();
     refreshSitInRecords();
+
+    // Reset sessions modal functions
+    function confirmResetSessions(idno, studentName) {
+        document.getElementById('resetStudentIdno').value = idno;
+        document.getElementById('resetStudentName').textContent = studentName;
+        document.getElementById('resetSessionsModal').classList.add('active');
+    }
+
+    function closeResetModal() {
+        document.getElementById('resetSessionsModal').classList.remove('active');
+    }
+
+    function resetSessions() {
+        const studentIdno = document.getElementById('resetStudentIdno').value;
+        
+        fetch('../controller/reset_sessions.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'idno=' + studentIdno
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Sessions reset successfully!');
+                closeResetModal();
+                location.reload(); // Reload to show updated values
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while resetting sessions.');
+        });
+    }
     </script>
 </body>
 </html>
