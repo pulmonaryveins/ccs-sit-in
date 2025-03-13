@@ -1,134 +1,86 @@
 <?php
+// Turn off output buffering
+ob_end_clean();
+
+// Set proper content type for JSON
+header('Content-Type: application/json');
+
 session_start();
 require_once '../config/db_connect.php';
 
-header('Content-Type: application/json');
-
-// Check if user is logged in as admin
+// Check if the user is logged in as admin
 if (!isset($_SESSION['admin_logged_in'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
-    exit;
+    exit();
 }
 
-// Validate incoming data
-if (!isset($_POST['idno']) || empty($_POST['idno']) ||
-    !isset($_POST['purpose']) || empty($_POST['purpose']) ||
-    !isset($_POST['laboratory']) || empty($_POST['laboratory']) ||
-    !isset($_POST['pc_number']) || empty($_POST['pc_number']) ||
-    !isset($_POST['time']) || empty($_POST['time']) ||
-    !isset($_POST['date']) || empty($_POST['date'])) {
-    
+// Function to validate required fields
+function validateFields($requiredFields) {
+    foreach ($requiredFields as $field) {
+        if (!isset($_POST[$field]) || empty($_POST[$field])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Required fields (removed pc_number from the required fields)
+$requiredFields = ['idno', 'purpose', 'laboratory', 'date', 'time'];
+
+// Validate required fields
+if (!validateFields($requiredFields)) {
     echo json_encode(['success' => false, 'message' => 'Missing required fields']);
-    exit;
+    exit();
 }
 
 // Get form data
+$studentId = isset($_POST['student_id']) ? $_POST['student_id'] : null;
 $idno = $_POST['idno'];
 $purpose = $_POST['purpose'];
 $laboratory = $_POST['laboratory'];
-$pc_number = $_POST['pc_number'];
-$time = $_POST['time'];
 $date = $_POST['date'];
+$time_in = $_POST['time'];
+// Even if pc_number is provided, we're not going to validate it anymore
+$pc_number = isset($_POST['pc_number']) ? $_POST['pc_number'] : '1'; // Default to '1' if not provided
 
-// Check if student exists
-$studentQuery = "SELECT * FROM users WHERE idno = ?";
-$stmt = $conn->prepare($studentQuery);
-$stmt->bind_param('s', $idno);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    echo json_encode(['success' => false, 'message' => 'Student not found']);
-    exit;
-}
-
-$student = $result->fetch_assoc();
-$fullname = $student['lastname'] . ', ' . $student['firstname'];
-if (!empty($student['middlename'])) {
-    $fullname .= ' ' . $student['middlename'];
-}
-
-// Check if PC is available
-$pcQuery = "SELECT status FROM computer_status WHERE laboratory = ? AND pc_number = ?";
-$stmt = $conn->prepare($pcQuery);
-$stmt->bind_param('si', $laboratory, $pc_number);
-$stmt->execute();
-$pcResult = $stmt->get_result();
-
-if ($pcResult->num_rows === 0) {
-    // PC doesn't exist in the database yet, add it first
-    $insertPcQuery = "INSERT INTO computer_status (laboratory, pc_number, status) VALUES (?, ?, 'available')";
-    $stmt = $conn->prepare($insertPcQuery);
-    $stmt->bind_param('si', $laboratory, $pc_number);
-    $stmt->execute();
-} else {
-    $pc = $pcResult->fetch_assoc();
-    if ($pc['status'] === 'in-use') {
-        echo json_encode(['success' => false, 'message' => 'Selected PC is already in use']);
-        exit;
-    }
-}
-
-// Begin transaction
-$conn->begin_transaction();
+// Set status to active
+$status = 'active';
 
 try {
-    // Insert into sit_ins table instead of reservations
-    $insertQuery = "INSERT INTO sit_ins (idno, fullname, purpose, laboratory, pc_number, time_in, date, created_at, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'active')";
-    $stmt = $conn->prepare($insertQuery);
-    $stmt->bind_param('ssssiss', $idno, $fullname, $purpose, $laboratory, $pc_number, $time, $date);
+    // Insert into sit_ins table with current time
+    $stmt = $conn->prepare("INSERT INTO sit_ins (idno, purpose, laboratory, pc_number, date, time_in, status) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?)");
     
-    if (!$stmt->execute()) {
-        throw new Exception("Failed to add sit-in record: " . $stmt->error);
-    }
-    $sit_in_id = $conn->insert_id;
-    
-    // Update PC status to in-use
-    $updatePcQuery = "UPDATE computer_status SET status = 'in-use' WHERE laboratory = ? AND pc_number = ?";
-    $stmt = $conn->prepare($updatePcQuery);
-    $stmt->bind_param('si', $laboratory, $pc_number);
-    
-    if (!$stmt->execute()) {
-        throw new Exception("Failed to update PC status: " . $stmt->error);
-    }
-    
-    // Update current sessions count for today's date
-    $today = date('Y-m-d');
-    $checkSessionsQuery = "SELECT * FROM current_sessions WHERE date = ?";
-    $stmt = $conn->prepare($checkSessionsQuery);
-    $stmt->bind_param('s', $today);
-    $stmt->execute();
-    $sessionResult = $stmt->get_result();
-    
-    if ($sessionResult->num_rows === 0) {
-        // No record for today, create one
-        $insertSessionQuery = "INSERT INTO current_sessions (date, count) VALUES (?, 1)";
-        $stmt = $conn->prepare($insertSessionQuery);
-        $stmt->bind_param('s', $today);
-        $stmt->execute();
-    } else {
-        // Update existing record
-        $updateSessionQuery = "UPDATE current_sessions SET count = count + 1 WHERE date = ?";
-        $stmt = $conn->prepare($updateSessionQuery);
-        $stmt->bind_param('s', $today);
-        $stmt->execute();
-    }
-    
-    // Commit transaction
-    $conn->commit();
-    
-    echo json_encode([
-        'success' => true, 
-        'message' => 'Student sit-in added successfully',
-        'sit_in_id' => $sit_in_id
-    ]);
-    
-} catch (Exception $e) {
-    // Rollback transaction on error
-    $conn->rollback();
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-}
+    // Fix parameter binding count - we have 7 placeholders
+    $stmt->bind_param("sssssss", $idno, $purpose, $laboratory, $pc_number, $date, $time_in, $status);
+    $success = $stmt->execute();
 
-$conn->close();
+    if ($success) {
+        // Update the remaining_sessions for the user if the student exists
+        if ($studentId) {
+            // Get the current remaining_sessions
+            $stmt = $conn->prepare("SELECT remaining_sessions FROM users WHERE id = ?");
+            $stmt->bind_param("i", $studentId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+            
+            if ($user) {
+                // Calculate new remaining sessions (don't go below 0)
+                $remainingSessions = max(0, ($user['remaining_sessions'] ?? 30) - 1);
+                
+                // Update the user's remaining_sessions
+                $stmt = $conn->prepare("UPDATE users SET remaining_sessions = ? WHERE id = ?");
+                $stmt->bind_param("ii", $remainingSessions, $studentId);
+                $stmt->execute();
+            }
+        }
+        
+        echo json_encode(['success' => true, 'message' => 'Sit-in added successfully']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to add sit-in: ' . $stmt->error]);
+    }
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+}
 ?>

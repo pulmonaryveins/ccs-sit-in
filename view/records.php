@@ -329,8 +329,8 @@ function getYearLevelDisplay($yearLevel) {
         }
 
         .action-button.edit {
-            background: #e0f2fe;
-            color: #0369a1;
+            background: #e9e9ff;
+            color: #6d28d9;
         }
 
         .action-button.delete {
@@ -662,6 +662,92 @@ function getYearLevelDisplay($yearLevel) {
             visibility: visible;
             opacity: 1;
         }
+        
+        /* Pagination controls */
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        
+        .entries-per-page {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .entries-per-page select {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: white;
+            font-size: 0.875rem;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .entries-per-page select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(117,86,204,0.1);
+            outline: none;
+        }
+        
+        .entries-per-page label {
+            font-size: 0.875rem;
+            color: #718096;
+        }
+        
+        .page-navigation {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .page-btn {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e0;
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-info {
+            font-size: 0.875rem;
+            color: #718096;
+            margin: 0 0.75rem;
+        }
+        
+        /* Adjust table container to have a fixed height */
+        .table-container {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+            border-radius: 0;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
     </style>
 
     <div class="content-wrapper">
@@ -685,7 +771,7 @@ function getYearLevelDisplay($yearLevel) {
             <!-- Student Records Container -->
             <div id="student-records" class="records-container active">
                 <div class="table-container">
-                    <table class="modern-table">
+                    <table class="modern-table" id="students-table">
                         <thead>
                             <tr>
                                 <th>ID Number</th>
@@ -696,7 +782,7 @@ function getYearLevelDisplay($yearLevel) {
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="students-table-body">
                             <?php if (empty($students)): ?>
                                 <tr>
                                     <td colspan="6" class="empty-state">
@@ -763,6 +849,27 @@ function getYearLevelDisplay($yearLevel) {
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination controls for students -->
+                <div class="pagination-controls">
+                    <div class="entries-per-page">
+                        <label for="students-per-page">Show</label>
+                        <select id="students-per-page">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+                    <div class="page-info" id="students-page-info">
+                        Showing 1 to 10 of 0 entries
+                    </div>
+                    <div class="page-navigation" id="students-pagination">
+                        <button class="page-btn" disabled data-action="prev">Previous</button>
+                        <button class="page-btn active" data-page="1">1</button>
+                        <button class="page-btn" disabled data-action="next">Next</button>
+                    </div>
+                </div>
             </div>
             
             <!-- Sit-in Records Container -->
@@ -776,7 +883,6 @@ function getYearLevelDisplay($yearLevel) {
                                 <th>Full Name</th>
                                 <th>Purpose</th>
                                 <th>Laboratory</th>
-                                <th>PC #</th>
                                 <th>Time In</th>
                                 <th>Time Out</th>
                                 <th>Status</th>
@@ -813,7 +919,6 @@ function getYearLevelDisplay($yearLevel) {
                                         <td><?php echo htmlspecialchars($record['firstname'] . ' ' . $record['lastname']); ?></td>
                                         <td><?php echo htmlspecialchars($record['purpose'] ?? 'Not specified'); ?></td>
                                         <td>Laboratory <?php echo htmlspecialchars($record['laboratory']); ?></td>
-                                        <td>PC <?php echo htmlspecialchars($record['pc_number']); ?></td>
                                         <td>
                                             <?php 
                                                 if ($record['time_in']) {
@@ -860,6 +965,27 @@ function getYearLevelDisplay($yearLevel) {
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+                <!-- Pagination controls for sit-ins -->
+                <div class="pagination-controls">
+                    <div class="entries-per-page">
+                        <label for="sitins-per-page">Show</label>
+                        <select id="sitins-per-page">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+                    <div class="page-info" id="sitins-page-info">
+                        Showing 1 to 10 of 0 entries
+                    </div>
+                    <div class="page-navigation" id="sitins-pagination">
+                        <button class="page-btn" disabled data-action="prev">Previous</button>
+                        <button class="page-btn active" data-page="1">1</button>
+                        <button class="page-btn" disabled data-action="next">Next</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1143,7 +1269,6 @@ function getYearLevelDisplay($yearLevel) {
                         <td>${record.firstname} ${record.lastname}</td>
                         <td>${record.purpose || 'Not specified'}</td>
                         <td>Laboratory ${record.laboratory}</td>
-                        <td>PC ${record.pc_number}</td>
                         <td>${timeIn}</td>
                         <td>${timeOut}</td>
                         <td>${statusBadge}</td>
@@ -1256,6 +1381,412 @@ function getYearLevelDisplay($yearLevel) {
             alert('An error occurred while resetting sessions.');
         });
     }
-    </script>
+    
+    // Pagination functionality for Students table
+    let studentsData = <?php echo json_encode($students); ?>;
+    let studentsCurrentPage = 1;
+    let studentsPerPage = 10;
+    
+    function setupStudentsPagination() {
+        const tableBody = document.getElementById('students-table-body');
+        const pagination = document.getElementById('students-pagination');
+        const pageInfo = document.getElementById('students-page-info');
+        const perPageSelect = document.getElementById('students-per-page');
+        
+        // Update entries per page when selection changes
+        perPageSelect.addEventListener('change', function() {
+            studentsPerPage = parseInt(this.value);
+            studentsCurrentPage = 1; // Reset to first page
+            renderStudentsTable();
+        });
+        
+        function renderStudentsTable() {
+            const filteredData = applyStudentSearchFilter(studentsData);
+            const totalPages = Math.ceil(filteredData.length / studentsPerPage);
+            const start = (studentsCurrentPage - 1) * studentsPerPage;
+            const end = Math.min(start + studentsPerPage, filteredData.length);
+            const visibleData = filteredData.slice(start, end);
+            
+            // Clear table body
+            tableBody.innerHTML = '';
+            
+            // Handle empty state
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="empty-state-content">
+                                <i class="ri-user-search-line"></i>
+                                <p>No students found</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // Add rows for current page
+                visibleData.forEach(student => {
+                    if (!student.idno) return;
+                    
+                    // Get remaining sessions
+                    const remainingSessions = student.remaining_sessions ?? 30;
+                    
+                    // Set CSS class based on remaining sessions
+                    let sessionsClass = 'sessions-badge';
+                    if (remainingSessions <= 5) {
+                        sessionsClass += ' sessions-low';
+                    } else if (remainingSessions <= 10) {
+                        sessionsClass += ' sessions-medium';
+                    }
+                    
+                    // Create table row
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="font-mono">${student.idno || 'N/A'}</td>
+                        <td>${student.firstname} ${student.lastname}</td>
+                        <td>${getYearLevelDisplay(student.year_level ?? student.year ?? 0)}</td>
+                        <td>${getCourseNameById(student.course_id ?? student.course ?? student.department ?? null)}</td>
+                        <td><span class="${sessionsClass}">${remainingSessions} sessions</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-button edit" onclick='openEditModal(${JSON.stringify(student)})'>
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button class="action-button delete" onclick="confirmDelete('${student.id}', '${student.firstname} ${student.lastname}')">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                                <div class="action-button-tooltip">
+                                    <button class="action-button reset" onclick="confirmResetSessions('${student.idno}', '${student.firstname} ${student.lastname}')">
+                                        <i class="ri-refresh-line"></i>
+                                    </button>
+                                    <span class="tooltiptext">Reset to 30 sessions</span>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Update page info text
+                pageInfo.textContent = `Showing ${start + 1} to ${end} of ${filteredData.length} entries`;
+                
+                // Update pagination buttons
+                renderStudentsPagination(totalPages);
+            }
+        }
+        
+        function renderStudentsPagination(totalPages) {
+            pagination.innerHTML = '';
+            
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.textContent = 'Previous';
+            prevBtn.disabled = studentsCurrentPage === 1;
+            prevBtn.setAttribute('data-action', 'prev');
+            prevBtn.addEventListener('click', () => {
+                if (studentsCurrentPage > 1) {
+                    studentsCurrentPage--;
+                    renderStudentsTable();
+                }
+            });
+            pagination.appendChild(prevBtn);
+            
+            // Page number buttons - show up to 5 pages
+            let startPage = Math.max(1, studentsCurrentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            // Adjust if we're at the end
+            if (endPage - startPage < 4 && startPage > 1) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === studentsCurrentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.setAttribute('data-page', i);
+                pageBtn.addEventListener('click', () => {
+                    studentsCurrentPage = i;
+                    renderStudentsTable();
+                });
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.textContent = 'Next';
+            nextBtn.disabled = studentsCurrentPage === totalPages;
+            nextBtn.setAttribute('data-action', 'next');
+            nextBtn.addEventListener('click', () => {
+                if (studentsCurrentPage < totalPages) {
+                    studentsCurrentPage++;
+                    renderStudentsTable();
+                }
+            });
+            pagination.appendChild(nextBtn);
+        }
+        
+        function applyStudentSearchFilter(data) {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            if (!searchText) return data;
+            
+            return data.filter(student => {
+                if (!student) return false;
+                
+                // Search in various fields
+                const fullName = `${student.firstname || ''} ${student.lastname || ''}`.toLowerCase();
+                const idno = (student.idno || '').toLowerCase();
+                const course = getCourseNameById(student.course_id ?? student.course ?? student.department).toLowerCase();
+                
+                return fullName.includes(searchText) || 
+                       idno.includes(searchText) || 
+                       course.includes(searchText);
+            });
+        }
+        
+        // Initial render
+        renderStudentsTable();
+        
+        // Connect search to pagination
+        document.getElementById('searchInput')?.addEventListener('keyup', function() {
+            studentsCurrentPage = 1; // Reset to first page when searching
+            renderStudentsTable();
+        });
+    }
+    
+    // Sit-in records pagination
+    let sitinData = <?php echo json_encode($sitin_records); ?>;
+    let sitinCurrentPage = 1;
+    let sitinPerPage = 10;
+    
+    function setupSitinPagination() {
+        const tableBody = document.getElementById('sitin-records-body');
+        const pagination = document.getElementById('sitins-pagination');
+        const pageInfo = document.getElementById('sitins-page-info');
+        const perPageSelect = document.getElementById('sitins-per-page');
+        
+        // Update entries per page when selection changes
+        perPageSelect.addEventListener('change', function() {
+            sitinPerPage = parseInt(this.value);
+            sitinCurrentPage = 1; // Reset to first page
+            renderSitinTable();
+        });
+        
+        function renderSitinTable() {
+            const filteredData = applySitinSearchFilter(sitinData);
+            const totalPages = Math.ceil(filteredData.length / sitinPerPage);
+            const start = (sitinCurrentPage - 1) * sitinPerPage;
+            const end = Math.min(start + sitinPerPage, filteredData.length);
+            const visibleData = filteredData.slice(start, end);
+            
+            // Clear table body
+            tableBody.innerHTML = '';
+            
+            // Handle empty state
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="empty-state">
+                            <div class="empty-state-content">
+                                <i class="ri-computer-line"></i>
+                                <p>No sit-in records found</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // Add rows for current page
+                visibleData.forEach(record => {
+                    // Format times using the same helper functions already defined
+                    const timeIn = record.time_in ? 
+                        formatTimeGMT8(record.date + ' ' + record.time_in) : 'Not yet';
+                    
+                    // Handle time out display
+                    let timeOut;
+                    if (record.time_out) {
+                        timeOut = formatTimeGMT8(record.date + ' ' + record.time_out);
+                    } else if (record.status == 'approved' && record.time_in) {
+                        const currentTime = formatCurrentTimeGMT8();
+                        timeOut = `<span class="realtime-out">${currentTime} (PST)</span>`;
+                    } else {
+                        timeOut = 'Not yet';
+                    }
+                    
+                    // Handle session count display
+                    let remainingClass = 'sessions-badge';
+                    if (record.remaining_sessions <= 5) {
+                        remainingClass += ' sessions-low';
+                    } else if (record.remaining_sessions <= 10) {
+                        remainingClass += ' sessions-medium';
+                    }
+                    
+                    let statusBadge = '';
+                    if (record.time_out) {
+                        statusBadge = '<span class="status-badge completed">Completed</span>';
+                    } else if (record.status == 'active' && record.time_in) {
+                        statusBadge = '<span class="status-badge active">Active</span>';
+                    } else if (record.status == 'approved') {
+                        statusBadge = '<span class="status-badge approved">Approved</span>';
+                    } else {
+                        statusBadge = '<span class="status-badge pending">Pending</span>';
+                    }
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(record.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</td>
+                        <td class="font-mono">${record.idno}</td>
+                        <td>${record.firstname} ${record.lastname}</td>
+                        <td>${record.purpose || 'Not specified'}</td>
+                        <td>Laboratory ${record.laboratory}</td>
+                        <td>${timeIn}</td>
+                        <td>${timeOut}</td>
+                        <td>${statusBadge}</td>
+                        <td><span class="${remainingClass}">${record.remaining_sessions} sessions</span></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Update page info text
+                pageInfo.textContent = `Showing ${start + 1} to ${end} of ${filteredData.length} entries`;
+                
+                // Update pagination buttons
+                renderSitinPagination(totalPages);
+            }
+        }
+        
+        function renderSitinPagination(totalPages) {
+            pagination.innerHTML = '';
+            
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.textContent = 'Previous';
+            prevBtn.disabled = sitinCurrentPage === 1;
+            prevBtn.setAttribute('data-action', 'prev');
+            prevBtn.addEventListener('click', () => {
+                if (sitinCurrentPage > 1) {
+                    sitinCurrentPage--;
+                    renderSitinTable();
+                }
+            });
+            pagination.appendChild(prevBtn);
+            
+            // Page number buttons - show up to 5 pages
+            let startPage = Math.max(1, sitinCurrentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            // Adjust if we're at the end
+            if (endPage - startPage < 4 && startPage > 1) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === sitinCurrentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.setAttribute('data-page', i);
+                pageBtn.addEventListener('click', () => {
+                    sitinCurrentPage = i;
+                    renderSitinTable();
+                });
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.textContent = 'Next';
+            nextBtn.disabled = sitinCurrentPage === totalPages;
+            nextBtn.setAttribute('data-action', 'next');
+            nextBtn.addEventListener('click', () => {
+                if (sitinCurrentPage < totalPages) {
+                    sitinCurrentPage++;
+                    renderSitinTable();
+                }
+            });
+            pagination.appendChild(nextBtn);
+        }
+        
+        function applySitinSearchFilter(data) {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            if (!searchText) return data;
+            
+            return data.filter(record => {
+                if (!record) return false;
+                
+                // Search in various fields
+                const fullName = `${record.firstname || ''} ${record.lastname || ''}`.toLowerCase();
+                const idno = (record.idno || '').toLowerCase();
+                const purpose = (record.purpose || '').toLowerCase();
+                const laboratory = `Laboratory ${record.laboratory}`.toLowerCase();
+                
+                return fullName.includes(searchText) || 
+                       idno.includes(searchText) || 
+                       purpose.includes(searchText) ||
+                       laboratory.includes(searchText);
+            });
+        }
+        
+        // Initial render
+        renderSitinTable();
+    }
+    
+    // Tab switching with pagination setup
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+            // Hide all record containers
+            document.querySelectorAll('.records-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            // Show the target container
+            const targetId = this.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+            // Clear search input when switching tabs
+            document.getElementById('searchInput').value = '';
+        });
+    });
+    
+    // Helper functions for year level and course name - use existing ones
+    function getYearLevelDisplay(yearLevel) {
+        switch (parseInt(yearLevel)) {
+            case 1: return '1st Year';
+            case 2: return '2nd Year';
+            case 3: return '3rd Year';
+            case 4: return '4th Year';
+            default: return 'Not specified';
+        }
+    }
+    
+    function getCourseNameById(courseId) {
+        if (courseId === null || courseId === undefined) {
+            return 'Not specified';
+        }
+        
+        if (typeof courseId === 'string' && courseId.length > 2) {
+            return courseId; // Return the course name directly
+        }
+        
+        switch (parseInt(courseId)) {
+            case 1: return 'BS Computer Science';
+            case 2: return 'BS Information Technology';
+            case 3: return 'BS Information Systems';
+            case 4: return 'BS Computer Engineering';
+            default: return courseId ? 'Course #' + courseId : 'Not specified';
+        }
+    }
+    
+    // Initialize pagination on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        setupStudentsPagination();
+        setupSitinPagination();
+    });
+    
+    // ...existing code...
+</script>
 </body>
 </html>

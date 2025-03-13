@@ -329,7 +329,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 5rem;
         }
 
         .form-group label {
@@ -341,11 +341,10 @@ echo "<!-- Found " . count($current_students) . " current students -->";
 
         .form-group input,
         .form-group select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
+            padding: 0.5rem; /* Reduced padding */
             font-size: 0.875rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
             transition: all 0.2s;
         }
 
@@ -502,7 +501,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         
         .sessions-badge {
             background-color: #dcfce7;
-            color: #16a34a;
+            color: #7556cc;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-weight: bold;
@@ -523,7 +522,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         
         .sessions-badge.high-sessions {
             background-color: #dcfce7;
-            color: #16a34a;
+            color: #7556cc;
         }
         
         .sessions-badge {
@@ -611,16 +610,14 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         }
 
         .profile-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 1.2rem 1rem;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            background: #f8fafc;
         }
 
         .profile-header h3 {
-            font-size: 1.1rem;
+            font-size: 1.5rem;
             font-weight: 600;
             margin: 0;
             color: #2d3748;
@@ -645,10 +642,11 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         .student-info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            padding: 1.25rem;
+            gap: 0.5rem; /* Reduced gap between elements */
+            padding: 0.5rem; /* Reduced padding */
             overflow-y: auto;
-            margin-bottom: 4rem; /* Add bottom margin for button space */
+            margin-top: 1rem; /* Reduced top margin */
+            margin-bottom: 5rem; /* Reduced bottom margin */
         }
         
         .edit-controls {
@@ -978,6 +976,213 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         .confirm-btn-confirm:hover {
             background-color: #6b46c1;
         }
+
+        /* Enhanced search-container styles */
+        .search-container {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+        }
+
+        .search-container label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .search-field {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .search-field:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(117,86,204,0.15);
+        }
+
+        .search-field input {
+            flex: 1;
+            width: 100%;
+            padding: 1rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            color: #2d3748;
+        }
+
+        .search-field input::placeholder {
+            color: #a0aec0;
+            font-size: 0.95rem;
+        }
+
+        .search-field button {
+            background: linear-gradient(135deg, rgba(117,86,204,0.95) 0%, rgba(213,105,167,0.95) 100%);
+            color: white;
+            border: none;
+            padding: 1rem 1.2rem;
+            height: 100%;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 10px;
+        }
+
+        .search-field button:hover {
+            opacity: 0.9;
+        }
+
+        .search-field button i {
+            font-size: 1.1rem;
+        }
+
+        .search-field button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Student info grid enhancement */
+        .student-info-grid {
+            margin-top: 2rem;
+            background-color: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 0.75rem; /* Reduced padding */
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem; /* Reduced gap between icon and content */
+
+        }
+
+        .info-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+
+        .info-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(117,86,204,0.15), rgba(213,105,167,0.15));
+            border-radius: 8px;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 0.95rem;
+            color: #2d3748;
+        }
+
+        .detail-value input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            color: #2d3748;
+            font-weight: 500;
+            padding: 0;
+            outline: none;
+        }
+
+        .detail-value select {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .detail-value select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(117,86,204,0.15);
+            outline: none;
+        }
+
+        .sessions-count {
+            font-weight: 600;
+            color: #6b46c1;
+        }
+        
+        /* Enhanced Add Sit-in container styles */
+        .profile-card {
+            padding: 0;
+            overflow: hidden;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-top: 1rem;
+        }
+        
+        /* Form container adjustments */
+        .reservation-form {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0 1.5rem 2rem; /* Added horizontal padding */
+        }
+        
+        /* Adjust search container and student info grid spacing */
+        .search-container {
+            margin-bottom: 1rem; /* Reduced margin */
+            padding: 1rem 0; /* Removed horizontal padding, only vertical */
+        }
+        
+        /* Student info grid enhancement - moved closer to search field */
+        .student-info-grid {
+            margin-top: 2rem; /* Reduced top margin */
+            background-color: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 1rem; /* Added padding to the grid container */
+        }
+        
+        /* Info card adjustments for tighter layout */
+        .info-card {
+            margin-bottom: 0.75rem; /* Added margin between cards */
+        }
+        
+        /* Bottom row cards (last two in the grid) */
+        .info-card:nth-last-child(-n+2) {
+            margin-bottom: 0; /* Remove margin from last row */
+        }
+        
+        /* Edit controls adjustment */
+        .edit-controls {
+            width: 100%;
+            margin-top: 1.5rem; /* Reduced top margin */
+            margin-bottom: 0.5rem; /* Reduced bottom margin */
+        }
     </style>
 
     <div class="content-wrapper">
@@ -1008,7 +1213,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                 <th>Full Name</th>
                                 <th>Purpose</th>
                                 <th>Laboratory</th>
-                                <th>PC Number</th>
+                                <!-- Removed PC Number column -->
                                 <th>Time</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -1017,7 +1222,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                         <tbody>
                             <?php if (empty($current_students)): ?>
                                 <tr>
-                                    <td colspan="8" class="empty-state">
+                                    <td colspan="7" class="empty-state"> <!-- Adjusted colspan from 8 to 7 -->
                                         <div class="empty-state-content">
                                             <i class="ri-computer-line"></i>
                                             <p>No students currently sitting in</p>
@@ -1039,7 +1244,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                         </td>
                                         <td><span class="purpose-badge"><?php echo htmlspecialchars($student['purpose']); ?></span></td>
                                         <td>Laboratory <?php echo htmlspecialchars($student['laboratory']); ?></td>
-                                        <td>PC <?php echo htmlspecialchars($student['pc_number']); ?></td>
+                                        <!-- Removed PC Number column -->
                                         <td><?php echo date('h:i A', strtotime($student['time_in'])); ?></td>
                                         <td><span class="status-badge active">Active</span></td>
                                         <td>
@@ -1057,26 +1262,22 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             
             <!-- Add Sit-in Container -->
             <div id="add-sitin" class="view-container">
-                <div class="dashboard-grid">
-                    <!-- Left Column - Student Search and Information -->
-                    <div class="dashboard-column">
-                        <div class="profile-card">
-                            <div class="profile-header">
-                                <h3>Student Information</h3>
-                            </div>
-                            <form id="addSitInForm" class="reservation-form">
-                                <!-- Student ID Search Field - Improved UI -->
-                                <div class="search-container">
-                                    <label for="student_idno">Student ID Number</label>
-                                    <div class="search-field">
-                                        <input type="text" id="student_idno" name="idno" placeholder="Enter student ID number" autocomplete="off">
-                                        <button type="button" id="searchStudentBtn">
-                                            <i class="ri-search-line"></i> Search
-                                        </button>
-                                    </div>
+                <div class="dashboard-column" style="max-width: 800px; margin: 0 auto;">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <h3>Add Student Sit-in</h3>
+                        </div>
+                        <form id="addSitInForm" class="reservation-form">
+                            <!-- Student ID Search Field - Enhanced UI -->
+                            <div class="search-container">
+                                <div class="search-field">
+                                    <input type="text" id="student_idno" name="idno" placeholder="Enter student ID number..." autocomplete="off">
+                                    <button type="button" id="searchStudentBtn">
+                                        <i class="ri-search-line"></i> Search
+                                    </button>
                                 </div>
-                                
-                                <!-- Student info displayed in cards -->
+                            
+                                <!-- Student info displayed in cards - Moved inside search container -->
                                 <div id="studentInfo" class="student-info-grid" style="display: none;">
                                     <!-- ID Number -->
                                     <div class="info-card">
@@ -1111,12 +1312,21 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                         </div>
                                     </div>
 
-                                    <!-- Remaining Sessions -->
+                                    <!-- Laboratory -->
                                     <div class="info-card">
-                                        <div class="info-icon"><i class="ri-timer-fill"></i></div>
+                                        <div class="info-icon"><i class="ri-computer-fill"></i></div>
                                         <div class="info-content">
-                                            <div class="detail-label">Remaining Sessions</div>
-                                            <div class="detail-value sessions-count" id="remainingSessions">30</div>
+                                            <div class="detail-label">Laboratory</div>
+                                            <div class="detail-value">
+                                                <select id="laboratory" name="laboratory" required>
+                                                    <option value="">Select Laboratory</option>
+                                                    <option value="524">524</option>
+                                                    <option value="526">526</option>
+                                                    <option value="528">528</option>
+                                                    <option value="530">530</option>
+                                                    <option value="542">542</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1138,28 +1348,14 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                         </div>
                                     </div>
 
-                                    <!-- Laboratory -->
+                                    <!-- Remaining Sessions -->
                                     <div class="info-card">
-                                        <div class="info-icon"><i class="ri-computer-fill"></i></div>
+                                        <div class="info-icon"><i class="ri-timer-fill"></i></div>
                                         <div class="info-content">
-                                            <div class="detail-label">Laboratory</div>
-                                            <div class="detail-value">
-                                                <select id="laboratory" name="laboratory" required>
-                                                    <option value="">Select Laboratory</option>
-                                                    <option value="524">524</option>
-                                                    <option value="526">526</option>
-                                                    <option value="528">528</option>
-                                                    <option value="530">530</option>
-                                                    <option value="542">542</option>
-                                                </select>
-                                            </div>
+                                            <div class="detail-label">Remaining Sessions</div>
+                                            <div class="detail-value sessions-count" id="remainingSessions">30</div>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Hidden fields for current date and time will be set via JavaScript -->
-                                    <input type="hidden" id="sit_in_date" name="date">
-                                    <input type="hidden" id="sit_in_time" name="time">
-                                    <input type="hidden" id="selected_pc" name="pc_number" value="">
                                     
                                     <!-- Submit Button -->
                                     <div class="edit-controls">
@@ -1169,33 +1365,14 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                         </button>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Column - PC Selection -->
-                    <div class="dashboard-column">
-                        <div class="profile-card">
-                            <div class="profile-header">
-                                <h3>Select a PC</h3>
-                                <select id="labSelectPc" class="lab-select">
-                                    <option value="">Select Laboratory</option>
-                                    <option value="524">Laboratory 524</option>
-                                    <option value="526">Laboratory 526</option>
-                                    <option value="528">Laboratory 528</option>
-                                    <option value="530">Laboratory 530</option>
-                                    <option value="542">Laboratory 542</option>
-                                </select>
                             </div>
-                            <div class="profile-content">
-                                <div class="computer-grid" id="pcSelector">
-                                    <div class="initial-message">
-                                        <i class="ri-computer-line"></i>
-                                        <div>Please select a laboratory to view available PCs</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            
+                            <!-- Hidden fields for current date and time will be set via JavaScript -->
+                            <input type="hidden" id="sit_in_date" name="date">
+                            <input type="hidden" id="sit_in_time" name="time">
+                            <!-- Add default PC number since we removed the selection -->
+                            <input type="hidden" id="selected_pc" name="pc_number" value="1">
+                        </form>
                     </div>
                 </div>
             </div>
@@ -1445,88 +1622,16 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         }
     });
 
-    // Load PC availability when laboratory is selected
+    // Load PC availability when laboratory is selected - remove this function
     document.getElementById('laboratory')?.addEventListener('change', function() {
-        const laboratory = this.value;
-        if (laboratory) {
-            loadPCAvailability(laboratory);
-        } else {
-            document.getElementById('pcSelector').innerHTML = '<p>Please select a laboratory first to view available PCs</p>';
-            document.getElementById('selected_pc').value = '';
-            validateForm();
-        }
+        validateForm(); // Only validate form, no PC loading
     });
-
-    function loadPCAvailability(laboratory) {
-        fetch('../controller/get_pc_availability.php?laboratory=' + laboratory)
-            .then(response => response.json())
-            .then(data => {
-                const pcSelector = document.getElementById('pcSelector');
-                pcSelector.innerHTML = '';
-                
-                // Check if data is available
-                if (!data || data.length === 0) {
-                    pcSelector.innerHTML = `
-                        <div class="initial-message">
-                            <i class="ri-information-line"></i>
-                            <div>No PC data available for this laboratory</div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Process PC data
-                data.forEach(pc => {
-                    const isAvailable = pc.status === 'available';
-                    const pcClass = isAvailable ? 'available' : 'in-use';
-                    const pcStatus = isAvailable ? 'Available' : 'In Use';
-                    const pcUnit = document.createElement('div');
-                    pcUnit.className = `computer-unit ${pcClass}`;
-                    pcUnit.dataset.pcNumber = pc.pc_number;
-  
-                    pcUnit.innerHTML = `
-                        <div class="computer-icon">
-                            <i class="ri-computer-${isAvailable ? 'line' : 'fill'}"></i>
-                        </div>
-                        <div class="computer-info">
-                            <span class="pc-number">PC${pc.pc_number}</span>
-                            <span class="pc-status ${pcClass}">${pcStatus}</span>
-                        </div>
-                    `;
-           
-                    if (isAvailable) {
-                        pcUnit.addEventListener('click', function() {
-                            document.querySelectorAll('.computer-unit.selected').forEach(unit => {
-                                unit.classList.remove('selected');
-                            });
-                            this.classList.add('selected');
-                            document.getElementById('selected_pc').value = this.dataset.pcNumber;
-                            validateForm();
-                        });
-                    }
-
-                    pcSelector.appendChild(pcUnit);
-                });
-                
-                validateForm();
-            })
-            .catch(error => {
-                console.error('Error loading PC availability:', error);
-                document.getElementById('pcSelector').innerHTML = `
-                    <div class="initial-message">
-                        <i class="ri-error-warning-line"></i>
-                        <div>Error loading PC availability. Please try again.</div>
-                    </div>
-                `;
-            });
-    }
 
     function validateForm() {
         const requiredFields = [
             { id: 'student_idno', check: () => document.getElementById('studentInfo').style.display === 'grid' },
             { id: 'purpose', check: () => document.getElementById('purpose').value !== '' },
             { id: 'laboratory', check: () => document.getElementById('laboratory').value !== '' },
-            { id: 'selected_pc', check: () => document.getElementById('selected_pc').value !== '' },
         ];
 
         const isValid = requiredFields.every(field => field.check());
@@ -1546,7 +1651,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
 
     function submitAddSitIn() {
         if (!validateForm()) {
-            showNotification("Form Incomplete", 'Please fill out all required fields and select a PC.', 'warning');
+            showNotification("Form Incomplete", 'Please fill out all required fields.', 'warning');
             return;
         }
         
@@ -1569,6 +1674,11 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         document.getElementById('sit_in_date').value = dateString;
         document.getElementById('sit_in_time').value = timeString;
         
+        // Ensure the pc_number field has a default value
+        if (!document.getElementById('selected_pc').value) {
+            document.getElementById('selected_pc').value = '1';
+        }
+        
         const formData = new FormData(document.getElementById('addSitInForm'));
         
         // For debugging - log form data
@@ -1589,8 +1699,6 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 // Reset the form
                 document.getElementById('addSitInForm').reset();
                 document.getElementById('studentInfo').style.display = 'none';
-                document.getElementById('selected_pc').value = '';
-                document.getElementById('pcSelector').innerHTML = '<div class="initial-message">Please select a laboratory to view available PCs</div>';
                 
                 // Switch back to the current students tab and reload after a short delay
                 setTimeout(() => {
@@ -1696,26 +1804,6 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 document.getElementById('searchStudentBtn').disabled = false;
             });
     }
-
-    // Connect lab select to laboratory field
-    document.getElementById('labSelectPc')?.addEventListener('change', function() {
-        const labValue = this.value;
-        if (labValue) {
-            // Update the laboratory select field to match
-            const laboratoryField = document.getElementById('laboratory');
-            if (laboratoryField) {
-                laboratoryField.value = labValue;
-                loadPCAvailability(labValue);
-            }
-        } else {
-            document.getElementById('pcSelector').innerHTML = `
-                <div class="initial-message">
-                    <i class="ri-computer-line"></i>
-                    <div>Please select a laboratory to view available PCs</div>
-                </div>
-            `;
-        }
-    });
     </script>
 </body>
 </html>
