@@ -785,159 +785,198 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             opacity: 0.7;
             cursor: not-allowed;
         }
+        /* Replace old notification styles with Tailwind-inspired styles */
+        #notification-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 320px;
+            pointer-events: auto;
+        }
+
         .notification {
-            margin-bottom: 10px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: flex-start;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-            background: white;
-            border-left: 4px solid #4a5568;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            border-left: 4px solid #6b7280;
+            overflow: hidden;
         }
-        
+
         .notification.show {
             transform: translateX(0);
+            opacity: 1;
         }
-        
+
         .notification-icon {
-            margin-right: 12px;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 0.75rem;
         }
-        
+
         .notification-content {
-            flex: 1;
+            flex-grow: 1;
         }
-        
+
         .notification-title {
             font-weight: 600;
-            margin-bottom: 5px;
-            color: #2d3748;
-            font-size: 16px;
+            font-size: 0.875rem;
+            color: #111827;
+            margin-bottom: 0.25rem;
         }
-        
+
         .notification-message {
-            color: #4a5568;
-            font-size: 14px;
-            line-height: 1.4;
+            font-size: 0.875rem;
+            color: #4b5563;
+            line-height: 1.25rem;
         }
-        
+
         .notification-close {
-            background: none;
+            background: transparent;
             border: none;
-            color: #a0aec0;
-            font-size: 18px;
+            color: #9ca3af;
+            cursor: pointer;
             padding: 0;
-            margin-left: 10px;
-            cursor: pointer;
-            align-self: flex-start;
+            font-size: 1.25rem;
+            line-height: 1;
+            transition: color 0.15s ease-in-out;
         }
-        
+
         .notification-close:hover {
-            color: #4a5568;
+            color: #6b7280;
         }
-        
-        /* Notification types */
+
+        /* Different notification types */
         .notification.success {
-            border-left-color: #48bb78;
+            border-left-color: #10b981;
         }
-        
+
         .notification.success .notification-icon {
-            color: #48bb78;
+            color: #10b981;
         }
-        
+
         .notification.error {
-            border-left-color: #f56565;
+            border-left-color: #ef4444;
         }
-        
+
         .notification.error .notification-icon {
-            color: #f56565;
+            color: #ef4444;
         }
-        
-        .notification.info {
-            border-left-color: #4299e1;
-        }
-        
-        .notification.info .notification-icon {
-            color: #4299e1;
-        }
-        
+
         .notification.warning {
-            border-left-color: #ed8936;
+            border-left-color: #f59e0b;
         }
-        
+
         .notification.warning .notification-icon {
-            color: #ed8936;
+            color: #f59e0b;
         }
-        
-        /* Confirmation Modal specific styles */
-        .notification-modal {
-            max-width: 400px;
+
+        .notification.info {
+            border-left-color: #3b82f6;
         }
-        
-        /* Add styles for the search container */
-        .search-container {
-            padding: 1.5rem 1.5rem 1rem;
+
+        .notification.info .notification-icon {
+            color: #3b82f6;
         }
-        
-        .search-container label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #4a5568;
-            font-size: 0.95rem;
-        }
-        
-        .search-field {
+
+        /* Confirmation modal with Tailwind styling */
+        .confirm-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 50;
             display: flex;
-            gap: 0.5rem;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
         }
-        
-        .search-field input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            transition: all 0.2s;
+
+        .confirm-modal-backdrop.show {
+            opacity: 1;
+            pointer-events: auto;
         }
-        
-        .search-field input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(117,86,204,0.1);
-            outline: none;
+
+        .confirm-modal {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 28rem;
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.2s ease-in-out;
         }
-        
-        .search-field button {
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            border-radius: 8px;
+
+        .confirm-modal-backdrop.show .confirm-modal {
+            transform: scale(1);
+        }
+
+        .confirm-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .confirm-modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .confirm-modal-body {
+            padding: 1.5rem;
+            color: #4b5563;
+        }
+
+        .confirm-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .confirm-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
             font-weight: 500;
+            border-radius: 0.375rem;
+            transition: background-color 0.15s ease-in-out;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
+            border: none;
         }
-        
-        .search-field button:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        .confirm-btn-cancel {
+            background-color: #f3f4f6;
+            color: #4b5563;
         }
-        
-        .search-field button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
+
+        .confirm-btn-cancel:hover {
+            background-color: #e5e7eb;
+        }
+
+        .confirm-btn-confirm {
+            background-color: #7556cc;
+            color: white;
+        }
+
+        .confirm-btn-confirm:hover {
+            background-color: #6b46c1;
         }
     </style>
 
@@ -1167,18 +1206,18 @@ echo "<!-- Found " . count($current_students) . " current students -->";
     <div id="notification-container"></div>
     
     <!-- Confirmation Modal -->
-    <div class="modal-backdrop" id="confirmModal">
-        <div class="modal notification-modal">
-            <div class="modal-header">
-                <h3 id="confirm-title">Confirm Action</h3>
-                <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+    <div class="confirm-modal-backdrop" id="confirmModal">
+        <div class="confirm-modal">
+            <div class="confirm-modal-header">
+                <h3 class="confirm-modal-title" id="confirm-title">Confirm Action</h3>
+                <button class="notification-close" onclick="closeConfirmModal()">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="confirm-modal-body">
                 <p id="confirm-message">Are you sure you want to proceed with this action?</p>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
-                <button class="btn btn-primary" id="confirm-yes">Yes, Continue</button>
+            <div class="confirm-modal-footer">
+                <button class="confirm-btn confirm-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="confirm-btn confirm-btn-confirm" id="confirm-yes">Yes, Continue</button>
             </div>
         </div>
     </div>
@@ -1245,13 +1284,16 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 <div class="notification-title">${title}</div>
                 <div class="notification-message">${message}</div>
             </div>
-            <button class="notification-close" onclick="closeNotification(this.parentElement)">&times;</button>
+            <button class="notification-close" onclick="closeNotification(this)">&times;</button>
         `;
         
         notificationContainer.appendChild(notification);
         
+        // Force reflow before adding the 'show' class for proper animation
+        notification.getBoundingClientRect();
+        
         // Show notification with animation
-        setTimeout(() => notification.classList.add('show'), 10);
+        notification.classList.add('show');
         
         // Auto dismiss after duration (if specified)
         if (duration > 0) {
@@ -1292,12 +1334,12 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             callback(true);
         });
         
-        document.getElementById('confirmModal').classList.add('active');
+        document.getElementById('confirmModal').classList.add('show');
         return false; // Prevent default behavior
     }
     
     function closeConfirmModal() {
-        document.getElementById('confirmModal').classList.remove('active');
+        document.getElementById('confirmModal').classList.remove('show');
     }
 
     function markTimeOut(sitInId) {
