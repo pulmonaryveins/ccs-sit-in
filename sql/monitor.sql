@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 09, 2025 at 05:02 PM
+-- Generation Time: Mar 13, 2025 at 10:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -157,7 +157,9 @@ INSERT INTO `computer_status` (`id`, `laboratory`, `pc_number`, `status`, `last_
 (134, '528', 14, 'in-use', '2025-03-09 13:22:21'),
 (135, '528', 13, 'in-use', '2025-03-09 13:22:22'),
 (136, '528', 12, 'in-use', '2025-03-09 13:22:22'),
-(138, '524', 25, 'in-use', '2025-03-09 14:41:14');
+(138, '524', 25, 'in-use', '2025-03-09 14:41:14'),
+(139, '528', 7, 'in-use', '2025-03-13 09:27:20'),
+(140, '530', 12, 'in-use', '2025-03-13 09:28:34');
 
 -- --------------------------------------------------------
 
@@ -177,7 +179,8 @@ CREATE TABLE `current_sessions` (
 INSERT INTO `current_sessions` (`date`, `count`) VALUES
 ('2025-03-04', 4),
 ('2025-03-05', 0),
-('2025-03-09', 13);
+('2025-03-09', 13),
+('2025-03-13', 2);
 
 -- --------------------------------------------------------
 
@@ -219,16 +222,6 @@ CREATE TABLE `sit_ins` (
   `status` varchar(20) NOT NULL DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `sit_ins`
---
-
-INSERT INTO `sit_ins` (`id`, `idno`, `fullname`, `purpose`, `laboratory`, `pc_number`, `time_in`, `time_out`, `date`, `created_at`, `status`) VALUES
-(1, '20952503', 'Cabunilas, Vince Bryant N.', 'C Programming', '524', 3, '21:07:00', '14:09:34', '2025-03-09', '2025-03-09 13:07:50', 'completed'),
-(2, '20983134', 'Tormis, Francine', 'C Programming', '524', 11, '21:10:00', '14:17:17', '2025-03-09', '2025-03-09 13:10:50', 'completed'),
-(3, '20952503', 'Cabunilas, Vince Bryant N.', 'C Programming', '524', 25, '22:41:00', NULL, '2025-03-09', '2025-03-09 14:41:14', 'active'),
-(4, '20983134', 'Tormis, Francine', 'Java Programming', '524', 11, '00:01:00', NULL, '2025-03-10', '2025-03-09 16:01:46', 'active');
-
 -- --------------------------------------------------------
 
 --
@@ -260,7 +253,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `idno`, `lastname`, `firstname`, `middlename`, `course`, `year`, `username`, `password`, `email`, `address`, `remaining_sessions`, `role`, `profile_image`, `created_at`) VALUES
 (1, '20183201', 'Monreal', 'Jeff', '', 'BS-Information Techn', 3, 'Jeffrey', '$2y$10$lBOdbK0MqdTvgzVKMUnSEOdzCo7Ai8fmIr8IyE76OJ8pe5coHy8J.', NULL, NULL, 30, '', 'uploads/profile_67ad71220ee12.jpg', '2025-02-13 04:10:38'),
 (2, '20952503', 'Cabunilas', 'Vince Bryant', 'N.', 'BS-Information Techn', 3, 'Vince', '$2y$10$twPu7cUcwWDXkPE3SlQR6.NLRybSZvvfEo2nBG6mGXx9NqxaXmmR6', 'vincebryant42@gmail.com', 'Cebu, City', 30, '', '../uploads/profile_67c6ec0d2164c.png', '2025-02-13 04:14:38'),
-(3, '20934721', 'Escoton', 'Julius', '', 'BS-Information Techn', 2, 'Joboy', '$2y$10$Ebzkn9jgH7A70vxKyJyyjuSkRgyHc49YsRl0AQaZinQCDmMnnWfLW', NULL, NULL, 30, '', 'uploads/profile_67ad7301f18d0.jpg', '2025-02-13 04:20:03'),
+(3, '20934721', 'Escoton', 'Julius', '', 'BS-Information Techn', 2, 'Joboy', '$2y$10$Ebzkn9jgH7A70vxKyJyyjuSkRgyHc49YsRl0AQaZinQCDmMnnWfLW', NULL, NULL, 29, '', 'uploads/profile_67ad7301f18d0.jpg', '2025-02-13 04:20:03'),
 (4, '20983134', 'Tormis', 'Francine', '', 'SJH', 4, 'pransin_noob', '$2y$10$hkZsRiyxNGlIGIbjTVNfVO6be.T1LStWe1qlOgvVWxasbTLHqvREm', 'pransin@gmail.com', 'Digos noob', 30, '', '../uploads/profile_67c6e9a9e2535.jpg', '2025-02-13 14:08:20'),
 (5, '20010012', 'Tudtud', 'Daphne', '', 'BS-Computer Science', 1, 'Sashimi', '$2y$10$Jad4spx3QyWBnw2WaeICReNb1ERgN9xC2qIDPV7ZtgVeQZkt7iDnW', 'sashimi@gmail.com', 'Tisa noob', 30, '', '../uploads/profile_67c7261dbfbda.jpg', '2025-02-14 02:44:15'),
 (6, '20914241', 'McArthur', 'Newbie', '', 'College of Education', 4, 'Newbie', '$2y$10$TZyAGn9J4LT1hQRFkhMaCueHcRkgqu2nD6K0y9pK5peHVqasjS1VG', '', '', 30, '', 'uploads/profile_67b602449f3d5.jpg', '2025-02-19 16:09:03'),
@@ -338,7 +331,7 @@ ALTER TABLE `announcements`
 -- AUTO_INCREMENT for table `computer_status`
 --
 ALTER TABLE `computer_status`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=139;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=141;
 
 --
 -- AUTO_INCREMENT for table `reservations`
@@ -350,7 +343,7 @@ ALTER TABLE `reservations`
 -- AUTO_INCREMENT for table `sit_ins`
 --
 ALTER TABLE `sit_ins`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`

@@ -814,19 +814,32 @@ function getYearLevelDisplay($yearLevel) {
                                         <td><?php echo htmlspecialchars($record['purpose'] ?? 'Not specified'); ?></td>
                                         <td>Laboratory <?php echo htmlspecialchars($record['laboratory']); ?></td>
                                         <td>PC <?php echo htmlspecialchars($record['pc_number']); ?></td>
-                                        <td><?php echo $record['time_in'] ? date('h:i A', strtotime($record['time_in'])) : 'Not yet'; ?></td>
+                                        <td>
+                                            <?php 
+                                                if ($record['time_in']) {
+                                                    // Convert time_in to Asia/Manila timezone
+                                                    $timeIn = new DateTime($record['time_in'], new DateTimeZone('UTC'));
+                                                    $timeIn->setTimezone(new DateTimeZone('Asia/Manila'));
+                                                    echo $timeIn->format('h:i A'); // 12-hour format with Manila timezone
+                                                } else {
+                                                    echo 'Not yet';
+                                                }
+                                            ?>
+                                        </td>
                                         <td>
                                             <?php 
                                                 if ($record['time_out']) {
-                                                    // Explicitly handle the time format with Manila timezone (GMT+8)
-                                                    $time = new DateTime($record['time_out'], new DateTimeZone('Asia/Manila'));
-                                                    echo $time->format('h:i A'); // This uses 12-hour format with Manila timezone
+                                                    // Convert time_out to Asia/Manila timezone
+                                                    $timeOut = new DateTime($record['time_out'], new DateTimeZone('UTC')); // in UTC or local time
+                                                    $timeOut->setTimezone(new DateTimeZone('Asia/Manila'));
+                                                    echo $timeOut->format('h:i A'); // This uses 12-hour format with Manila timezone
                                                 } else if ($record['status'] == 'approved' && $record['time_in']) {
                                                     // For active sessions, show current time in Manila timezone
                                                     $currentTime = new DateTime('now', new DateTimeZone('Asia/Manila'));
-                                                    echo '<span class="realtime-out">' . $currentTime->format('h:i A') . ' (current)</span>';
+                                                    echo '<span class="realtime-out">' . $currentTime->format('h:i A') . ' (PST)</span>';
                                                 } else {
-                                                    echo 'Not yet';
+                                                    // if timestamp is invalid
+                                                    echo 'Not yet'; 
                                                 }
                                             ?>
                                         </td>
@@ -1054,7 +1067,7 @@ function getYearLevelDisplay($yearLevel) {
         // GMT+8 adjustment
         const gmtPlus8 = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // For GMT+8
         
-        const options = { 
+        const options = {
             weekday: 'short',
             year: 'numeric',
             month: 'short',
@@ -1062,9 +1075,15 @@ function getYearLevelDisplay($yearLevel) {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: true
+            hour12: true,
+            timeZone: 'Asia/Manila'
         };
-        document.getElementById('current-time').textContent = now.toLocaleString('en-US', options);
+        
+        // Check if element exists before updating
+        const clockElement = document.getElementById('current-time');
+        if (clockElement) {
+            clockElement.textContent = now.toLocaleString('en-US', options);
+        }
     }
 
     // Function to refresh sit-in records data
@@ -1081,21 +1100,19 @@ function getYearLevelDisplay($yearLevel) {
                 
                 // Add new rows
                 data.forEach(record => {
-                    // Format time_in using GMT+8
+                    // Format time_in using GMT+8 - same function used for both time_in and time_out
                     const timeIn = record.time_in ? 
                         formatTimeGMT8(record.date + ' ' + record.time_in) : 'Not yet';
                     
                     // Handle time out display - show real-time for active sessions
                     let timeOut;
                     if (record.time_out) {
-                        // Format time_out using GMT+8
+                        // Format time_out using GMT+8 - same function as time_in
                         timeOut = formatTimeGMT8(record.date + ' ' + record.time_out);
-                    } else if (record.status == 'active' && record.time_in) {
-                        // For active sessions, display current time with a special indicator
-                        const now = new Date();
-                        // Use the GMT+8 time for display
+                    } else if (record.status == 'approved' && record.time_in) {
+                        // For active sessions, display current time with PST indicator
                         const currentTime = formatCurrentTimeGMT8();
-                        timeOut = `<span class="realtime-out">${currentTime} (current)</span>`;
+                        timeOut = `<span class="realtime-out">${currentTime} (PST)</span>`;
                     } else {
                         timeOut = 'Not yet';
                     }
@@ -1165,7 +1182,7 @@ function getYearLevelDisplay($yearLevel) {
             // Get current time in GMT+8
             const currentTime = formatCurrentTimeGMT8();
             realTimeOuts.forEach(element => {
-                element.innerHTML = `${currentTime} (current)`;
+                element.innerHTML = `${currentTime} (PST)`;
             });
         }
     }

@@ -1309,6 +1309,20 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 const formData = new FormData();
                 formData.append('sit_in_id', sitInId);
                 
+                // Explicitly add the current time in Manila/GMT+8 timezone
+                const now = new Date();
+                const manilaTime = now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                    timeZone: 'Asia/Manila'
+                });
+                
+                // Send the Manila timezone with the request
+                formData.append('time_out', manilaTime);
+                formData.append('timezone', 'Asia/Manila');
+                
                 // Send AJAX request to process time out
                 fetch('../controller/time_out.php', {
                     method: 'POST',
