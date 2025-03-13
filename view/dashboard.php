@@ -10,8 +10,8 @@ if (!isset($_SESSION['username'])) {
 // Get user details from database
 require_once '../config/db_connect.php';
 $username = $_SESSION['username'];
-// Update the SQL query to include new fields
-$sql = "SELECT idno, firstname, lastname, middlename, course, year, profile_image, email, address FROM users WHERE username = ?";
+// Update the SQL query to include remaining_sessions
+$sql = "SELECT idno, firstname, lastname, middlename, course, year, profile_image, email, address, remaining_sessions FROM users WHERE username = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $username);
 $stmt->execute();
@@ -41,6 +41,9 @@ if ($row = $result->fetch_assoc()) {
     $_SESSION['profile_image'] = $row['profile_image'] ?? '../assets/images/logo/AVATAR.png';
     $_SESSION['email'] = $row['email'];
     $_SESSION['address'] = $row['address'];
+    
+    // Store remaining sessions in session
+    $_SESSION['remaining_sessions'] = $row['remaining_sessions'] ?? 30;
 }
 
 // Fetch announcements
@@ -67,6 +70,21 @@ $conn->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+        /* Add styles for sessions count */
+        .sessions-count {
+            font-weight: 600;
+            color: #16a34a;
+        }
+        
+        .sessions-count.low {
+            color: #dc2626;
+        }
+        
+        .sessions-count.medium {
+            color: #ea580c;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -181,10 +199,15 @@ $conn->close();
                         </div>
                     </div>
                     <div class="info-card">
-                        <div class="info-icon"><i class="ri-time-fill"></i></div>
+                        <div class="info-icon"><i class="ri-timer-fill"></i></div>
                         <div class="info-content">
                             <div class="detail-label">Session</div>
-                            <div class="detail-value">30</div>
+                            <div class="detail-value sessions-count <?php 
+                                $remaining = isset($_SESSION['remaining_sessions']) ? (int)$_SESSION['remaining_sessions'] : 30;
+                                echo $remaining <= 5 ? 'low' : ($remaining <= 10 ? 'medium' : ''); 
+                            ?>">
+                                <?php echo $remaining; ?>
+                            </div>
                         </div>
                     </div>
                     <div class="edit-controls">
@@ -286,6 +309,7 @@ $conn->close();
             </div>
         </div>
     </div>
+    
     <style>
         /* Update card height */
         .dashboard-column .profile-card {
@@ -303,7 +327,6 @@ $conn->close();
             height: 700px;
         }
     </style>
-
 
     <script>
         // Profile panel functionality

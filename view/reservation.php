@@ -21,8 +21,8 @@ if (!isset($_SESSION['username'])) {
 // Get user details from database
 require_once '../config/db_connect.php';
 $username = $_SESSION['username'];
-// Update the SQL query to include new fields
-$sql = "SELECT idno, firstname, lastname, middlename, course, year, profile_image, email, address FROM users WHERE username = ?";
+// Update the SQL query to include new fieldssessions
+$sql = "SELECT idno, firstname, lastname, middlename, course, year, profile_image, email, address, remaining_sessions FROM users WHERE username = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $username);
 $stmt->execute();
@@ -52,6 +52,9 @@ if ($row = $result->fetch_assoc()) {
     $_SESSION['profile_image'] = $row['profile_image'] ?? '../assets/images/logo/AVATAR.png';
     $_SESSION['email'] = $row['email'];
     $_SESSION['address'] = $row['address'];
+    
+    // Store remaining sessions in session
+    $_SESSION['remaining_sessions'] = $row['remaining_sessions'] ?? 30;
 }
 
 $stmt->close();
@@ -217,16 +220,21 @@ $conn->close();
                                     </div>
                                 </div>
                             </div>
+                            
                             <!-- Remaining Sessions -->
                             <div class="info-card">
                                 <div class="info-icon"><i class="ri-timer-fill"></i></div>
                                 <div class="info-content">
                                     <div class="detail-label">Remaining Sessions</div>
-                                    <div class="detail-value sessions-count">
-                                        <?php echo isset($_SESSION['remaining_sessions']) ? $_SESSION['remaining_sessions'] : '30'; ?>
+                                    <div class="detail-value sessions-count <?php 
+                                        $remaining = isset($_SESSION['remaining_sessions']) ? (int)$_SESSION['remaining_sessions'] : 30;
+                                        echo $remaining <= 5 ? 'low' : ($remaining <= 10 ? 'medium' : ''); 
+                                    ?>">
+                                        <?php echo $remaining; ?>
                                     </div>
                                 </div>
                             </div>
+                            
                             <!-- Submit Button -->
                             <div class="edit-controls" style="grid-column: span 2;">
                                 <button type="submit" class="edit-btn">
@@ -259,6 +267,91 @@ $conn->close();
                         <div class="initial-message">
                             Please select a laboratory to view available PCs
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backdrop -->
+    <div class="backdrop" id="backdrop"></div>
+
+    <!-- Profile Panel -->
+    <div class="profile-panel" id="profile-panel">
+        <div class="profile-content">
+            <div class="profile-header">
+                <h3>STUDENT INFORMATION</h3>
+            </div>
+            <div class="profile-body">
+                <div class="profile-image-container">
+                    <div class="profile-image">
+                        <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : '../assets/images/logo/AVATAR.png'; ?>" 
+                             alt="Profile Picture"
+                             id="profile-preview">
+                    </div>
+                    <div class="profile-name">
+                        <div class="user-info">
+                            <h3><?php echo htmlspecialchars($_SESSION['fullname']); ?></h3>
+                        </div>  
+                    </div>
+                </div>
+
+                <div class="student-info-grid">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-profile-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Student ID</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['idno']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-user-3-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Full Name</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['fullname']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-graduation-cap-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Course/Department</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['course']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-expand-up-down-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Year Level</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['year_level']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-mail-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['email']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-home-9-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Address</div>
+                            <div class="detail-value"><?php echo htmlspecialchars($_SESSION['address']); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="ri-timer-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Session</div>
+                            <div class="detail-value sessions-count">
+                                <?php echo isset($_SESSION['remaining_sessions']) ? $_SESSION['remaining_sessions'] : '30'; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="edit-controls">
+                        <a href="profile.php" class="edit-btn">
+                            <span>Edit Profile</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -344,17 +437,24 @@ $conn->close();
             background: #f0f0ff;
         }
         
-        .computer-unit.available {
-            cursor: pointer;
-        }
-        
         .computer-unit.in-use {
             opacity: 0.6;
             cursor: not-allowed;
         }
+        
+        .sessions-count.low {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        
+        .sessions-count.medium {
+            color: #ea580c;
+            font-weight: 600;
+        }
     </style>
 
     <script>
+        // Lab selection functionality
         document.getElementById('labSelect').addEventListener('change', function() {
             loadComputerStatus(this.value);
             // Update the laboratory field in the form
@@ -421,7 +521,7 @@ $conn->close();
                 });
         }
 
-        // Add validation function
+        // Add validation function   
         function validateForm() {
             const requiredFields = [
                 'purpose',
@@ -448,35 +548,42 @@ $conn->close();
 
         // Initial validation
         validateForm();
-    </script>
+        
+        // Profile panel functionality
+        const profilePanel = document.getElementById('profile-panel');
+        const backdrop = document.getElementById('backdrop');
+        const profileTrigger = document.getElementById('profile-trigger');
 
-    <!-- Backdrop -->
-    <div class="backdrop" id="backdrop"></div>
+        function toggleProfile(show) {
+            profilePanel.classList.toggle('active', show);
+            backdrop.classList.toggle('active', show);
+            document.body.style.overflow = show ? 'hidden' : '';
+        }
 
-    <!-- Profile Panel -->
-    <div class="profile-panel" id="profile-panel">
-        <div class="profile-content">
-            <div class="profile-header">
-                <h3>STUDENT INFORMATION</h3>
-            </div>
-            <div class="profile-body">
-                <div class="profile-image-container">
-                    <div class="profile-image">
-                        <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : '../assets/images/logo/AVATAR.png'; ?>" 
-                             alt="Profile Picture" 
-                             id="profile-preview">
-                    </div>
-                    <div class="profile-name">
-                        <div class="user-info">
-                            <h3><?php echo htmlspecialchars($_SESSION['fullname']); ?></h3>
-                        </div>  
-                    </div>
-                </div>
-        </div>
-    </div>
+        profileTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleProfile(true);
+        });
 
-    <!-- Add JavaScript for dynamic schedule loading -->
-    <script>
+        // Close profile panel when clicking outside
+        document.addEventListener('click', (e) => {
+            if (profilePanel.classList.contains('active') && 
+                !profilePanel.contains(e.target) && 
+                !profileTrigger.contains(e.target)) {
+                toggleProfile(false);
+            }
+        });
+
+        // Prevent clicks inside panel from closing it
+        profilePanel.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Close on backdrop click
+        backdrop.addEventListener('click', () => toggleProfile(false));
+
+        // Add schedule functionality
         document.querySelector('select[name="laboratory"]').addEventListener('change', loadSchedule);
         document.querySelector('input[name="date"]').addEventListener('change', loadSchedule);
 
@@ -486,7 +593,7 @@ $conn->close();
             
             if (lab && date) {
                 // Add AJAX call to fetch schedule
-                fetch(`get_schedule.php?lab=${lab}&date=${date}`)
+                fetch(`../controllers/get_schedule.php?lab=${lab}&date=${date}`)
                     .then(response => response.json())
                     .then(data => {
                         updateScheduleDisplay(data);
@@ -495,9 +602,6 @@ $conn->close();
         }
 
         function updateScheduleDisplay(scheduleData) {
-            const scheduleInfo = document.getElementById('schedule-info');
-            const scheduleGrid = document.getElementById('schedule-grid');
-            
             // Update display logic here
         }
     </script>

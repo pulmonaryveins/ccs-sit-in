@@ -10,8 +10,8 @@ if (!isset($_SESSION['username'])) {
 // Get user details from database
 require_once '../config/db_connect.php';
 $username = $_SESSION['username'];
-// Update the SQL query to include new fields
-$sql = "SELECT idno, firstname, lastname, middlename, course, year, profile_image, email, address FROM users WHERE username = ?";
+// Update the SQL query to include new fieldssessions
+$sql = "SELECT idno, firstname, lastname, middlename, course, year, profile_image, email, address, remaining_sessions FROM users WHERE username = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $username);
 $stmt->execute();
@@ -41,6 +41,9 @@ if ($row = $result->fetch_assoc()) {
     $_SESSION['profile_image'] = $row['profile_image'] ?? '../assets/images/logo/AVATAR.png';
     $_SESSION['email'] = $row['email'];
     $_SESSION['address'] = $row['address'];
+    
+    // Store remaining sessions in session
+    $_SESSION['remaining_sessions'] = $row['remaining_sessions'] ?? 30;
 }
 
 $stmt->close();
@@ -206,10 +209,12 @@ $conn->close();
                         </div>
                     </div>
                     <div class="info-card">
-                        <div class="info-icon"><i class="ri-time-fill"></i></div>
+                        <div class="info-icon"><i class="ri-timer-fill"></i></div>
                         <div class="info-content">
                             <div class="detail-label">Session</div>
-                            <div class="detail-value">30</div>
+                            <div class="detail-value sessions-count">
+                                <?php echo isset($_SESSION['remaining_sessions']) ? $_SESSION['remaining_sessions'] : '30'; ?>
+                            </div>
                         </div>
                     </div>
                     <div class="edit-controls">
@@ -221,71 +226,6 @@ $conn->close();
             </div>
         </div>
     </div>
-
-    <script>
-        // Profile panel functionality
-        const profilePanel = document.getElementById('profile-panel');
-        const backdrop = document.getElementById('backdrop');
-        const profileTrigger = document.getElementById('profile-trigger');
-
-        function toggleProfile(show) {
-            profilePanel.classList.toggle('active', show);
-            backdrop.classList.toggle('active', show);
-            document.body.style.overflow = show ? 'hidden' : '';
-        }
-
-        profileTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleProfile(true);
-        });
-
-        // Close profile panel when clicking outside
-        document.addEventListener('click', (e) => {
-            if (profilePanel.classList.contains('active') && 
-                !profilePanel.contains(e.target) && 
-                !profileTrigger.contains(e.target)) {
-                toggleProfile(false);
-            }
-        });
-
-        // Prevent clicks inside panel from closing it
-        profilePanel.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // Close on backdrop click
-        backdrop.addEventListener('click', () => toggleProfile(false));
-
-        // Profile data update function
-        async function updateProfilePanel() {
-            try {
-                const response = await fetch('../profile/get_profile_data.php');
-                const data = await response.json();
-                
-                // Update profile image
-                const profileImages = document.querySelectorAll('.profile-image img');
-                profileImages.forEach(img => {
-                    img.src = data.profile_image + '?t=' + new Date().getTime();
-                });
-
-                // Update info
-                document.querySelector('.user-info h3').textContent = data.fullname;
-                
-                // Update info cards
-                const detailValues = document.querySelectorAll('.info-card .detail-value');
-                detailValues[0].textContent = data.idno;
-                detailValues[1].textContent = data.fullname;
-                detailValues[2].textContent = data.course;
-                detailValues[3].textContent = data.year_level;
-            } catch (error) {
-                console.error('Error updating profile:', error);
-            }
-        }
-
-        // Update profile when panel is opened
-        profileTrigger.addEventListener('click', updateProfilePanel);
-    </script>
 
     <!-- History Page Content -->
     <div class="history-container">
@@ -360,7 +300,7 @@ $conn->close();
             </div>
         </div>
     </div>
-
+    
     <style>
         body {
             display: flex;
@@ -369,7 +309,8 @@ $conn->close();
             height: 100vh; /* Full height */
             margin: 0;
             background-color: #f8f9fa; /* Light background for contrast */
-    }
+        }
+        
         .history-container {
             width: 100%;
             max-width: 1700px;
@@ -497,6 +438,69 @@ $conn->close();
     </style>
 
     <script>
+        // Profile panel functionality
+        const profilePanel = document.getElementById('profile-panel');
+        const backdrop = document.getElementById('backdrop');
+        const profileTrigger = document.getElementById('profile-trigger');
+
+        function toggleProfile(show) {
+            profilePanel.classList.toggle('active', show);
+            backdrop.classList.toggle('active', show);
+            document.body.style.overflow = show ? 'hidden' : '';
+        }
+
+        profileTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleProfile(true);
+        });
+
+        // Close profile panel when clicking outside
+        document.addEventListener('click', (e) => {
+            if (profilePanel.classList.contains('active') && 
+                !profilePanel.contains(e.target) && 
+                !profileTrigger.contains(e.target)) {
+                toggleProfile(false);
+            }
+        });
+
+        // Prevent clicks inside panel from closing it
+        profilePanel.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Close on backdrop click
+        backdrop.addEventListener('click', () => toggleProfile(false));
+
+        // Profile data update function
+        async function updateProfilePanel() {
+            try {
+                const response = await fetch('../profile/get_profile_data.php');
+                const data = await response.json();
+                
+                // Update profile image
+                const profileImages = document.querySelectorAll('.profile-image img');
+                profileImages.forEach(img => {
+                    img.src = data.profile_image + '?t=' + new Date().getTime();
+                });
+
+                // Update info
+                document.querySelector('.user-info h3').textContent = data.fullname;
+                
+                // Update info cards
+                const detailValues = document.querySelectorAll('.info-card .detail-value');
+                detailValues[0].textContent = data.idno;
+                detailValues[1].textContent = data.fullname;
+                detailValues[2].textContent = data.course;
+                detailValues[3].textContent = data.year_level;
+            } catch (error) {
+                console.error('Error updating profile:', error);
+            }
+        }
+
+        // Update profile when panel is opened
+        profileTrigger.addEventListener('click', updateProfilePanel);
+
         // Filter functionality for history table
         document.getElementById('historyFilter').addEventListener('change', function() {
             const filterValue = this.value;

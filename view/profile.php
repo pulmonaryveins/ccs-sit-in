@@ -18,6 +18,9 @@ $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
+// Store remaining sessions in session
+$_SESSION['remaining_sessions'] = $user['remaining_sessions'] ?? 30;
+
 $stmt->close();
 $conn->close();
 ?>
@@ -144,10 +147,12 @@ $conn->close();
                         </div>
                     </div>
                     <div class="info-card">
-                        <div class="info-icon"><i class="ri-time-fill"></i></div>
+                        <div class="info-icon"><i class="ri-timer-fill"></i></div>
                         <div class="info-content">
                             <div class="detail-label">Session</div>
-                            <div class="detail-value">30</div>
+                            <div class="detail-value sessions-count">
+                                <?php echo isset($_SESSION['remaining_sessions']) ? $_SESSION['remaining_sessions'] : '30'; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -165,8 +170,8 @@ $conn->close();
             <div class="profile-content">
                 <div class="profile-image-section">
                     <div class="profile-image">
-                        <img src="<?php echo htmlspecialchars($user['profile_image'] ?? '../assets/images/logo/AVATAR.png'); ?>" 
-                             alt="Profile Picture" 
+                        <img src="<?php echo htmlspecialchars($user['profile_image'] ?? '../assets/images/logo/AVATAR.png'); ?>"
+                             alt="Profile Picture"
                              id="profile-preview">
                         <form id="image-upload-form" class="upload-form">
                             <input type="file" id="profile-upload" name="profile_image" accept="image/*" class="hidden">
@@ -256,7 +261,6 @@ $conn->close();
     </div>
 
     <script>
-        // Replace the existing DOMContentLoaded event handler with this:
         document.addEventListener('DOMContentLoaded', function() {
             const profilePanel = document.getElementById('profile-panel');
             const backdrop = document.getElementById('backdrop');
@@ -308,7 +312,6 @@ $conn->close();
                 formData.append('profile_image', file);
 
                 profilePreview.style.opacity = '0.5';
-                
                 fetch('../profile/upload_image.php', {
                     method: 'POST',
                     body: formData
@@ -356,7 +359,7 @@ $conn->close();
                         position: 'top-end', // Position in top-right corner
                         width: '300px', // Smaller width
                         showConfirmButton: false, // Remove confirm button
-                        timer: 1000, // Auto close after 2 seconds
+                        timer: 1000, // Auto close after 1 second
                         toast: true, // Enable toast mode
                         customClass: {
                             popup: 'small-toast' // Custom class for additional styling
