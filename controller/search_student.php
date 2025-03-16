@@ -17,18 +17,16 @@ if (isset($_GET['idno']) && !empty($_GET['idno'])) {
     $idno = $_GET['idno'];
     
     // Prepare the SQL query to search for students
-    $query = "SELECT 
-                id, idno, firstname, lastname, course, year, 
-                CASE 
-                    WHEN year = 1 THEN '1st Year'
-                    WHEN year = 2 THEN '2nd Year'
-                    WHEN year = 3 THEN '3rd Year'
-                    WHEN year = 4 THEN '4th Year'
-                    ELSE CONCAT(year, 'th Year')
-                END as year_level_display,
-                remaining_sessions
-              FROM users 
-              WHERE idno LIKE ?";
+    $query = "SELECT u.id, u.idno, u.firstname, u.lastname, u.course, u.year, u.profile_image, u.remaining_sessions,
+              CASE 
+                WHEN u.year = 1 THEN '1st Year'
+                WHEN u.year = 2 THEN '2nd Year'
+                WHEN u.year = 3 THEN '3rd Year'
+                WHEN u.year = 4 THEN '4th Year'
+                ELSE CONCAT(u.year, 'th Year')
+              END as year_level_display
+              FROM users u 
+              WHERE u.idno LIKE ?";
     
     // Prepare statement
     $stmt = $conn->prepare($query);
@@ -39,7 +37,18 @@ if (isset($_GET['idno']) && !empty($_GET['idno'])) {
     
     // Check if we found a student
     if ($result->num_rows > 0) {
-        $student = $result->fetch_assoc();
+        $row = $result->fetch_assoc();
+        $student = [
+            'id' => $row['id'],
+            'idno' => $row['idno'],
+            'firstname' => $row['firstname'],
+            'lastname' => $row['lastname'],
+            'course' => $row['course'],
+            'year' => $row['year'],
+            'year_level_display' => $row['year_level_display'],
+            'profile_image' => $row['profile_image'] ?? '../assets/images/logo/AVATAR.png',
+            'remaining_sessions' => $row['remaining_sessions'] ?? 30,
+        ];
         echo json_encode([
             'success' => true, 
             'student' => $student

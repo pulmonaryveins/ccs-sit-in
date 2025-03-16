@@ -1,0 +1,2304 @@
+/* Base styles for sit-in page */
+:root {
+    --nav-height: 60px;
+    --primary-color: #7556cc;
+    --secondary-color: #d569a7;
+}
+
+/* Reset some basic elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    color: #2d3748;
+    background-color: #f7fafc;
+}
+
+.content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - var(--nav-height));
+    padding: 2rem;
+    margin-top: var(--nav-height);
+}
+
+.table-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 1600px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table-header h2 {
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+}
+
+.search-box {
+    position: relative;
+    width: 250px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.search-box input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(117,86,204,0.1);
+    outline: none;
+}
+
+.search-box i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.modern-table th {
+    background: #f8fafc;
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modern-table td {
+    padding: 1rem;
+    font-size: 0.875rem;
+    color: #4a5568;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modern-table tr:hover td {
+    background-color: #f8fafc;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem !important;
+}
+
+.empty-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: #a0aec0;
+}
+
+.empty-state-content i {
+    font-size: 2.5rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-badge.approved {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.status-badge.completed {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.status-badge.pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.action-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-button.danger {
+    background: #ef4444;
+    color: white;
+}
+
+.action-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Add these styles for the modal form */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.modal-backdrop.active .modal {
+    transform: translateY(0);
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #a0aec0;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.modal-close:hover {
+    color: #4a5568;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #4a5568;
+}
+
+.form-group input,
+.form-group select {
+    padding: 0.5rem; /* Reduced padding */
+    font-size: 0.875rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(117,86,204,0.1);
+    outline: none;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.student-info {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    margin-top: 1rem;
+    display: none;
+}
+
+.student-info.active {
+    display: block;
+}
+
+.student-info h4 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    color: #4a5568;
+}
+
+.student-info p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.pc-selector {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+/* Updated PC unit styling to match request page */
+.pc-unit {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pc-unit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.computer-icon {
+    font-size: 1.5rem;
+    color: #7556cc;
+    margin-bottom: 0.5rem;
+}
+
+.computer-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pc-number {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.pc-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    margin-top: 0.25rem;
+}
+
+.pc-unit.available {
+    border-color: #c6f6d5;
+}
+
+.pc-unit.in-use {
+    border-color: #fed7d7;
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.pc-status.available {
+    background: #c6f6d5;
+    color: #2f855a;
+}
+
+.pc-status.in-use {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.pc-unit.selected {
+    background: #e0f2fe;
+    border-color: #7556cc;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(117,86,204,0.2);
+}
+
+.sessions-badge {
+    background-color: #dcfce7;
+    color: #7556cc;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: bold;
+    display: inline-block;
+    min-width: 2.5rem;
+    text-align: center;
+}
+
+.sessions-badge.low-sessions {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.sessions-badge.medium-sessions {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.sessions-badge.high-sessions {
+    background-color: #dcfce7;
+    color: #7556cc;
+}
+
+.sessions-badge {
+    background-color: #dcfce7;
+    color: #16a34a;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: bold;
+}
+
+#submitSitinBtn {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+#submitSitinBtn.active {
+    opacity: 1;
+    cursor: pointer;
+}
+
+/* Adjusted spacing between dashboard grid and filter tabs */
+.filter-tabs {
+    display: flex;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 0.5rem; /* Reduced margin */
+}
+
+.filter-tab {
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #718096;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.filter-tab:hover {
+    color: var(--primary-color);
+}
+
+.filter-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.view-container {
+    display: none;
+}
+
+.view-container.active {
+    display: block;
+}
+
+.dashboard-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    height: calc(100vh - 240px);
+    margin-top: 0; /* Removed margin-top */
+}
+
+.dashboard-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.profile-header {
+    padding: 1.2rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    color: #2d3748;
+}
+
+.profile-content {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Reservation form styles */        /* Add styles for the two-column layout */
+.reservation-form {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 2rem; /* Add padding to the bottom of the form */
+}
+
+/* Adjust student info grid for consistent spacing */
+.student-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem; /* Reduced gap between elements */
+    padding: 0.5rem; /* Reduced padding */
+    overflow-y: auto;
+    margin-top: 1rem; /* Reduced top margin */
+    margin-bottom: 5rem; /* Reduced bottom margin */
+}
+
+.edit-controls {
+    width: 100%;
+    margin-top: 2rem; /* Increased top margin */
+    margin-bottom: 1rem; /* Add bottom margin */
+    display: flex;
+    justify-content: center;
+    grid-column: span 2;
+    padding: 0 1rem;
+}
+
+.edit-btn {
+    width: auto; /* Allow button to size to content */
+    min-width: 200px; /* Set minimum width */
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, rgba(117,86,204,0.95) 0%, rgba(213,105,167,0.95) 100%);
+    color: white;
+    text-decoration: none;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(117,86,204,0.2);
+    cursor: pointer;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Dashboard grid and columns */
+.dashboard-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.dashboard-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Lab selector styles */
+.lab-select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    margin-left: 1rem;
+    background: white;
+}
+
+/* Computer unit styles to match reservation.php */
+.computer-unit {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.computer-unit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.computer-unit.in-use {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.computer-icon {
+    font-size: 1.5rem;
+    color: #7556cc;
+    margin-bottom: 0.5rem;
+}
+
+.computer-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pc-number {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.pc-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    margin-top: 0.25rem;
+}
+
+.computer-unit.selected {
+    background: #e0f2fe;
+    border-color: #7556cc;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(117, 86, 204, 0.2);
+}
+
+/* Computer grid layout */
+.computer-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.initial-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #718096;
+    padding: 2rem;
+}
+
+/* Style for submit button */ */
+#submitSitinBtn {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+/* Replace old notification styles with Tailwind-inspired styles */
+#notification-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 320px;
+    pointer-events: auto;
+}
+
+.notification {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+    border-left: 4px solid #6b7280;
+    overflow: hidden;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    margin-right: 0.75rem;
+}
+
+.notification-content {
+    flex-grow: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+.notification-message {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.25rem;
+}
+
+.notification-close {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: color 0.15s ease-in-out;
+}
+
+.notification-close:hover {
+    color: #6b7280;
+}
+
+/* Different notification types */
+.notification.success {
+    border-left-color: #10b981;
+}
+
+.notification.success .notification-icon {
+    color: #10b981;
+}
+
+.notification.error {
+    border-left-color: #ef4444;
+}
+
+.notification.error .notification-icon {
+    color: #ef4444;
+}
+
+.notification.warning {
+    border-left-color: #f59e0b;
+}
+
+.notification.warning .notification-icon {
+    color: #f59e0b;
+}
+
+.notification.info {
+    border-left-color: #3b82f6;
+}
+
+.notification.info .notification-icon {
+    color: #3b82f6;
+}
+
+/* Confirmation modal with Tailwind styling */
+.confirm-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.confirm-modal-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.confirm-modal {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 28rem;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s ease-in-out;
+}
+
+.confirm-modal-backdrop.show .confirm-modal {
+    transform: scale(1);
+}
+
+.confirm-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.confirm-modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.confirm-modal-body {
+    padding: 1.5rem;
+    color: #4b5563;
+}
+
+.confirm-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.confirm-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: background-color 0.15s ease-in-out;
+    cursor: pointer;
+    border: none;
+}
+
+.confirm-btn-cancel {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+.confirm-btn-cancel:hover {
+    background-color: #e5e7eb;
+}
+
+.confirm-btn-confirm {
+    background-color: #7556cc;
+    color: white;
+}
+
+.confirm-btn-confirm:hover {
+    background-color: #6b46c1;
+}
+
+/* Enhanced search-container styles */
+.search-container {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+}
+
+.search-container label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    height: 3rem;
+}
+
+.search-field:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(117,86,204,0.15);
+}
+
+.search-field input {
+    flex: 1;
+    width: 100%;
+    padding: 1rem 1rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: #2d3748;
+}
+
+.search-field input::placeholder {
+    color: #a0aec0;
+    font-size: 0.95rem;
+}
+
+.search-field button {
+    background: linear-gradient(135deg, rgba(117,86,204,0.95) 0%, rgba(213,105,167,0.95) 100%);
+    color: white;
+    border: none;
+    padding: 1rem 1.2rem;
+    height: 100%;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 10px;
+}
+
+.search-field button:hover {
+    opacity: 0.9;
+}
+
+.search-field button i {
+    font-size: 1.1rem;
+}
+
+.search-field button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Student info grid enhancement */
+.student-info-grid {
+    margin-top: 2rem;
+    background-color: #f8fafc;
+    border-radius: 12px;
+}
+
+.info-card {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem; /* Reduced padding */
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem; /* Reduced gap between icon and content */
+
+}
+
+.info-sessions {
+    background: white;
+    border-radius: 8px;
+    width: 200%;
+    padding: 1rem;
+    margin: 0rem auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.info-sessions:hover {
+    transform: translateY(-2px);
+}
+.sessions-number {
+    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+    min-width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #7556cc;
+    border: 2px solid rgba(117,86,204,0.2);
+}
+
+.sessions-content {
+    flex: 1;
+}
+
+.sessions-label {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-bottom: 1rem;
+}
+
+.sessions-progress {
+    width: 100%;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    padding: 0.25rem;
+    box-shadow: inset 0 2px 9px rgba(0, 0, 0, 0.05);
+}
+
+.info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, rgba(117,86,204,0.15), rgba(213,105,167,0.15));
+    border-radius: 8px;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-size: 0.95rem;
+    color: #2d3748;
+}
+
+.detail-value input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: #2d3748;
+    font-weight: 500;
+    padding: 0;
+    outline: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.detail-value select {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.detail-value select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(117,86,204,0.15);
+    outline: none;
+}
+
+.sessions-count {
+    font-weight: 600;
+    color: #6b46c1;
+}
+
+/* Enhanced Add Sit-in container styles */
+.profile-card {
+    padding: 0;
+    overflow: hidden;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-top: 1rem;
+}
+
+/* Form container adjustments */
+.reservation-form {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0 1.5rem 2rem; /* Added horizontal padding */
+}
+
+/* Adjust search container and student info grid spacing */
+.search-container {
+    margin-bottom: 1rem; /* Reduced margin */
+    padding: 1rem 0; /* Removed horizontal padding, only vertical */
+}
+
+/* Student info grid enhancement - moved closer to search field */
+.student-info-grid {
+    margin-top: 2rem; /* Reduced top margin */
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 1rem; /* Added padding to the grid container */
+}
+
+/* Info card adjustments for tighter layout */
+.info-card {
+    margin-bottom: 0.75rem; /* Added margin between cards */
+}
+
+/* Bottom row cards (last two in the grid) */
+.info-card:nth-last-child(-n+2) {
+    margin-bottom: 0; /* Remove margin from last row */
+}
+
+/* Fix edit controls positioning */
+.edit-controls {
+    width: 100%;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
+    grid-column: span 2;
+    padding: 0;
+}
+
+/* Ensure the button has enough space */
+.edit-btn {
+    width: auto;
+    min-width: 200px;
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 1rem;
+    /* ...rest of the existing properties... */
+}
+
+/* Adjust profile container */
+.student-profile-container {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Info sessions styling improvements */
+.info-sessions {
+    background: white;
+    border-radius: 8px;
+    width: 100%; /* Changed from 200% to fix layout */
+    grid-column: span 2; /* Make it span both columns */
+    padding: 1rem;
+    margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+/* Add these styles for the student profile image */
+.student-profile-container {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.student-profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(117,86,204,0.2);
+    margin-bottom: 0.75rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.student-profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.student-profile-name {
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #2d3748;
+    margin-top: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem; /* Reduced margin to accommodate badge */
+}
+
+/* Improved student info layout with two-column design */
+.student-info-grid {
+    display: flex;
+    gap: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    overflow: visible;
+}
+
+/* Left column - Student profile */
+.student-info-left {
+    flex: 0 0 50px; /* Fixed width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.student-profile-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.student-profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(117,86,204,0.2);
+    margin-bottom: 0.75rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.student-profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.student-profile-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-align: center;
+    color: #2d3748;
+    margin-top: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Sessions display on left side */
+.sessions-container {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.sessions-number {
+    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #7556cc;
+    border: 2px solid rgba(117,86,204,0.2);
+    margin: 0 auto 0.5rem;
+}
+
+.sessions-label {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.sessions-progress {
+    width: 100%;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    padding: 0.25rem;
+    box-shadow: inset 0 2px 9px rgba(0, 0, 0, 0.05);
+    margin-top: 0.75rem;
+}
+
+/* Right column - Student info cards */
+.student-info-right {
+    flex: 1; /* Take remaining space */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.info-card {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+/* Submit button and controls placement */
+.form-controls {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.5rem;
+}
+
+.edit-btn {
+    width: auto;
+    min-width: 200px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, rgba(117,86,204,0.95) 0%, rgba(213,105,167,0.95) 100%);
+    color: white;
+    text-decoration: none;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(117,86,204,0.2);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Right column decoration */
+.decoration-element {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    opacity: 0.1;
+    pointer-events: none;
+    font-size: 5rem;
+    color: var(--primary-color);
+}
+
+/* Adjust container width for more space */
+#add-sitin .dashboard-column {
+    max-width: 1000px !important; /* Increased from 800px */
+}
+
+/* Improved student info layout with two-column design - with more space */
+.student-info-grid {
+    display: flex;
+    gap: 2rem; /* Increased from 1.5rem */
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 2rem; /* Increased padding */
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow: visible;
+}
+
+/* Left column - Student profile - with adjusted width */
+.student-info-left {
+    flex: 0 0 50px; /* Increased from 200px */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Student profile container with more space */
+.student-profile-container {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 10px; /* Increased from 8px */
+    padding: 1.5rem; /* Increased from 1.25rem */
+    margin-bottom: 1.5rem; /* Increased from 1rem */
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+}
+
+/* Right column - Student info cards - with more space */
+.student-info-right {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem; /* Increased from 0.75rem */
+}
+
+/* Info cards with more breathing room */
+.info-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem; /* Increased from 0.75rem */
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem; /* Increased from 0.5rem */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Adjust layout to prioritize student information display */
+/* Improved student info layout with two-column design */
+.student-info-grid {
+    display: flex;
+    gap: 1.5rem; /* Reduced from 2rem for better space utilization */
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow: visible;
+}
+
+/* Left column - Student profile - with adjusted width */
+.student-info-left {
+    flex: 0 0 50px; /* Decreased from 220px to give more space to the right side */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Student profile container with adjusted spacing */
+.student-profile-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 10px;
+    padding: 1rem; /* Reduced padding */
+    margin-bottom: 1rem; /* Reduced margin */
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+}
+
+/* Slightly smaller profile image */
+.student-profile-image {
+    width: 100px; /* Reduced from 100px */
+    height: 100px; /* Reduced from 100px */
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(117,86,204,0.2);
+    margin-bottom: 0.5rem; /* Reduced margin */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Sessions display with adjusted width */
+.sessions-container {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem; /* Reduced padding */
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.sessions-number {
+    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+    height: 50px; /* Reduced from 60px */
+    width: 50px; /* Reduced from 60px */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem; /* Reduced from 1.4rem */
+    font-weight: 600;
+    color: #7556cc;
+    border: 2px solid rgba(117,86,204,0.2);
+    margin: 0 auto 0.5rem;
+}
+
+/* Right column - Student info cards - with more space */
+.student-info-right {
+    flex: 1; /* Take remaining space */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+/* Info cards with proper spacing */
+.info-card {
+    background: white;
+    border-radius: 8px;
+    padding: 0.875rem; /* Adjusted padding for better space utilization */
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Form controls with better positioning */
+.form-controls {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1.25rem; /* Adjusted margin */
+    padding: 0.5rem;
+}
+
+/* Redesigned student info layout - more balanced and visually appealing */
+.student-info-grid {
+    display: flex;
+    gap: 2rem;
+    background-color: #f8fafc;
+    border-radius: 15px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    padding: 2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+/* Left column with profile and sessions */
+.student-info-left {
+    flex: 0 0 180px; /* Fixed appropriate width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Enhanced profile container */
+.student-profile-container {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 0; /* Reset margin to prevent conflicts */
+}
+
+.student-profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid rgba(117,86,204,0.15);
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(117,86,204,0.15);
+    background: #f1f5f9;
+}
+
+.student-profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.student-profile-name {
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
+    margin-top: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Enhanced sessions container */
+.sessions-container {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.sessions-number {
+    background: linear-gradient(135deg, rgba(117,86,204,0.08), rgba(213,105,167,0.08));
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #7556cc;
+    border: 2px solid rgba(117,86,204,0.15);
+    margin: 0 auto 0.75rem;
+}
+
+.sessions-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.sessions-progress {
+    width: 100%;
+    height: 10px;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    padding: 2px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 0.75rem;
+    overflow: hidden;
+}
+
+/* Right column - Student info form fields */
+.student-info-right {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+/* Enhanced info cards */
+.info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+    margin-bottom: 0; /* Reset margin to prevent conflicts */
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+}
+
+.info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+    border-radius: 10px;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.info-content {
+    flex: 1;
+    min-width: 0; /* Ensures text can shrink and doesn't overflow */
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.detail-value {
+    font-size: 0.95rem;
+    color: #1e293b;
+    width: 100%;
+}
+
+.detail-value input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 500;
+    padding: 0;
+    outline: none;
+    overflow: visible;
+    white-space: normal;
+}
+
+.detail-value select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    color: #1e293b;
+    transition: all 0.2s;
+    background-color: #f8fafc;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237556cc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px;
+}
+
+.detail-value select:focus {
+    border-color: #7556cc;
+    box-shadow: 0 0 0 3px rgba(117,86,204,0.15);
+    outline: none;
+    background-color: white;
+}
+
+/* Submit button and controls placement */
+.form-controls {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.edit-btn, #submitSitinBtn {
+    min-width: 180px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, rgba(117,86,204,0.95), rgba(213,105,167,0.95));
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(117,86,204,0.15);
+    cursor: pointer;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.edit-btn:hover, #submitSitinBtn.active:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(117,86,204,0.25);
+}
+
+.edit-btn:active, #submitSitinBtn.active:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(117,86,204,0.2);
+}
+
+#submitSitinBtn {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+#submitSitinBtn.active {
+    opacity: 1;
+    cursor: pointer;
+}
+
+/* Redesigned student info layout with improved width proportions */
+.student-info-grid {
+    display: flex;
+    gap: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: 15px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    min-width: 850px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Left column with profile and sessions - more compact */
+.student-info-left {
+    flex: 0 0 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem; /* Reduced from 1.5rem */
+}
+
+/* Enhanced profile container - more compact */
+.student-profile-container {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem; /* Reduced from 1.5rem */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 0;
+}
+
+.student-profile-image {
+    width: 80px; /* Reduced from 100px */
+    height: 80px; /* Reduced from 100px */
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(117,86,204,0.15);
+    margin-bottom: 0.75rem; /* Reduced from 1rem */
+    box-shadow: 0 4px 12px rgba(117,86,204,0.15);
+    background: #f1f5f9;
+}
+
+/* Enhanced sessions container - more compact */
+.sessions-container {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem; /* Reduced from 1.25rem */
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.sessions-number {
+    height: 50px; /* Reduced from 60px */
+    width: 50px; /* Reduced from 60px */
+    font-size: 1.2rem; /* Reduced from 1.3rem */
+    margin: 0 auto 0.5rem; /* Reduced from 0.75rem */
+}
+
+/* Right column - More compact info cards */
+.student-info-right {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem; /* Reduced from 1.25rem for more compact layout */
+}
+
+/* Enhanced info cards - more compact */
+.info-card {
+    background: white;
+    border-radius: 10px; /* Reduced from 12px */
+    padding: 0.875rem; /* Reduced from 1.25rem */
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem; /* Reduced from 1rem */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+    margin-bottom: 0;
+}
+
+.info-icon {
+    width: 36px; /* Reduced from 40px */
+    height: 36px; /* Reduced from 40px */
+    font-size: 1.125rem; /* Reduced from 1.25rem */
+}
+
+.detail-label {
+    font-size: 0.75rem; /* Reduced from 0.8rem */
+    margin-bottom: 0.375rem; /* Reduced from 0.5rem */
+}
+
+.detail-value {
+    font-size: 0.875rem; /* Reduced from 0.95rem */
+}
+
+.detail-value input {
+    font-size: 0.875rem; /* Reduced from 0.95rem */
+}
+
+.detail-value select {
+    padding: 0.5rem 0.675rem; /* Reduced from 0.6rem 0.75rem */
+    font-size: 0.85rem; /* Reduced from 0.9rem */
+}
+
+/* Form controls with better positioning - more compact */
+.form-controls {
+    margin-top: 0.75rem; /* Reduced from 1rem */
+}
+
+/* Clean, consistent implementation of student info layout */
+.student-info-grid {
+    display: flex;
+    gap: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin: 1.5rem auto;
+    position: relative;
+    min-width: auto;
+    max-width: 950px;
+    overflow: visible;
+}
+
+/* Left column with profile and sessions */
+.student-info-left {
+    flex: 0 0 160px; /* Fixed width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Profile container */
+.student-profile-container {
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    margin-bottom: 0;
+}
+
+.student-profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(117,86,204,0.15);
+    margin-bottom: 0.75rem;
+    box-shadow: 0 4px 10px rgba(117,86,204,0.15);
+    background: #f1f5f9;
+}
+
+.student-profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.student-profile-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: center;
+    margin-top: 0.25rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Sessions container */
+.sessions-container {
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.sessions-number {
+    background: linear-gradient(135deg, rgba(117,86,204,0.08), rgba(213,105,167,0.08));
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #7556cc;
+    border: 2px solid rgba(117,86,204,0.15);
+    margin: 0 auto 0.5rem;
+}
+
+.sessions-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-bottom: 0.375rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.sessions-progress {
+    width: 100%;
+    height: 10px;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    padding: 2px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 0.75rem;
+    overflow: hidden;
+}
+
+/* Right column with info cards */
+.student-info-right {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+}
+
+/* Info cards */
+.info-card {
+    background: white;
+    border-radius: 10px;
+    padding: 0.875rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+    height: 100%;
+    margin-bottom: 0;
+}
+
+.info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+    border-radius: 8px;
+    color: var(--primary-color);
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+
+.info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 0.375rem;
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 0.875rem;
+    color: #1e293b;
+    width: 100%;
+}
+
+.detail-value input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    color: #1e293b;
+    font-weight: 500;
+    padding: 0;
+    outline: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.detail-value select {
+    width: 100%;
+    padding: 0.5rem 0.625rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.85rem;
+    color: #1e293b;
+    transition: all 0.2s;
+    background-color: #f8fafc;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237556cc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 14px;
+}
+
+.detail-value select:focus {
+    border-color: #7556cc;
+    box-shadow: 0 0 0 2px rgba(117,86,204,0.1);
+    outline: none;
+    background-color: white;
+}
+
+/* Form controls */
+.form-controls {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .student-info-grid {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .student-info-left {
+        flex: 0 0 auto;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    
+    .student-profile-container, 
+    .sessions-container {
+        width: calc(50% - 0.375rem);
+    }
+    
+    .student-info-right {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Enhanced search-container styles with more width */
+.search-container {
+    margin-bottom: 1rem;
+    padding: 1rem 0;
+    width: 100%;
+    max-width: 1100px; /* Increased from default */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Make the dashboard column wider to accommodate larger content */
+#add-sitin .dashboard-column {
+    max-width: 1100px !important; /* Increased from 1000px */
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Adjust the student info grid to decrease the width */
+.student-info-grid {
+    display: flex;
+    gap: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin: 1.5rem auto;
+    position: relative;
+    min-width: auto;
+    max-width: 800px; /* Decreased from 1050px */
+    width: 100%;
+    overflow: visible;
+}
+
+/* Adjust right column for more room */
+.student-info-right {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem; /* Adjusted for better spacing */
+    min-width: 0; /* Ensures the grid can shrink if needed */
+    width: 100%; /* Ensures the grid takes all available width */
+}
+
+/* Info cards with slightly more padding */
+.info-card {
+    background: white;
+    border-radius: 10px;
+    padding: 0.875rem; /* Adjusted padding */
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+    height: 100%;
+    margin-bottom: 0;
+    width: 100%; /* Ensure cards take full width of their grid cell */
+}
+
+/* Adjust the student info grid to better utilize the increased space */
+.student-info-grid {
+    display: flex;
+    gap: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin: 1.5rem auto;
+    position: relative;
+    min-width: auto;
+    max-width: 1050px; /* Increased from 950px */
+    width: 100%;
+    overflow: visible;
+}
+
+/* Adjust right column for more room */
+.student-info-right {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem; /* Slightly increased from 0.875rem */
+    min-width: 0; /* Ensures the grid can shrink if needed */
+    width: 100%; /* Ensures the grid takes all available width */
+}
+
+/* Info cards with slightly more padding */
+.info-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem; /* Increased from 0.875rem */
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+    height: 100%;
+    margin-bottom: 0;
+    width: 100%; /* Ensure cards take full width of their grid cell */
+}
+
+/* Add styles for course badge */
+.course-badge {
+    margin-top: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+    color: var(--primary-color);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(117,86,204,0.2);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+    display: inline-block;
+    min-width: 120px;
+}
