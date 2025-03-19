@@ -467,6 +467,9 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                 formData.append('time_out', manilaTime);
                 formData.append('timezone', 'Asia/Manila');
                 
+                // Add admin_timeout flag to indicate this is an admin timeout
+                formData.append('admin_timeout', 'true');
+                
                 // Send AJAX request to process time out
                 fetch('../controller/time_out.php', {
                     method: 'POST',
@@ -494,79 +497,134 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         });
     }
 
-    // Student search by ID - enhanced to fetch remaining sessions
-    document.getElementById('student_idno')?.addEventListener('input', function() {
-        let idno = this.value.trim();
-        if (idno.length >= 5) {
-            // Search for student with this ID
-            fetch('../controller/search_student.php?idno=' + idno)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Display student information
-                        document.getElementById('display_idno').value = data.student.idno || '';
-                        document.getElementById('display_course').textContent = data.student.course || 'Not specified';
-                        document.getElementById('display_year').value = data.student.year_level_display || 'Not specified';
-                        updateSessionsDisplay(data.student.remaining_sessions || 30);
-                        
-                        // Display student profile image and name
-                        const profileImage = document.getElementById('display_profile_image');
-                        profileImage.src = data.student.profile_image || '../assets/images/logo/AVATAR.png';
-                        profileImage.onerror = function() {
-                            this.src = '../assets/images/logo/AVATAR.png';
-                        };
-                        document.getElementById('display_student_name').textContent = 
-                            data.student.firstname + ' ' + data.student.lastname;
-                        
-                        // Store the student ID for form submission
-                        const hiddenIdField = document.createElement('input');
-                        hiddenIdField.type = 'hidden';
-                        hiddenIdField.name = 'student_id';
-                        hiddenIdField.value = data.student.id;
-                        
-                        // Remove any existing hidden field before adding a new one
-                        const existingField = document.querySelector('input[name="student_id"]');
-                        if (existingField) existingField.remove();
-                        document.getElementById('addSitInForm').appendChild(hiddenIdField);
-                        
-                        // Show the student info section
-                        document.getElementById('studentInfo').style.display = 'grid';
-                        validateForm();
-                    } else {
-                        document.getElementById('studentInfo').style.display = 'none';
-                        showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('studentInfo').style.display = 'none';
-                    
-                    // Provide more helpful error message
-                    if (error.message && error.message.includes('Network response was not ok')) {
-                        showNotification("Server Error", 'Server error: ' + error.message, 'error');
-                    } else {
-                        showNotification("Error", 'Error searching for student. Please try again.', 'error');
-                    }
-                });
+    // Consolidated function to update sessions display
+    function updateSessionsDisplay(sessions) {
+        const maxSessions = 30; // Maximum number of sessions
+        const remainingElement = document.getElementById('remainingSessions');
+        const progressBar = document.getElementById('sessionsProgress');
+        
+        // Update the number
+        remainingElement.textContent = sessions;
+        
+        // Calculate percentage
+        const percentage = (sessions / maxSessions) * 100;
+        
+        // Update progress bar width
+        progressBar.style.width = `${percentage}%`;
+        
+        // Update colors based on remaining sessions
+        if (sessions <= 5) {
+            progressBar.className = 'bg-gradient-to-r from-red-500 to-red-400 h-full rounded-full transition-all duration-500';
+            remainingElement.style.color = '#ef4444';
+            remainingElement.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.08))';
+            remainingElement.style.borderColor = 'rgba(239,68,68,0.15)';
+        } else if (sessions <= 10) {
+            progressBar.className = 'bg-gradient-to-r from-yellow-500 to-yellow-400 h-full rounded-full transition-all duration-500';
+            remainingElement.style.color = '#d97706';
+            remainingElement.style.background = 'linear-gradient(135deg, rgba(217,119,6,0.08), rgba(217,119,6,0.08))';
+            remainingElement.style.borderColor = 'rgba(217,119,6,0.15)';
         } else {
-            document.getElementById('studentInfo').style.display = 'none';
+            progressBar.className = 'bg-gradient-to-r from-violet-500 to-fuchsia-500 h-full rounded-full transition-all duration-500';
+            remainingElement.style.color = '#7556cc';
+            remainingElement.style.background = 'linear-gradient(135deg, rgba(117,86,204,0.08), rgba(213,105,167,0.08))';
+            remainingElement.style.borderColor = 'rgba(117,86,204,0.15)';
         }
-    });
+    }
 
-    // Load PC availability when laboratory is selected - remove this function
-    document.getElementById('laboratory')?.addEventListener('change', function() {
-        validateForm(); // Only validate form, no PC loading
-    });
-
+    // Consolidated student search functionality
+    function searchStudent() {
+        let idno = document.getElementById('student_idno').value.trim();
+        const studentInfo = document.getElementById('studentInfo');
+        
+        if (idno.length < 5) {
+            showNotification("Warning", 'Please enter at least 5 characters of the student ID', 'warning');
+            return;
+        }
+        
+        // Show loading indicator
+        document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-loader-4-line"></i> Searching...';
+        document.getElementById('searchStudentBtn').disabled = true;
+        
+        // Clear the previous search result
+        studentInfo.style.display = 'none';
+        
+        // Search for student with this ID
+        fetch('../controller/search_student.php?idno=' + idno)
+            .then(response => {
+                // Check if the response is ok
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Search response:', data); // Debug log
+                
+                if (data.success) {
+                    // Display student information
+                    const student = data.student;
+                    document.getElementById('display_idno').value = student.idno || '';
+                    document.getElementById('display_course').textContent = student.course || 'Not specified';
+                    document.getElementById('display_year').value = student.year_level_display || 'Not specified';
+                    updateSessionsDisplay(student.remaining_sessions || 30);
+                    
+                    // Display student profile image and name
+                    const profileImage = document.getElementById('display_profile_image');
+                    profileImage.src = student.profile_image || '../assets/images/logo/AVATAR.png';
+                    profileImage.onerror = function() {
+                        this.src = '../assets/images/logo/AVATAR.png';
+                    };
+                    document.getElementById('display_student_name').textContent = 
+                        student.firstname + ' ' + student.lastname;
+                    
+                    // Store the student ID for form submission
+                    const hiddenIdField = document.createElement('input');
+                    hiddenIdField.type = 'hidden';
+                    hiddenIdField.name = 'student_id';
+                    hiddenIdField.value = student.id;
+                    
+                    // Remove any existing hidden field before adding a new one
+                    const existingField = document.querySelector('input[name="student_id"]');
+                    if (existingField) existingField.remove();
+                    document.getElementById('addSitInForm').appendChild(hiddenIdField);
+                    
+                    // Show the student info section
+                    studentInfo.style.display = 'grid';
+                    validateForm();
+                } else {
+                    studentInfo.style.display = 'none';
+                    showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                studentInfo.style.display = 'none';
+                
+                // Provide more helpful error message
+                if (error.message && error.message.includes('Network response was not ok')) {
+                    showNotification("Server Error", 'Server error: ' + error.message, 'error');
+                } else {
+                    showNotification("Error", 'Error searching for student. Please try again.', 'error');
+                }
+            })
+            .finally(() => {
+                // Reset button state
+                document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-search-line"></i> Search';
+                document.getElementById('searchStudentBtn').disabled = false;
+            });
+    }
+    
+    // Form validation
     function validateForm() {
         const requiredFields = [
-            { id: 'student_idno', check: () => document.getElementById('studentInfo').style.display === 'grid' },
+            { id: 'student_idno', check: () => document.getElementById('studentInfo').style.display !== 'none' },
             { id: 'purpose', check: () => document.getElementById('purpose').value !== '' },
             { id: 'laboratory', check: () => document.getElementById('laboratory').value !== '' },
         ];
 
         const isValid = requiredFields.every(field => field.check());
         const submitBtn = document.getElementById('submitSitinBtn');
+        
         if (isValid) {
             submitBtn.classList.add('active');
             submitBtn.disabled = false;
@@ -574,11 +632,9 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             submitBtn.classList.remove('active');
             submitBtn.disabled = true;
         }
+        
         return isValid;
     }
-
-    // Add event listeners for form fields
-    document.getElementById('purpose')?.addEventListener('change', validateForm);
 
     function submitAddSitIn() {
         if (!validateForm()) {
@@ -646,369 +702,31 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         });
     }
 
-    // Add search button click handler
-    document.getElementById('searchStudentBtn')?.addEventListener('click', function(e) {
-        e.preventDefault(); // Prevent form submission
-        searchStudent();
-    });
-
-    // Add enter key support for search
-    document.getElementById('student_idno')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+    // Set up event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add event listener for laboratory selection (form validation only)
+        document.getElementById('laboratory')?.addEventListener('change', validateForm);
+        
+        // Add event listener for purpose selection
+        document.getElementById('purpose')?.addEventListener('change', validateForm);
+        
+        // Add search button click handler 
+        document.getElementById('searchStudentBtn')?.addEventListener('click', function(e) {
             e.preventDefault(); // Prevent form submission
             searchStudent();
-        }
+        });
+
+        // Add enter key support for student ID field
+        document.getElementById('student_idno')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submission
+                searchStudent();
+            }
+        });
+        
+        // Remove the automatic search on input to eliminate double panel issue
+        // We'll only search when the button is clicked or Enter is pressed
     });
-
-    // Separate search functionality into its own function
-    function searchStudent() {
-        let idno = document.getElementById('student_idno').value.trim();
-        const studentInfo = document.getElementById('studentInfo');
-        
-        if (idno.length < 5) {
-            showNotification("Warning", 'Please enter at least 5 characters of the student ID', 'warning');
-            return;
-        }
-        
-        // Show loading indicator
-        document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-loader-4-line"></i> Searching...';
-        document.getElementById('searchStudentBtn').disabled = true;
-        
-        // Clear the previous search result
-        studentInfo.style.display = 'none';
-        
-        // Search for student with this ID
-        fetch('../controller/search_student.php?idno=' + idno)
-            .then(response => {
-                // Check if the response is ok (status in the range 200-299)
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Search response:', data); // Debug log
-                if (data.success) {
-                    // Display complete student information
-                    const student = data.student;
-                    document.getElementById('display_idno').value = student.idno || '';
-                    document.getElementById('display_course').textContent = student.course || 'Not specified';
-                    document.getElementById('display_year').value = student.year_level_display || 'Not specified';
-                    updateSessionsDisplay(student.remaining_sessions || 30);
-                    
-                    // Display student profile image and name
-                    const profileImage = document.getElementById('display_profile_image');
-                    profileImage.src = student.profile_image || '../assets/images/logo/AVATAR.png';
-                    profileImage.onerror = function() {
-                        this.src = '../assets/images/logo/AVATAR.png';
-                    };
-                    document.getElementById('display_student_name').textContent = 
-                        student.firstname + ' ' + student.lastname;
-                    
-                    // Store the student ID for form submission
-                    const hiddenIdField = document.createElement('input');
-                    hiddenIdField.type = 'hidden';
-                    hiddenIdField.name = 'student_id';
-                    hiddenIdField.value = student.id;
-                    
-                    // Remove any existing hidden field before adding a new one
-                    const existingField = document.querySelector('input[name="student_id"]');
-                    if (existingField) existingField.remove();
-                    document.getElementById('addSitInForm').appendChild(hiddenIdField);
-                    
-                    // Show the student info section
-                    studentInfo.style.display = 'grid';
-                    validateForm();
-                } else {
-                    studentInfo.style.display = 'none';
-                    showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                studentInfo.style.display = 'none';
-                
-                // Provide more helpful error message
-                if (error.message && error.message.includes('Network response was not ok')) {
-                    showNotification("Server Error", 'Server error: ' + error.message, 'error');
-                } else {
-                    showNotification("Error", 'Error searching for student. Please try again.', 'error');
-                }
-            })
-            .finally(() => {
-                // Reset button state
-                document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-search-line"></i> Search';
-                document.getElementById('searchStudentBtn').disabled = false;
-            });
-    }
-
-    // Update the JavaScript section that handles updating sessions
-    function updateSessionsDisplay(sessions) {
-        const maxSessions = 30; // Maximum number of sessions
-        const remainingElement = document.getElementById('remainingSessions');
-        const progressBar = document.getElementById('sessionsProgress');
-        
-        // Update the number
-        remainingElement.textContent = sessions;
-        
-        // Calculate percentage
-        const percentage = (sessions / maxSessions) * 100;
-        
-        // Update progress bar width
-        progressBar.style.width = `${percentage}%`;
-        
-        // Update colors based on remaining sessions
-        if (sessions <= 5) {
-            progressBar.className = 'bg-gradient-to-r from-red-500 to-red-400 h-full rounded-full transition-all duration-500';
-            remainingElement.style.color = '#ef4444';
-            remainingElement.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.08))';
-            remainingElement.style.borderColor = 'rgba(239,68,68,0.15)';
-        } else if (sessions <= 10) {
-            progressBar.className = 'bg-gradient-to-r from-yellow-500 to-yellow-400 h-full rounded-full transition-all duration-500';
-            remainingElement.style.color = '#d97706';
-            remainingElement.style.background = 'linear-gradient(135deg, rgba(217,119,6,0.08), rgba(217,119,6,0.08))';
-            remainingElement.style.borderColor = 'rgba(217,119,6,0.15)';
-        } else {
-            progressBar.className = 'bg-gradient-to-r from-violet-500 to-fuchsia-500 h-full rounded-full transition-all duration-500';
-            remainingElement.style.color = '#7556cc';
-            remainingElement.style.background = 'linear-gradient(135deg, rgba(117,86,204,0.08), rgba(213,105,167,0.08))';
-            remainingElement.style.borderColor = 'rgba(117,86,204,0.15)';
-        }
-    }
-
-    // Update the student search function to use the new sessions display
-    document.getElementById('student_idno')?.addEventListener('input', function() {
-        let idno = this.value.trim();
-        if (idno.length >= 5) {
-            // Search for student with this ID
-            fetch('../controller/search_student.php?idno=' + idno)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Display student information
-                        document.getElementById('display_idno').value = data.student.idno || '';
-                        document.getElementById('display_course').textContent = data.student.course || 'Not specified';
-                        document.getElementById('display_year').value = data.student.year_level_display || 'Not specified';
-                        updateSessionsDisplay(data.student.remaining_sessions || 30);
-                        
-                        // Display student profile image and name
-                        const profileImage = document.getElementById('display_profile_image');
-                        profileImage.src = data.student.profile_image || '../assets/images/logo/AVATAR.png';
-                        profileImage.onerror = function() {
-                            this.src = '../assets/images/logo/AVATAR.png';
-                        };
-                        document.getElementById('display_student_name').textContent = 
-                            data.student.firstname + ' ' + data.student.lastname;
-                        
-                        // Store the student ID for form submission
-                        const hiddenIdField = document.createElement('input');
-                        hiddenIdField.type = 'hidden';
-                        hiddenIdField.name = 'student_id';
-                        hiddenIdField.value = data.student.id;
-                        
-                        // Remove any existing hidden field before adding a new one
-                        const existingField = document.querySelector('input[name="student_id"]');
-                        if (existingField) existingField.remove();
-                        document.getElementById('addSitInForm').appendChild(hiddenIdField);
-                        
-                        // Show the student info section
-                        document.getElementById('studentInfo').style.display = 'grid';
-                        validateForm();
-                    } else {
-                        document.getElementById('studentInfo').style.display = 'none';
-                        showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('studentInfo').style.display = 'none';
-                    
-                    // Provide more helpful error message
-                    if (error.message && error.message.includes('Network response was not ok')) {
-                        showNotification("Server Error", 'Server error: ' + error.message, 'error');
-                    } else {
-                        showNotification("Error", 'Error searching for student. Please try again.', 'error');
-                    }
-                });
-        } else {
-            document.getElementById('studentInfo').style.display = 'none';
-        }
-    });
-
-    // Also update the searchStudent function
-    function searchStudent() {
-        let idno = document.getElementById('student_idno').value.trim();
-        const studentInfo = document.getElementById('studentInfo');
-        
-        if (idno.length < 5) {
-            showNotification("Warning", 'Please enter at least 5 characters of the student ID', 'warning');
-            return;
-        }
-        
-        // Show loading indicator
-        document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-loader-4-line"></i> Searching...';
-        document.getElementById('searchStudentBtn').disabled = true;
-        
-        // Clear the previous search result
-        studentInfo.style.display = 'none';
-        
-        // Search for student with this ID
-        fetch('../controller/search_student.php?idno=' + idno)
-            .then(response => {
-                // Check if the response is ok (status in the range 200-299)
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Search response:', data); // Debug log
-                if (data.success) {
-                    // Display complete student information
-                    const student = data.student;
-                    document.getElementById('display_idno').value = student.idno || '';
-                    document.getElementById('display_course').textContent = student.course || 'Not specified';
-                    document.getElementById('display_year').value = student.year_level_display || 'Not specified';
-                    updateSessionsDisplay(student.remaining_sessions || 30);
-                    
-                    // Display student profile image and name
-                    const profileImage = document.getElementById('display_profile_image');
-                    profileImage.src = student.profile_image || '../assets/images/logo/AVATAR.png';
-                    profileImage.onerror = function() {
-                        this.src = '../assets/images/logo/AVATAR.png';
-                    };
-                    document.getElementById('display_student_name').textContent = 
-                        student.firstname + ' ' + student.lastname;
-                    
-                    // Store the student ID for form submission
-                    const hiddenIdField = document.createElement('input');
-                    hiddenIdField.type = 'hidden';
-                    hiddenIdField.name = 'student_id';
-                    hiddenIdField.value = student.id;
-                    
-                    // Remove any existing hidden field before adding a new one
-                    const existingField = document.querySelector('input[name="student_id"]');
-                    if (existingField) existingField.remove();
-                    document.getElementById('addSitInForm').appendChild(hiddenIdField);
-                    
-                    // Show the student info section
-                    studentInfo.style.display = 'grid';
-                    validateForm();
-                } else {
-                    studentInfo.style.display = 'none';
-                    showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                studentInfo.style.display = 'none';
-                
-                // Provide more helpful error message
-                if (error.message && error.message.includes('Network response was not ok')) {
-                    showNotification("Server Error", 'Server error: ' + error.message, 'error');
-                } else {
-                    showNotification("Error", 'Error searching for student. Please try again.', 'error');
-                }
-            })
-            .finally(() => {
-                // Reset button state
-                document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-search-line"></i> Search';
-                document.getElementById('searchStudentBtn').disabled = false;
-            });
-    }
-
-    // Fix for toggling display of student info - simplified & consistent
-    function showStudentInfo(show) {
-        const studentInfo = document.getElementById('studentInfo');
-        studentInfo.style.display = show ? 'flex' : 'none';
-    }
-    
-    // Update existing functions that toggle studentInfo visibility
-    document.getElementById('searchStudentBtn')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        searchStudent();
-    });
-    
-    // Modify search functions to use the new display toggle
-    function searchStudent() {
-        let idno = document.getElementById('student_idno').value.trim();
-        
-        if (idno.length < 5) {
-            showNotification("Warning", 'Please enter at least 5 characters of the student ID', 'warning');
-            return;
-        }
-        
-        // Show loading indicator
-        document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-loader-4-line"></i> Searching...';
-        document.getElementById('searchStudentBtn').disabled = true;
-        
-        // Clear the previous search result
-        showStudentInfo(false);
-        
-        // Search for student with this ID
-        fetch('../controller/search_student.php?idno=' + idno)
-            .then(response => {
-                // Check if the response is ok (status in the range 200-299)
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Search response:', data); // Debug log
-                if (data.success) {
-                    // Display complete student information
-                    const student = data.student;
-                    document.getElementById('display_idno').value = student.idno || '';
-                    document.getElementById('display_course').textContent = student.course || 'Not specified';
-                    document.getElementById('display_year').value = student.year_level_display || 'Not specified';
-                    updateSessionsDisplay(student.remaining_sessions || 30);
-                    
-                    // Display student profile image and name
-                    const profileImage = document.getElementById('display_profile_image');
-                    profileImage.src = student.profile_image || '../assets/images/logo/AVATAR.png';
-                    profileImage.onerror = function() {
-                        this.src = '../assets/images/logo/AVATAR.png';
-                    };
-                    document.getElementById('display_student_name').textContent = 
-                        student.firstname + ' ' + student.lastname;
-                    
-                    // Store the student ID for form submission
-                    const hiddenIdField = document.createElement('input');
-                    hiddenIdField.type = 'hidden';
-                    hiddenIdField.name = 'student_id';
-                    hiddenIdField.value = student.id;
-                    
-                    // Remove any existing hidden field before adding a new one
-                    const existingField = document.querySelector('input[name="student_id"]');
-                    if (existingField) existingField.remove();
-                    document.getElementById('addSitInForm').appendChild(hiddenIdField);
-                    
-                    // Show the student info section with proper display
-                    showStudentInfo(true);
-                    validateForm();
-                } else {
-                    showStudentInfo(false);
-                    showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showStudentInfo(false);
-                
-                // Provide more helpful error message
-                if (error.message && error.message.includes('Network response was not ok')) {
-                    showNotification("Server Error", 'Server error: ' + error.message, 'error');
-                } else {
-                    showNotification("Error", 'Error searching for student. Please try again.', 'error');
-                }
-            })
-            .finally(() => {
-                // Reset button state
-                document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-search-line"></i> Search';
-                document.getElementById('searchStudentBtn').disabled = false;
-            });
-    }
     </script>
 </body>
 </html>

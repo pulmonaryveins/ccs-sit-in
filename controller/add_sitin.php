@@ -68,11 +68,7 @@ try {
             if ($user) {
                 // Calculate new remaining sessions (don't go below 0)
                 $remainingSessions = max(0, ($user['remaining_sessions'] ?? 30) - 1);
-                
-                // Update the user's remaining_sessions
-                $stmt = $conn->prepare("UPDATE users SET remaining_sessions = ? WHERE id = ?");
-                $stmt->bind_param("ii", $remainingSessions, $studentId);
-                $stmt->execute();
+
             }
         }
         
