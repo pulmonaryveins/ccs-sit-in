@@ -1,5 +1,4 @@
-
-        .content-wrapper {
+.content-wrapper {
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -77,6 +76,9 @@
             font-weight: 600;
             color: #4a5568;
             border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .modern-table td {
@@ -84,6 +86,11 @@
             font-size: 0.875rem;
             color: #4a5568;
             border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        .modern-table td:nth-child(7) {
+            white-space: normal;
         }
 
         .modern-table tr:hover td {
@@ -546,4 +553,38 @@
             border-radius: 0;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
+        }
+
+        /* Star rating styles */
+        .star-rating {
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            gap: 2px;
+        }
+
+        .report-container {
+            display: none;
+        }
+
+        .report-container.active {
+            display: block;
+        }
+
+        .report-type-tabs {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .report-type-tabs .filter-tab {
+            padding: 1rem 1.75rem;
+            font-weight: 600;
+        }
+
+        /* Feedback message cell styling */
+        #feedback-table-body td:nth-child(7) {
+            max-width: 300px;
+            white-space: normal;
+            line-height: 1.4;
         }

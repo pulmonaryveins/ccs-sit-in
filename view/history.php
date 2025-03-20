@@ -48,11 +48,17 @@ if ($row = $result->fetch_assoc()) {
 
 $stmt->close();
 
-// Fetch history data from both reservations and sit_ins tables
+// Fetch history data from both reservations and sit_ins tables with feedback info
 $history_records = [];
 
-// Fetch from reservations table
-$sql = "SELECT *, 'reservation' as source FROM reservations WHERE idno = ? ORDER BY date DESC, time_in DESC";
+// Fetch from reservations table with feedback info
+$sql = "SELECT r.*, 'reservation' as source, 
+        CASE WHEN f.id IS NOT NULL THEN 1 ELSE 0 END AS has_feedback,
+        f.rating, f.message AS feedback_message
+        FROM reservations r 
+        LEFT JOIN feedback f ON r.id = f.reservation_id
+        WHERE r.idno = ? 
+        ORDER BY r.date DESC, r.time_in DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $_SESSION['idno']);
 $stmt->execute();
@@ -62,8 +68,14 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Fetch from sit_ins table
-$sql = "SELECT *, 'sit_in' as source FROM sit_ins WHERE idno = ? ORDER BY date DESC, time_in DESC";
+// Fetch from sit_ins table with feedback info
+$sql = "SELECT s.*, 'sit_in' as source, 
+        CASE WHEN f.id IS NOT NULL THEN 1 ELSE 0 END AS has_feedback,
+        f.rating, f.message AS feedback_message 
+        FROM sit_ins s 
+        LEFT JOIN feedback f ON s.id = f.sit_in_id
+        WHERE s.idno = ? 
+        ORDER BY s.date DESC, s.time_in DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $_SESSION['idno']);
 $stmt->execute();
@@ -269,6 +281,7 @@ $conn->close();
                                     <th>Purpose</th>
                                     <th>Activity</th>
                                     <th>Status</th>
+                                    <th>Feedback</th>
                                 </tr>
                             </thead>
                             <tbody id="history-table-body">
@@ -295,6 +308,32 @@ $conn->close();
                                                 <span class="status-badge rejected">Rejected</span>
                                             <?php else: ?>
                                                 <span class="status-badge pending">Pending</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($record['time_out'] && !$record['has_feedback']): ?>
+                                                <button class="feedback-btn" 
+                                                        data-id="<?php echo htmlspecialchars($record['id']); ?>"
+                                                        data-type="<?php echo htmlspecialchars($record['source']); ?>">
+                                                    Rate Experience
+                                                </button>
+                                            <?php elseif ($record['has_feedback']): ?>
+                                                <div class="feedback-given">
+                                                    <div class="star-display">
+                                                        <?php 
+                                                            $rating = intval($record['rating']);
+                                                            for ($i = 1; $i <= 5; $i++) {
+                                                                if ($i <= $rating) {
+                                                                    echo '<i class="fas fa-star"></i>';
+                                                                } else {
+                                                                    echo '<i class="far fa-star"></i>';
+                                                                }
+                                                            }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                            <?php elseif (!$record['time_out']): ?>
+                                                <span class="feedback-unavailable">Not completed</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -324,6 +363,43 @@ $conn->close();
                     <button class="page-btn active" data-page="1">1</button>
                     <button class="page-btn" disabled data-action="next">Next</button>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feedback Modal -->
+    <div class="modal-backdrop" id="feedbackModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Rate Your Experience</h3>
+                <button class="modal-close" onclick="closeFeedbackModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm">
+                    <input type="hidden" id="feedback_id" name="id">
+                    <input type="hidden" id="feedback_type" name="type">
+                    
+                    <div class="form-group">
+                        <label>How would you rate your experience?</label>
+                        <div class="rating-stars">
+                            <i class="far fa-star" data-rating="1"></i>
+                            <i class="far fa-star" data-rating="2"></i>
+                            <i class="far fa-star" data-rating="3"></i>
+                            <i class="far fa-star" data-rating="4"></i>
+                            <i class="far fa-star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" id="rating_value" name="rating" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="feedback_message">Additional comments (optional)</label>
+                        <textarea id="feedback_message" name="message" rows="4" placeholder="Share your thoughts about your sit-in experience..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeFeedbackModal()">Cancel</button>
+                <button class="btn btn-primary" id="submit-feedback" disabled>Submit Feedback</button>
             </div>
         </div>
     </div>
@@ -677,100 +753,350 @@ $conn->close();
                 font-size: 0.875rem;
             }
         }
+        
+        /* Feedback related styles */
+        .feedback-btn {
+            padding: 0.35rem 0.75rem;
+            border: none;
+            border-radius: 20px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .feedback-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+        
+        .feedback-given {
+            display: flex;
+            align-items: center;
+        }
+        
+        .star-display {
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            gap: 2px;
+        }
+        
+        .feedback-unavailable {
+            color: #a0aec0;
+            font-size: 0.75rem;
+            font-style: italic;
+        }
+        
+        /* Rating stars in modal */
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            color: #d1d5db;
+            margin: 1rem 0;
+        }
+        
+        .rating-stars i {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .rating-stars i:hover,
+        .rating-stars i.selected {
+            color: #fbbf24;
+        }
+        
+        /* Modal backdrop */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .modal-backdrop.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: #a0aec0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .modal-close:hover {
+            color: #4a5568;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: #4a5568;
+        }
+        
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 80px;
+            transition: all 0.2s;
+        }
+        
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(117,86,204,0.1);
+            outline: none;
+        }
     </style>
 
     <script>
         // Profile panel functionality
+        const profileTrigger = document.getElementById('profile-trigger');
         const profilePanel = document.getElementById('profile-panel');
         const backdrop = document.getElementById('backdrop');
-        const profileTrigger = document.getElementById('profile-trigger');
-
-        function toggleProfile(show) {
-            profilePanel.classList.toggle('active', show);
-            backdrop.classList.toggle('active', show);
-            document.body.style.overflow = show ? 'hidden' : '';
-        }
-
-        profileTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleProfile(true);
+        
+        profileTrigger.addEventListener('click', () => {
+            profilePanel.classList.toggle('active');
+            backdrop.classList.toggle('active');
         });
-
-        // Close profile panel when clicking outside
-        document.addEventListener('click', (e) => {
-            if (profilePanel.classList.contains('active') && 
-                !profilePanel.contains(e.target) && 
-                !profileTrigger.contains(e.target)) {
-                toggleProfile(false);
-            }
+        
+        backdrop.addEventListener('click', () => {
+            profilePanel.classList.remove('active');
+            backdrop.classList.remove('active');
         });
-
-        // Prevent clicks inside panel from closing it
-        profilePanel.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // Close on backdrop click
-        backdrop.addEventListener('click', () => toggleProfile(false));
-
-        // Profile data update function
-        async function updateProfilePanel() {
-            try {
-                const response = await fetch('../profile/get_profile_data.php');
-                const data = await response.json();
+        
+        // Feedback modal functionality
+        const feedbackModal = document.getElementById('feedbackModal');
+        const ratingStars = document.querySelectorAll('.rating-stars i');
+        const submitFeedbackBtn = document.getElementById('submit-feedback');
+        
+        // Open feedback modal when clicking on Rate Experience button
+        document.querySelectorAll('.feedback-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const recordId = this.getAttribute('data-id');
+                const recordType = this.getAttribute('data-type');
                 
-                // Update profile image
-                const profileImages = document.querySelectorAll('.profile-image img');
-                profileImages.forEach(img => {
-                    img.src = data.profile_image + '?t=' + new Date().getTime();
+                // Reset modal state
+                document.getElementById('feedback_id').value = recordId;
+                document.getElementById('feedback_type').value = recordType;
+                document.getElementById('rating_value').value = '0';
+                document.getElementById('feedback_message').value = '';
+                
+                // Reset stars
+                ratingStars.forEach(star => {
+                    star.classList.remove('selected');
+                    star.classList.remove('fas');
+                    star.classList.add('far');
                 });
-
-                // Update info
-                document.querySelector('.user-info h3').textContent = data.fullname;
                 
-                // Update info cards
-                const detailValues = document.querySelectorAll('.info-card .detail-value');
-                detailValues[0].textContent = data.idno;
-                detailValues[1].textContent = data.fullname;
-                detailValues[2].textContent = data.course;
-                detailValues[3].textContent = data.year_level;
-            } catch (error) {
-                console.error('Error updating profile:', error);
-            }
-        }
-
-        // Update profile when panel is opened
-        profileTrigger.addEventListener('click', updateProfilePanel);
-
-        // Pagination functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            setupPagination();
-            
-            // Search functionality
-            document.getElementById('searchInput').addEventListener('keyup', function() {
-                currentPage = 1; // Reset to first page when searching
-                renderTable();
+                // Disable submit button until rating is selected
+                submitFeedbackBtn.disabled = true;
+                
+                // Show modal
+                feedbackModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
             });
         });
         
-        let allRecords = <?php echo json_encode($history_records); ?>;
-        let currentPage = 1;
-        let recordsPerPage = 10;
-        
-        function setupPagination() {
-            const perPageSelect = document.getElementById('entries-per-page');
-            
-            // Update entries per page when selection changes
-            perPageSelect.addEventListener('change', function() {
-                recordsPerPage = parseInt(this.value);
-                currentPage = 1; // Reset to first page
-                renderTable();
+        // Handle star rating selection
+        ratingStars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                document.getElementById('rating_value').value = rating;
+                
+                // Update star display
+                ratingStars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas', 'selected');
+                    } else {
+                        s.classList.remove('fas', 'selected');
+                        s.classList.add('far');
+                    }
+                });
+                
+                // Enable submit button
+                submitFeedbackBtn.disabled = false;
             });
-            
-            // Initial render
-            renderTable();
+        });
+        
+        // Close feedback modal
+        function closeFeedbackModal() {
+            feedbackModal.classList.remove('active');
+            document.body.style.overflow = '';
         }
+        
+        // Submit feedback
+        submitFeedbackBtn.addEventListener('click', function() {
+            const recordId = document.getElementById('feedback_id').value;
+            const recordType = document.getElementById('feedback_type').value;
+            const rating = document.getElementById('rating_value').value;
+            const message = document.getElementById('feedback_message').value;
+            
+            const data = {
+                id: recordId,
+                type: recordType,
+                rating: rating,
+                message: message
+            };
+            
+            // Display loading or disabled state
+            submitFeedbackBtn.disabled = true;
+            submitFeedbackBtn.textContent = 'Submitting...';
+            
+            fetch('../controller/submit_feedback.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    // Close modal
+                    closeFeedbackModal();
+                    
+                    // Show success message
+                    alert('Thank you for your feedback!');
+                    
+                    // Reload page to show updated data
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (result.message || 'Failed to submit feedback'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting your feedback. Please try again.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitFeedbackBtn.disabled = false;
+                submitFeedbackBtn.textContent = 'Submit Feedback';
+            });
+        });
+        
+        // Pagination functionality
+        const allRecords = <?php echo json_encode($history_records); ?>;
+        const recordsPerPage = 10;
+        let currentPage = 1;
+        
+        document.getElementById('entries-per-page').addEventListener('change', function() {
+            recordsPerPage = parseInt(this.value);
+            currentPage = 1; // Reset to first page
+            renderTable();
+        });
+        
+        document.getElementById('searchInput').addEventListener('input', function() {
+            currentPage = 1; // Reset to first page
+            renderTable();
+        });
+        
+        // Initial render
+        renderTable();
         
         function renderTable() {
             const tableBody = document.getElementById('history-table-body');
@@ -821,7 +1147,7 @@ $conn->close();
             if (displayedRecords.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="empty-state">
+                        <td colspan="8" class="empty-state">
                             <div class="empty-state-content">
                                 <i class="ri-history-line"></i>
                                 <p>No matching records found</p>
@@ -865,6 +1191,28 @@ $conn->close();
                         statusBadge = '<span class="status-badge pending">Pending</span>';
                     }
                     
+                    // Create feedback column content
+                    let feedbackContent = '';
+                    if (record.time_out && !record.has_feedback) {
+                        feedbackContent = `
+                            <button class="feedback-btn" 
+                                    data-id="${record.id}"
+                                    data-type="${record.source}">
+                                Rate Experience
+                            </button>
+                        `;
+                    } else if (record.has_feedback) {
+                        feedbackContent = `
+                            <div class="feedback-given">
+                                <div class="star-display">
+                                    ${generateStars(record.rating)}
+                                </div>
+                            </div>
+                        `;
+                    } else if (!record.time_out) {
+                        feedbackContent = '<span class="feedback-unavailable">Not completed</span>';
+                    }
+                    
                     row.innerHTML = `
                         <td>${date}</td>
                         <td>Laboratory ${record.laboratory}</td>
@@ -877,9 +1225,38 @@ $conn->close();
                             </span>
                         </td>
                         <td>${statusBadge}</td>
+                        <td>${feedbackContent}</td>
                     `;
                     
                     tableBody.appendChild(row);
+                });
+                
+                // Re-attach event listeners for feedback buttons
+                document.querySelectorAll('.feedback-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const recordId = this.getAttribute('data-id');
+                        const recordType = this.getAttribute('data-type');
+                        
+                        // Reset modal state
+                        document.getElementById('feedback_id').value = recordId;
+                        document.getElementById('feedback_type').value = recordType;
+                        document.getElementById('rating_value').value = '0';
+                        document.getElementById('feedback_message').value = '';
+                        
+                        // Reset stars
+                        ratingStars.forEach(star => {
+                            star.classList.remove('selected');
+                            star.classList.remove('fas');
+                            star.classList.add('far');
+                        });
+                        
+                        // Disable submit button until rating is selected
+                        submitFeedbackBtn.disabled = true;
+                        
+                        // Show modal
+                        feedbackModal.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                    });
                 });
             }
             
@@ -890,6 +1267,19 @@ $conn->close();
             
             // Update pagination buttons
             renderPaginationControls(totalPages);
+        }
+        
+        // Helper function to generate star ratings
+        function generateStars(rating) {
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    starsHtml += '<i class="fas fa-star"></i>';
+                } else {
+                    starsHtml += '<i class="far fa-star"></i>';
+                }
+            }
+            return starsHtml;
         }
         
         function renderPaginationControls(totalPages) {
