@@ -151,10 +151,6 @@ if ($feedback_table_exists) {
             <div class="table-header">
                 <h2>Sit-in Reports</h2>
                 <div class="table-actions">
-                    <div class="real-time-clock">
-                        <i class="ri-time-line"></i>
-                        <span id="current-time">Loading...</span>
-                    </div>
                     <div class="search-box">
                         <i class="ri-search-line"></i>
                         <input type="text" id="searchInput" placeholder="Search records...">
@@ -210,34 +206,8 @@ if ($feedback_table_exists) {
                                         <td><?php echo htmlspecialchars($record['firstname'] . ' ' . $record['lastname']); ?></td>
                                         <td><?php echo htmlspecialchars($record['purpose'] ?? 'Not specified'); ?></td>
                                         <td>Laboratory <?php echo htmlspecialchars($record['laboratory']); ?></td>
-                                        <td>
-                                            <?php 
-                                                if ($record['time_in']) {
-                                                    // Convert time_in to Asia/Manila timezone
-                                                    $timeIn = new DateTime($record['time_in'], new DateTimeZone('UTC'));
-                                                    $timeIn->setTimezone(new DateTimeZone('Asia/Manila'));
-                                                    echo $timeIn->format('h:i A'); // 12-hour format with Manila timezone
-                                                } else {
-                                                    echo 'Not yet';
-                                                }
-                                            ?>
-                                        </td>
-                                        <td>
-                                            <?php 
-                                                if ($record['time_out']) {
-                                                    // Convert time_out to Asia/Manila timezone
-                                                    $timeOut = new DateTime($record['time_out'], new DateTimeZone('UTC'));
-                                                    $timeOut->setTimezone(new DateTimeZone('Asia/Manila'));
-                                                    echo $timeOut->format('h:i A'); // 12-hour format with Manila timezone
-                                                } else if ($record['status'] == 'approved' && $record['time_in']) {
-                                                    // For active sessions, show current time in Manila timezone
-                                                    $currentTime = new DateTime('now', new DateTimeZone('Asia/Manila'));
-                                                    echo '<span class="realtime-out">' . $currentTime->format('h:i A') . ' (PST)</span>';
-                                                } else {
-                                                    echo 'Not yet'; 
-                                                }
-                                            ?>
-                                        </td>
+                                        <td><?php echo date('h:i A', strtotime($record['time_in'])); ?></td>
+                                        <td><?php echo $record['time_out'] ? date('h:i A', strtotime($record['time_out'])) : 'Active'; ?></td>
                                         <td>
                                             <span class="source-badge <?php echo htmlspecialchars($record['source']); ?>">
                                                 <?php echo ($record['source'] == 'reservation') ? 'Reservation' : 'Sit-in'; ?>
@@ -438,27 +408,6 @@ if ($feedback_table_exists) {
     </style>
 
     <script>
-        // Real-time clock functionality
-        function updateClock() {
-            const now = new Date();
-            const options = {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true,
-                timeZone: 'Asia/Manila'
-            };
-            
-            const clockElement = document.getElementById('current-time');
-            if (clockElement) {
-                clockElement.textContent = now.toLocaleString('en-US', options);
-            }
-        }
-
         // Update realtime elements
         function updateRealTimeElements() {
             // Update clock

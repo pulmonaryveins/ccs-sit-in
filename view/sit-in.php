@@ -150,7 +150,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                 <th>Purpose</th>
                                 <th>Laboratory</th>
                                 <!-- Removed PC Number column -->
-                                <th>Time</th>
+                                <th>Time in</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>

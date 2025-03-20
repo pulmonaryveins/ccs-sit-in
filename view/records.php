@@ -766,6 +766,12 @@ function getYearLevelDisplay($yearLevel) {
             color: #ea580c;
         }
         
+        .bulk-action-btn.primary {
+            margin-right: 1rem;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        
         .bulk-action-btn:hover {
             opacity: 0.9;
             transform: translateY(-1px);
@@ -779,6 +785,27 @@ function getYearLevelDisplay($yearLevel) {
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
         }
+
+        /* Horizontal form layout for add student modal */
+        .horizontal-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .horizontal-form .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .horizontal-form .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Wider modal for add student */
+        .wide-modal {
+            max-width: 800px !important;
+        }
     </style>
 
     <div class="content-wrapper">
@@ -788,6 +815,9 @@ function getYearLevelDisplay($yearLevel) {
                 <div class="table-actions">
                     <!-- This div will show different buttons based on the active tab -->
                     <div id="student-records-actions" style="display: flex; gap: 10px;">
+                        <button class="bulk-action-btn primary" onclick="openAddStudentModal()">
+                            <i class="ri-user-add-line"></i> Add Student
+                        </button>
                         <button class="bulk-action-btn warning" onclick="confirmResetAllSessions()">
                             <i class="ri-refresh-line"></i> Reset All Sessions
                         </button>
@@ -853,17 +883,16 @@ function getYearLevelDisplay($yearLevel) {
                                         <td class="font-mono"><?php echo htmlspecialchars($student['idno'] ?? 'N/A'); ?></td>
                                         <td><?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?></td>
                                         <td>
-                                            <?php 
+                                            <?php
                                                 // Check for both 'year_level' and 'year' fields
                                                 $yearLevel = $student['year_level'] ?? $student['year'] ?? 0;
                                                 echo htmlspecialchars(getYearLevelDisplay($yearLevel));
                                             ?>
                                         </td>
                                         <td>
-                                            <?php 
+                                            <?php
                                                 // Check for all possible course field names
-                                                $courseInfo = $student['course_id'] ?? $student['course'] ?? 
-                                                              $student['department'] ?? $student['course_name'] ?? null;
+                                                $courseInfo = $student['course_id'] ?? $student['course'] ?? $student['department'] ?? $student['course_name'] ?? null;
                                                 echo htmlspecialchars(getCourseNameById($courseInfo)); 
                                             ?>
                                         </td>
@@ -928,13 +957,13 @@ function getYearLevelDisplay($yearLevel) {
                                 <th>Time In</th>
                                 <th>Time Out</th>
                                 <th>Status</th>
-                                <th>Remaining Sessions</th> <!-- Added new column -->
+                                <th>Remaining Sessions</th>
                             </tr>
                         </thead>
                         <tbody id="sitin-records-body">
                             <?php if (empty($sitin_records)): ?>
                                 <tr>
-                                    <td colspan="10" class="empty-state"> <!-- Updated colspan from 9 to 10 -->
+                                    <td colspan="10" class="empty-state">
                                         <div class="empty-state-content">
                                             <i class="ri-computer-line"></i>
                                             <p>No sit-in records found</p>
@@ -961,30 +990,8 @@ function getYearLevelDisplay($yearLevel) {
                                         <td><?php echo htmlspecialchars($record['firstname'] . ' ' . $record['lastname']); ?></td>
                                         <td><?php echo htmlspecialchars($record['purpose'] ?? 'Not specified'); ?></td>
                                         <td>Laboratory <?php echo htmlspecialchars($record['laboratory']); ?></td>
-                                        <td>
-                                            <?php 
-                                                if ($record['time_in']) {
-                                                    // Convert time_in to Asia/Manila timezone
-                                                    $timeIn = new DateTime($record['time_in'], new DateTimeZone('UTC'));
-                                                    $timeIn->setTimezone(new DateTimeZone('Asia/Manila'));
-                                                    echo $timeIn->format('h:i A'); // 12-hour format with Manila timezone
-                                                } else {
-                                                    echo 'Not yet';
-                                                }
-                                            ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($record['time_out']): ?>
-                                                <?php
-                                                    // Convert time_out to Asia/Manila timezone
-                                                    $timeOut = new DateTime($record['time_out'], new DateTimeZone('UTC')); // in UTC or local time
-                                                    $timeOut->setTimezone(new DateTimeZone('Asia/Manila'));
-                                                    echo $timeOut->format('h:i A'); // This uses 12-hour format with Manila timezone
-                                                ?>
-                                            <?php else: ?>
-                                                <span class="realtime-out"><?php echo (new DateTime('now', new DateTimeZone('Asia/Manila')))->format('h:i A'); ?> (PST)</span>
-                                            <?php endif; ?>
-                                        </td>
+                                        <td><?php echo date('h:i A', strtotime($record['time_in'])); ?></td>
+                                        <td><?php echo $record['time_out'] ? date('h:i A', strtotime($record['time_out'])) : 'Active'; ?></td>
                                         <td>
                                             <?php if ($record['time_out']): ?>
                                                 <span class="status-badge completed">Completed</span>
@@ -1028,6 +1035,7 @@ function getYearLevelDisplay($yearLevel) {
         </div>
     </div>
 
+    <!-- Edit Student Modal -->
     <div class="modal-backdrop" id="editModal">
         <div class="modal">
             <div class="modal-header">
@@ -1075,6 +1083,7 @@ function getYearLevelDisplay($yearLevel) {
             </div>
         </div>
     </div>
+    
     <!-- Delete Confirmation Modal -->
     <div class="modal-backdrop" id="deleteModal">
         <div class="modal">
@@ -1093,6 +1102,7 @@ function getYearLevelDisplay($yearLevel) {
             </div>
         </div>
     </div>
+    
     <!-- Reset Sessions Confirmation Modal -->
     <div class="modal-backdrop" id="resetSessionsModal">
         <div class="modal">
@@ -1110,6 +1120,7 @@ function getYearLevelDisplay($yearLevel) {
             </div>
         </div>
     </div>
+    
     <!-- Reset All Sessions Confirmation Modal -->
     <div class="modal-backdrop" id="resetAllSessionsModal">
         <div class="modal">
@@ -1136,7 +1147,7 @@ function getYearLevelDisplay($yearLevel) {
                 <button class="modal-close" onclick="closeClearAllRecordsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete <strong>ALL sit-in records</strong>?</p>
+                <p>Are you sure you want to clear <strong>ALL sit-in records</strong>?</p>
                 <p class="text-red-500 font-semibold">This action cannot be undone and will remove all reservation and sit-in history!</p>
             </div>
             <div class="modal-footer">
@@ -1145,7 +1156,75 @@ function getYearLevelDisplay($yearLevel) {
             </div>
         </div>
     </div>
-    
+
+    <!-- Add Student Modal -->
+    <div class="modal-backdrop" id="addStudentModal">
+        <div class="modal wide-modal">
+            <div class="modal-header">
+                <h3>Add New Student</h3>
+                <button class="modal-close" onclick="closeAddStudentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addStudentForm" class="horizontal-form">
+                    <div class="form-group">
+                        <label for="add_idno">ID Number</label>
+                        <input type="text" id="add_idno" name="idno" pattern="\d{8}" title="ID Number must be exactly 8 digits" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add_username">Username</label>
+                        <input type="text" id="add_username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add_firstname">First Name</label>
+                        <input type="text" id="add_firstname" name="firstname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add_lastname">Last Name</label>
+                        <input type="text" id="add_lastname" name="lastname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add_year_level">Year Level</label>
+                        <select id="add_year_level" name="year_level" required>
+                            <option value="" disabled selected>Select Year Level</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="add_course_id">Course/Department</label>
+                        <select id="add_course_id" name="course_id" required>
+                            <option value="" disabled selected>Select Course/Department</option>
+                            <option value="BS-Information Technology">BS-Information Technology</option>
+                            <option value="BS-Computer Science">BS-Computer Science</option>
+                            <option value="COE">COE</option>
+                            <option value="CAS">CAS</option>
+                            <option value="SJH">SJH</option>
+                            <option value="CTE">CTE</option>
+                            <option value="CCA">CCA</option>
+                            <option value="CBA">CBA</option>
+                            <option value="CCJ">CCJ</option>
+                            <option value="CON">CON</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="add_password">Password</label>
+                        <input type="password" id="add_password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add_confirm_password">Confirm Password</label>
+                        <input type="password" id="add_confirm_password" name="confirm_password" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddStudentModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="addStudent()">Add Student</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     // Tab switching functionality
     document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -1161,7 +1240,6 @@ function getYearLevelDisplay($yearLevel) {
             // Show the target container
             const targetId = this.getAttribute('data-target');
             document.getElementById(targetId).classList.add('active');
-            
             // Toggle action buttons based on active tab
             if (targetId === 'student-records') {
                 document.getElementById('student-records-actions').style.display = 'flex';
@@ -1170,18 +1248,105 @@ function getYearLevelDisplay($yearLevel) {
                 document.getElementById('student-records-actions').style.display = 'none';
                 document.getElementById('sitin-records-actions').style.display = 'flex';
             }
-            
             // Clear search input when switching tabs
             document.getElementById('searchInput').value = '';
         });
     });
 
-    // ... existing code for search, edit, delete functionality ...
+    // Add Student Modal Functions
+    function openAddStudentModal() {
+        // Reset form fields
+        document.getElementById('addStudentForm').reset();
+        document.getElementById('addStudentModal').classList.add('active');
+    }
+    
+    function closeAddStudentModal() {
+        document.getElementById('addStudentModal').classList.remove('active');
+    }
+    
+    function addStudent() {
+        // Get form data
+        const idno = document.getElementById('add_idno').value;
+        const firstname = document.getElementById('add_firstname').value;
+        const lastname = document.getElementById('add_lastname').value;
+        const username = document.getElementById('add_username').value;
+        const yearLevel = document.getElementById('add_year_level').value;
+        const course = document.getElementById('add_course_id').value;
+        const password = document.getElementById('add_password').value;
+        const confirmPassword = document.getElementById('add_confirm_password').value;
+        
+        // Validate form
+        if (!idno || !firstname || !lastname || !username || !yearLevel || !course || !password || !confirmPassword) {
+            alert('Please fill all required fields');
+            return;
+        }
+        
+        // Validate ID number format
+        if (!/^\d{8}$/.test(idno)) {
+            alert('ID Number must be exactly 8 digits');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+        
+        // Show loading state
+        const addButton = document.querySelector('#addStudentModal .btn-primary');
+        const originalText = addButton.textContent;
+        addButton.textContent = 'Adding...';
+        addButton.disabled = true;
+        
+        // Send data to server
+        fetch('../controller/add_student.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                idno: idno,
+                firstname: firstname,
+                lastname: lastname,
+                username: username,
+                year_level: yearLevel,
+                course_id: course,
+                password: password
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                closeAddStudentModal();
+                alert('Student added successfully!');
+                // Refresh the page to show the new student
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+                // Reset button state
+                addButton.textContent = originalText;
+                addButton.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while processing your request. Please check the console for details.');
+            // Reset button state
+            addButton.textContent = originalText;
+            addButton.disabled = false;
+        });
+    }
 
     // Functions for resetting all sessions
     function confirmResetAllSessions() {
         document.getElementById('resetAllSessionsModal').classList.add('active');
     }
+    
     function closeResetAllSessionsModal() {
         document.getElementById('resetAllSessionsModal').classList.remove('active');
     }
@@ -1225,6 +1390,7 @@ function getYearLevelDisplay($yearLevel) {
     function confirmClearAllRecords() {
         document.getElementById('clearAllRecordsModal').classList.add('active');
     }
+    
     function closeClearAllRecordsModal() {
         document.getElementById('clearAllRecordsModal').classList.remove('active');
     }
