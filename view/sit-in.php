@@ -135,8 +135,8 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             
             <!-- Filter Tabs -->
             <div class="filter-tabs">
-                <div class="filter-tab active" data-target="current-students"><i class="ri-bar-chart-box-ai-fill"></i> Current Students in Laboratory</div>
-                <div class="filter-tab" data-target="add-sitin"><i class="ri-map-pin-add-fill"></i> Add Sit-in</div>
+                <div class="filter-tab active" data-target="current-students">Current Students in Laboratory</div>
+                <div class="filter-tab" data-target="add-sitin">Add Sit-in</div>
             </div>
             
             <!-- Current Students Container -->

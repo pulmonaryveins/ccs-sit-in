@@ -1,48 +1,46 @@
 <?php
 session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit();
-}
-
 require_once '../config/db_connect.php';
 
-// Check if required fields are provided
-if (!isset($_POST['id']) || empty($_POST['id']) ||
-    !isset($_POST['firstname']) || empty($_POST['firstname']) ||
-    !isset($_POST['lastname']) || empty($_POST['lastname']) ||
-    !isset($_POST['year_level']) || !isset($_POST['course_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Required fields are missing']);
-    exit();
+// Check if admin is logged in
+if (!isset($_SESSION['admin_logged_in'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
+    exit;
 }
 
-$id = intval($_POST['id']);
+// Validate that required fields exist
+if (!isset($_POST['id']) || !isset($_POST['firstname']) || !isset($_POST['lastname']) || 
+    !isset($_POST['year_level']) || !isset($_POST['course_id'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+    exit;
+}
+
+// Get the form data
+$id = $_POST['id'];
 $firstname = trim($_POST['firstname']);
 $lastname = trim($_POST['lastname']);
-$year_level = intval($_POST['year_level']);
-$course_id = intval($_POST['course_id']);
+$year_level = $_POST['year_level'];
+$course_id = $_POST['course_id'];
 
-// Validate year level
-if ($year_level < 1 || $year_level > 4) {
-    echo json_encode(['success' => false, 'message' => 'Invalid year level']);
-    exit();
+// Basic validation
+if (empty($firstname) || empty($lastname)) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Name fields cannot be empty']);
+    exit;
 }
 
-// Update the student record
-$query = "UPDATE users SET 
-          firstname = ?, 
-          lastname = ?, 
-          year_level = ?, 
-          course_id = ? 
-          WHERE id = ? AND role = 'student'";
-
+// Update student information
+$query = "UPDATE users SET firstname = ?, lastname = ?, year_level = ?, course_id = ? WHERE id = ?";
 $stmt = $conn->prepare($query);
-$stmt->bind_param('ssiii', $firstname, $lastname, $year_level, $course_id, $id);
+$stmt->bind_param("ssisi", $firstname, $lastname, $year_level, $course_id, $id);
 
 if ($stmt->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Student updated successfully']);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true, 'message' => 'Student information updated successfully']);
 } else {
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
 }
 

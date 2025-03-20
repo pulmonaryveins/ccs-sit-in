@@ -169,8 +169,8 @@ if ($feedback_table_exists) {
             
             <!-- Report Type Tabs -->
             <div class="filter-tabs report-type-tabs">
-                <div class="filter-tab active" data-report="activity"><i class="ri-megaphone-fill"></i> Activity Reports</div>
-                <div class="filter-tab" data-report="feedback"><i class="ri-feedback-fill"></i> Feedback Reports</div>
+                <div class="filter-tab active" data-report="activity">Activity Reports</div>
+                <div class="filter-tab" data-report="feedback">Feedback Reports</div>
             </div>
             
             <!-- Activity Reports Container -->

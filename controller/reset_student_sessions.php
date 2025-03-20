@@ -9,23 +9,23 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-// Validate that id exists
-if (!isset($_POST['id'])) {
+// Validate that idno exists
+if (!isset($_POST['idno'])) {
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Missing student ID']);
+    echo json_encode(['success' => false, 'message' => 'Missing student ID number']);
     exit;
 }
 
-$id = $_POST['id'];
+$idno = $_POST['idno'];
 
-// Delete the student
-$query = "DELETE FROM users WHERE id = ?";
+// Reset the student's session count to 30
+$query = "UPDATE users SET remaining_sessions = 30 WHERE idno = ?";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("i", $id);
+$stmt->bind_param("s", $idno);
 
 if ($stmt->execute()) {
     header('Content-Type: application/json');
-    echo json_encode(['success' => true, 'message' => 'Student deleted successfully']);
+    echo json_encode(['success' => true, 'message' => 'Sessions reset successfully']);
 } else {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
