@@ -403,6 +403,37 @@ if ($feedback_table_exists) {
             max-width: 300px;
             white-space: normal;
             line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+        }
+        
+        /* Add a class for expandable feedback messages */
+        .feedback-message {
+            max-height: 3em;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: max-height 0.3s ease;
+        }
+        
+        .feedback-message.expanded {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .feedback-message::after {
+            content: "...";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(to right, transparent, white 40%);
+            padding-left: 20px;
+            display: block;
+        }
+        
+        .feedback-message.expanded::after {
+            display: none;
         }
     </style>
 
@@ -819,7 +850,38 @@ if ($feedback_table_exists) {
             
             // Initialize feedback pagination
             applyFeedbackPagination();
+            
+            // Make feedback messages expandable
+            initializeFeedbackMessages();
         });
+        
+        // Function to make feedback messages expandable
+        function initializeFeedbackMessages() {
+            // Get all message cells in the feedback table
+            const messageCells = document.querySelectorAll('#feedback-table-body td:nth-child(7)');
+            
+            messageCells.forEach(cell => {
+                const text = cell.textContent;
+                
+                // Only apply to cells with substantial text content
+                if (text && text.length > 50 && text !== 'No comment provided') {
+                    // Create wrapper for the message
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'feedback-message';
+                    wrapper.textContent = text;
+                    
+                    // Clear the cell and append the wrapper
+                    cell.textContent = '';
+                    cell.appendChild(wrapper);
+                    
+                    // Add click event to toggle expansion
+                    cell.addEventListener('click', function() {
+                        const messageEl = this.querySelector('.feedback-message');
+                        messageEl.classList.toggle('expanded');
+                    });
+                }
+            });
+        }
     </script>
 </body>
 </html>

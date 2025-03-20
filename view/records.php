@@ -740,6 +740,35 @@ function getYearLevelDisplay($yearLevel) {
             margin: 0 0.75rem;
         }
         
+        /* Bulk action buttons */
+        .bulk-action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .bulk-action-btn.danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .bulk-action-btn.warning {
+            background: #fff7ed;
+            color: #ea580c;
+        }
+        
+        .bulk-action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
         /* Adjust table container to have a fixed height */
         .table-container {
             max-height: calc(100vh - 300px);
@@ -755,13 +784,24 @@ function getYearLevelDisplay($yearLevel) {
             <div class="table-header">
                 <h2>Records Management</h2>
                 <div class="table-actions">
+                    <!-- This div will show different buttons based on the active tab -->
+                    <div id="student-records-actions" style="display: flex; gap: 10px;">
+                        <button class="bulk-action-btn warning" onclick="confirmResetAllSessions()">
+                            <i class="ri-refresh-line"></i> Reset All Sessions
+                        </button>
+                    </div>
+                    <div id="sitin-records-actions" style="display: none; gap: 10px;">
+                        <button class="bulk-action-btn danger" onclick="confirmClearAllRecords()">
+                            <i class="ri-delete-bin-line"></i> Clear All Records
+                        </button>
+                    </div>
                     <div class="search-box">
                         <i class="ri-search-line"></i>
                         <input type="text" id="searchInput" placeholder="Search records...">
                     </div>
                 </div>
             </div>
-            
+
             <!-- Filter Tabs -->
             <div class="filter-tabs">
                 <div class="filter-tab active" data-target="student-records">Student Records</div>
@@ -795,18 +835,18 @@ function getYearLevelDisplay($yearLevel) {
                             <?php else: ?>
                                 <?php foreach ($students as $student): ?>
                                     <?php if (isset($student['idno']) && !empty($student['idno'])): ?>
-                                    <?php 
-                                        // Get remaining sessions directly from the database
-                                        $remaining_sessions = $student['remaining_sessions'] ?? $total_allowed_sessions;
-                                        
-                                        // Set CSS class based on remaining sessions
-                                        $sessionsClass = 'sessions-badge';
-                                        if ($remaining_sessions <= 5) {
-                                            $sessionsClass .= ' sessions-low';
-                                        } else if ($remaining_sessions <= 10) {
-                                            $sessionsClass .= ' sessions-medium';
-                                        }
-                                    ?>
+                                        <?php
+                                            // Get remaining sessions directly from the database
+                                            $remaining_sessions = $student['remaining_sessions'] ?? $total_allowed_sessions;
+                                            
+                                            // Set CSS class based on remaining sessions
+                                            $sessionsClass = 'sessions-badge';
+                                            if ($remaining_sessions <= 5) {
+                                                $sessionsClass .= ' sessions-low';
+                                            } else if ($remaining_sessions <= 10) {
+                                                $sessionsClass .= ' sessions-medium';
+                                            }
+                                        ?>
                                     <tr>
                                         <td class="font-mono"><?php echo htmlspecialchars($student['idno'] ?? 'N/A'); ?></td>
                                         <td><?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?></td>
@@ -814,14 +854,14 @@ function getYearLevelDisplay($yearLevel) {
                                             <?php 
                                                 // Check for both 'year_level' and 'year' fields
                                                 $yearLevel = $student['year_level'] ?? $student['year'] ?? 0;
-                                                echo htmlspecialchars(getYearLevelDisplay($yearLevel)); 
+                                                echo htmlspecialchars(getYearLevelDisplay($yearLevel));
                                             ?>
                                         </td>
                                         <td>
                                             <?php 
                                                 // Check for all possible course field names
                                                 $courseInfo = $student['course_id'] ?? $student['course'] ?? 
-                                                           $student['department'] ?? $student['course_name'] ?? null;
+                                                              $student['department'] ?? $student['course_name'] ?? null;
                                                 echo htmlspecialchars(getCourseNameById($courseInfo)); 
                                             ?>
                                         </td>
@@ -932,21 +972,16 @@ function getYearLevelDisplay($yearLevel) {
                                             ?>
                                         </td>
                                         <td>
-                                            <?php 
-                                                if ($record['time_out']) {
+                                            <?php if ($record['time_out']): ?>
+                                                <?php
                                                     // Convert time_out to Asia/Manila timezone
                                                     $timeOut = new DateTime($record['time_out'], new DateTimeZone('UTC')); // in UTC or local time
                                                     $timeOut->setTimezone(new DateTimeZone('Asia/Manila'));
                                                     echo $timeOut->format('h:i A'); // This uses 12-hour format with Manila timezone
-                                                } else if ($record['status'] == 'approved' && $record['time_in']) {
-                                                    // For active sessions, show current time in Manila timezone
-                                                    $currentTime = new DateTime('now', new DateTimeZone('Asia/Manila'));
-                                                    echo '<span class="realtime-out">' . $currentTime->format('h:i A') . ' (PST)</span>';
-                                                } else {
-                                                    // if timestamp is invalid
-                                                    echo 'Not yet'; 
-                                                }
-                                            ?>
+                                                ?>
+                                            <?php else: ?>
+                                                <span class="realtime-out"><?php echo (new DateTime('now', new DateTimeZone('Asia/Manila')))->format('h:i A'); ?> (PST)</span>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <?php if ($record['time_out']): ?>
@@ -990,7 +1025,7 @@ function getYearLevelDisplay($yearLevel) {
             </div>
         </div>
     </div>
-    <!-- Edit Student Modal -->
+
     <div class="modal-backdrop" id="editModal">
         <div class="modal">
             <div class="modal-header">
@@ -1073,6 +1108,42 @@ function getYearLevelDisplay($yearLevel) {
             </div>
         </div>
     </div>
+    <!-- Reset All Sessions Confirmation Modal -->
+    <div class="modal-backdrop" id="resetAllSessionsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Reset All Sessions</h3>
+                <button class="modal-close" onclick="closeResetAllSessionsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reset <strong>ALL students'</strong> sessions back to 30?</p>
+                <p class="text-red-500 font-semibold">This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeResetAllSessionsModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="resetAllSessions()">Reset All Sessions</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Clear All Records Confirmation Modal -->
+    <div class="modal-backdrop" id="clearAllRecordsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Clear All Records</h3>
+                <button class="modal-close" onclick="closeClearAllRecordsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>ALL sit-in records</strong>?</p>
+                <p class="text-red-500 font-semibold">This action cannot be undone and will remove all reservation and sit-in history!</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeClearAllRecordsModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="clearAllRecords()">Clear All Records</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
     // Tab switching functionality
     document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -1088,705 +1159,127 @@ function getYearLevelDisplay($yearLevel) {
             // Show the target container
             const targetId = this.getAttribute('data-target');
             document.getElementById(targetId).classList.add('active');
+            
+            // Toggle action buttons based on active tab
+            if (targetId === 'student-records') {
+                document.getElementById('student-records-actions').style.display = 'flex';
+                document.getElementById('sitin-records-actions').style.display = 'none';
+            } else {
+                document.getElementById('student-records-actions').style.display = 'none';
+                document.getElementById('sitin-records-actions').style.display = 'flex';
+            }
+            
             // Clear search input when switching tabs
             document.getElementById('searchInput').value = '';
         });
     });
 
-    document.getElementById('searchInput')?.addEventListener('keyup', function() {
-        let searchText = this.value.toLowerCase();
-        let activeContainer = document.querySelector('.records-container.active');
-        let tableRows = activeContainer.querySelectorAll('.modern-table tbody tr');
-        tableRows.forEach(row => {
-            if (!row.querySelector('.empty-state')) {
-                let text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchText) ? '' : 'none';
-            }
-        });
-    });
+    // ... existing code for search, edit, delete functionality ...
 
-    // Edit modal functions
-    function openEditModal(student) {
-        document.getElementById('edit_id').value = student.id;
-        document.getElementById('edit_idno').value = student.idno;
-        document.getElementById('edit_firstname').value = student.firstname;
-        document.getElementById('edit_lastname').value = student.lastname;
-        // Handle different field names for year level
-        const yearLevel = student.year_level !== undefined ? student.year_level : 
-                         (student.year !== undefined ? student.year : 1);
-        document.getElementById('edit_year_level').value = yearLevel || 1;
-        // Handle different field names for course
-        const courseId = student.course_id !== undefined ? student.course_id : 
-                        (student.course !== undefined ? student.course : 
-                         (student.department !== undefined ? student.department : 1));
-        document.getElementById('edit_course_id').value = courseId || 1;
-        document.getElementById('editModal').classList.add('active');
+    // Functions for resetting all sessions
+    function confirmResetAllSessions() {
+        document.getElementById('resetAllSessionsModal').classList.add('active');
     }
-
-    function closeEditModal() {
-        document.getElementById('editModal').classList.remove('active');
-    }
-
-    function saveStudentChanges() {
-        const formData = new FormData(document.getElementById('editStudentForm'));
-        fetch('../controller/update_student.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Student updated successfully!');
-                closeEditModal();
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while updating the student.');
-        });
-    }
-
-    // Delete modal functions
-    function confirmDelete(studentId, studentName) {
-        document.getElementById('deleteStudentId').value = studentId;
-        document.getElementById('deleteStudentName').textContent = studentName;
-        document.getElementById('deleteModal').classList.add('active');
-    }
-
-    function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.remove('active');
-    }
-
-    function deleteStudent() {
-        const studentId = document.getElementById('deleteStudentId').value;
-        
-        fetch('../controller/delete_student.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'id=' + studentId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Student deleted successfully!');
-                closeDeleteModal();
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while deleting the student.');
-        });
-    }
-
-    // Real-time clock functionality
-    function updateClock() {
-        // Create a date object for GMT+8 time
-        const now = new Date();
-        // GMT+8 adjustment
-        const gmtPlus8 = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // For GMT+8
-        
-        const options = {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true,
-            timeZone: 'Asia/Manila'
-        };
-        
-        // Check if element exists before updating
-        const clockElement = document.getElementById('current-time');
-        if (clockElement) {
-            clockElement.textContent = now.toLocaleString('en-US', options);
-        }
-    }
-
-    // Function to refresh sit-in records data
-    function refreshSitInRecords() {
-        fetch('../controller/get_sitin_records.php')
-            .then(response => response.json())
-            .then(data => {
-                const recordsBody = document.getElementById('sitin-records-body');
-                
-                // Clear existing rows except for the "no records" row
-                if (data.length > 0) {
-                    recordsBody.innerHTML = '';
-                }
-                
-                // Add new rows
-                data.forEach(record => {
-                    // Format time_in using GMT+8 - same function used for both time_in and time_out
-                    const timeIn = record.time_in ? 
-                        formatTimeGMT8(record.date + ' ' + record.time_in) : 'Not yet';
-                    
-                    // Handle time out display - show real-time for active sessions
-                    let timeOut;
-                    if (record.time_out) {
-                        // Format time_out using GMT+8 - same function as time_in
-                        timeOut = formatTimeGMT8(record.date + ' ' + record.time_out);
-                    } else if (record.status == 'approved' && record.time_in) {
-                        // For active sessions, display current time with PST indicator
-                        const currentTime = formatCurrentTimeGMT8();
-                        timeOut = `<span class="realtime-out">${currentTime} (PST)</span>`;
-                    } else {
-                        timeOut = 'Not yet';
-                    }
-                    
-                    // Handle session count display
-                    let remainingClass = 'sessions-badge';
-                    if (record.remaining_sessions <= 5) {
-                        remainingClass += ' sessions-low';
-                    } else if (record.remaining_sessions <= 10) {
-                        remainingClass += ' sessions-medium';
-                    }
-
-                    let statusBadge = '';
-                    if (record.time_out) {
-                        statusBadge = '<span class="status-badge completed">Completed</span>';
-                    } else if (record.status == 'active' && record.time_in) {
-                        statusBadge = '<span class="status-badge active">Active</span>';
-                    } else if (record.status == 'approved') {
-                        statusBadge = '<span class="status-badge approved">Approved</span>';
-                    } else {
-                        statusBadge = '<span class="status-badge pending">Pending</span>';
-                    }
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${new Date(record.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</td>
-                        <td class="font-mono">${record.idno}</td>
-                        <td>${record.firstname} ${record.lastname}</td>
-                        <td>${record.purpose || 'Not specified'}</td>
-                        <td>Laboratory ${record.laboratory}</td>
-                        <td>${timeIn}</td>
-                        <td>${timeOut}</td>
-                        <td>${statusBadge}</td>
-                        <td><span class="${remainingClass}">${record.remaining_sessions} sessions</span></td>
-                    `;
-                    recordsBody.appendChild(row);
-                });
-                
-                // Show empty state if no records
-                if (data.length === 0) {
-                    recordsBody.innerHTML = `
-                        <tr>
-                            <td colspan="10" class="empty-state">
-                                <div class="empty-state-content">
-                                    <i class="ri-computer-line"></i>
-                                    <p>No sit-in records found</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching records:', error);
-            });
-    }
-
-    // Function to update real-time elements
-    function updateRealTimeElements() {
-        // Update clock
-        updateClock();
-        
-        // Update time out for active sessions
-        const realTimeOuts = document.querySelectorAll('.realtime-out');
-        if (realTimeOuts.length > 0) {
-            // Get current time in GMT+8
-            const currentTime = formatCurrentTimeGMT8();
-            realTimeOuts.forEach(element => {
-                element.innerHTML = `${currentTime} (PST)`;
-            });
-        }
-    }
-
-    // Helper function to format time in GMT+8
-    function formatTimeGMT8(dateTimeStr) {
-        const dateObj = new Date(dateTimeStr);
-        // Format to 12-hour with AM/PM specifically using Manila timezone (GMT+8)
-        return dateObj.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: 'Asia/Manila'
-        });
+    function closeResetAllSessionsModal() {
+        document.getElementById('resetAllSessionsModal').classList.remove('active');
     }
     
-    // Helper function to get current time in GMT+8
-    function formatCurrentTimeGMT8() {
-        const now = new Date();
-        // Set to Manila time (GMT+8)
-        const options = {
-            hour: '2-digit', 
-            minute: '2-digit', 
-            hour12: true,
-            timeZone: 'Asia/Manila'
-        };
-        return now.toLocaleTimeString('en-US', options);
-    }
-
-    // Set intervals for updates
-    setInterval(updateRealTimeElements, 1000); // Update real-time elements every second
-    setInterval(refreshSitInRecords, 30000); // Refresh all records every 30 seconds
-
-    // Initial load
-    updateRealTimeElements();
-    refreshSitInRecords();
-
-    // Reset sessions modal functions
-    function confirmResetSessions(idno, studentName) {
-        document.getElementById('resetStudentIdno').value = idno;
-        document.getElementById('resetStudentName').textContent = studentName;
-        document.getElementById('resetSessionsModal').classList.add('active');
-    }
-
-    function closeResetModal() {
-        document.getElementById('resetSessionsModal').classList.remove('active');
-    }
-
-    function resetSessions() {
-        const studentIdno = document.getElementById('resetStudentIdno').value;
+    function resetAllSessions() {
+        // Show loading state or disable button
+        const resetButton = document.querySelector('#resetAllSessionsModal .btn-danger');
+        const originalText = resetButton.textContent;
+        resetButton.textContent = 'Processing...';
+        resetButton.disabled = true;
         
-        fetch('../controller/reset_sessions.php', {
+        fetch('../controller/reset_all_sessions.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'idno=' + studentIdno
+            }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Sessions reset successfully!');
-                closeResetModal();
+                closeResetAllSessionsModal();
+                alert(`Success! ${data.count} students' sessions have been reset to 30.`);
                 location.reload(); // Reload to show updated values
             } else {
                 alert('Error: ' + data.message);
+                // Reset button state
+                resetButton.textContent = originalText;
+                resetButton.disabled = false;
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while resetting sessions.');
+            alert('An error occurred while processing your request.');
+            // Reset button state
+            resetButton.textContent = originalText;
+            resetButton.disabled = false;
         });
     }
     
-    // Pagination functionality for Students table
-    let studentsData = <?php echo json_encode($students); ?>;
-    let studentsCurrentPage = 1;
-    let studentsPerPage = 10;
+    // Functions for clearing all sit-in records
+    function confirmClearAllRecords() {
+        document.getElementById('clearAllRecordsModal').classList.add('active');
+    }
+    function closeClearAllRecordsModal() {
+        document.getElementById('clearAllRecordsModal').classList.remove('active');
+    }
     
-    function setupStudentsPagination() {
-        const tableBody = document.getElementById('students-table-body');
-        const pagination = document.getElementById('students-pagination');
-        const pageInfo = document.getElementById('students-page-info');
-        const perPageSelect = document.getElementById('students-per-page');
+    function clearAllRecords() {
+        // Show loading state or disable button
+        const clearButton = document.querySelector('#clearAllRecordsModal .btn-danger');
+        const originalText = clearButton.textContent;
+        clearButton.textContent = 'Processing...';
+        clearButton.disabled = true;
         
-        // Update entries per page when selection changes
-        perPageSelect.addEventListener('change', function() {
-            studentsPerPage = parseInt(this.value);
-            studentsCurrentPage = 1; // Reset to first page
-            renderStudentsTable();
-        });
-        
-        function renderStudentsTable() {
-            const filteredData = applyStudentSearchFilter(studentsData);
-            const totalPages = Math.ceil(filteredData.length / studentsPerPage);
-            const start = (studentsCurrentPage - 1) * studentsPerPage;
-            const end = Math.min(start + studentsPerPage, filteredData.length);
-            const visibleData = filteredData.slice(start, end);
-            
-            // Clear table body
-            tableBody.innerHTML = '';
-            
-            // Handle empty state
-            if (filteredData.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="empty-state">
-                            <div class="empty-state-content">
-                                <i class="ri-user-search-line"></i>
-                                <p>No students found</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+        fetch('../controller/clear_all_records.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeClearAllRecordsModal();
+                alert(`Success! ${data.count} sit-in records have been deleted.`);
+                // Refresh the sit-in records
+                refreshSitInRecords();
+                sitinData = []; // Clear the local data
+                setupSitinPagination(); // Rebuild pagination
             } else {
-                // Add rows for current page
-                visibleData.forEach(student => {
-                    if (!student.idno) return;
-                    
-                    // Get remaining sessions
-                    const remainingSessions = student.remaining_sessions ?? 30;
-                    
-                    // Set CSS class based on remaining sessions
-                    let sessionsClass = 'sessions-badge';
-                    if (remainingSessions <= 5) {
-                        sessionsClass += ' sessions-low';
-                    } else if (remainingSessions <= 10) {
-                        sessionsClass += ' sessions-medium';
-                    }
-                    
-                    // Create table row
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="font-mono">${student.idno || 'N/A'}</td>
-                        <td>${student.firstname} ${student.lastname}</td>
-                        <td>${getYearLevelDisplay(student.year_level ?? student.year ?? 0)}</td>
-                        <td>${getCourseNameById(student.course_id ?? student.course ?? student.department ?? null)}</td>
-                        <td><span class="${sessionsClass}">${remainingSessions} sessions</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-button edit" onclick='openEditModal(${JSON.stringify(student)})'>
-                                    <i class="ri-edit-line"></i>
-                                </button>
-                                <button class="action-button delete" onclick="confirmDelete('${student.id}', '${student.firstname} ${student.lastname}')">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
-                                <div class="action-button-tooltip">
-                                    <button class="action-button reset" onclick="confirmResetSessions('${student.idno}', '${student.firstname} ${student.lastname}')">
-                                        <i class="ri-refresh-line"></i>
-                                    </button>
-                                    <span class="tooltiptext">Reset to 30 sessions</span>
-                                </div>
-                            </div>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-                
-                // Update page info text
-                pageInfo.textContent = `Showing ${start + 1} to ${end} of ${filteredData.length} entries`;
-                
-                // Update pagination buttons
-                renderStudentsPagination(totalPages);
+                alert('Error: ' + data.message);
+                // Reset button state
+                clearButton.textContent = originalText;
+                clearButton.disabled = false;
             }
-        }
-        
-        function renderStudentsPagination(totalPages) {
-            pagination.innerHTML = '';
-            
-            // Previous button
-            const prevBtn = document.createElement('button');
-            prevBtn.className = 'page-btn';
-            prevBtn.textContent = 'Previous';
-            prevBtn.disabled = studentsCurrentPage === 1;
-            prevBtn.setAttribute('data-action', 'prev');
-            prevBtn.addEventListener('click', () => {
-                if (studentsCurrentPage > 1) {
-                    studentsCurrentPage--;
-                    renderStudentsTable();
-                }
-            });
-            pagination.appendChild(prevBtn);
-            
-            // Page number buttons - show up to 5 pages
-            let startPage = Math.max(1, studentsCurrentPage - 2);
-            let endPage = Math.min(totalPages, startPage + 4);
-            
-            // Adjust if we're at the end
-            if (endPage - startPage < 4 && startPage > 1) {
-                startPage = Math.max(1, endPage - 4);
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = `page-btn ${i === studentsCurrentPage ? 'active' : ''}`;
-                pageBtn.textContent = i;
-                pageBtn.setAttribute('data-page', i);
-                pageBtn.addEventListener('click', () => {
-                    studentsCurrentPage = i;
-                    renderStudentsTable();
-                });
-                pagination.appendChild(pageBtn);
-            }
-            
-            // Next button
-            const nextBtn = document.createElement('button');
-            nextBtn.className = 'page-btn';
-            nextBtn.textContent = 'Next';
-            nextBtn.disabled = studentsCurrentPage === totalPages;
-            nextBtn.setAttribute('data-action', 'next');
-            nextBtn.addEventListener('click', () => {
-                if (studentsCurrentPage < totalPages) {
-                    studentsCurrentPage++;
-                    renderStudentsTable();
-                }
-            });
-            pagination.appendChild(nextBtn);
-        }
-        
-        function applyStudentSearchFilter(data) {
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
-            if (!searchText) return data;
-            
-            return data.filter(student => {
-                if (!student) return false;
-                
-                // Search in various fields
-                const fullName = `${student.firstname || ''} ${student.lastname || ''}`.toLowerCase();
-                const idno = (student.idno || '').toLowerCase();
-                const course = getCourseNameById(student.course_id ?? student.course ?? student.department).toLowerCase();
-                
-                return fullName.includes(searchText) || 
-                       idno.includes(searchText) || 
-                       course.includes(searchText);
-            });
-        }
-        
-        // Initial render
-        renderStudentsTable();
-        
-        // Connect search to pagination
-        document.getElementById('searchInput')?.addEventListener('keyup', function() {
-            studentsCurrentPage = 1; // Reset to first page when searching
-            renderStudentsTable();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while processing your request.');
+            // Reset button state
+            clearButton.textContent = originalText;
+            clearButton.disabled = false;
         });
     }
     
-    // Sit-in records pagination
-    let sitinData = <?php echo json_encode($sitin_records); ?>;
-    let sitinCurrentPage = 1;
-    let sitinPerPage = 10;
-    
-    function setupSitinPagination() {
-        const tableBody = document.getElementById('sitin-records-body');
-        const pagination = document.getElementById('sitins-pagination');
-        const pageInfo = document.getElementById('sitins-page-info');
-        const perPageSelect = document.getElementById('sitins-per-page');
-        
-        // Update entries per page when selection changes
-        perPageSelect.addEventListener('change', function() {
-            sitinPerPage = parseInt(this.value);
-            sitinCurrentPage = 1; // Reset to first page
-            renderSitinTable();
-        });
-        
-        function renderSitinTable() {
-            const filteredData = applySitinSearchFilter(sitinData);
-            const totalPages = Math.ceil(filteredData.length / sitinPerPage);
-            const start = (sitinCurrentPage - 1) * sitinPerPage;
-            const end = Math.min(start + sitinPerPage, filteredData.length);
-            const visibleData = filteredData.slice(start, end);
-            
-            // Clear table body
-            tableBody.innerHTML = '';
-            
-            // Handle empty state
-            if (filteredData.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="10" class="empty-state">
-                            <div class="empty-state-content">
-                                <i class="ri-computer-line"></i>
-                                <p>No sit-in records found</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            } else {
-                // Add rows for current page
-                visibleData.forEach(record => {
-                    // Format times using the same helper functions already defined
-                    const timeIn = record.time_in ? 
-                        formatTimeGMT8(record.date + ' ' + record.time_in) : 'Not yet';
-                    
-                    // Handle time out display
-                    let timeOut;
-                    if (record.time_out) {
-                        timeOut = formatTimeGMT8(record.date + ' ' + record.time_out);
-                    } else if (record.status == 'approved' && record.time_in) {
-                        const currentTime = formatCurrentTimeGMT8();
-                        timeOut = `<span class="realtime-out">${currentTime} (PST)</span>`;
-                    } else {
-                        timeOut = 'Not yet';
-                    }
-                    
-                    // Handle session count display
-                    let remainingClass = 'sessions-badge';
-                    if (record.remaining_sessions <= 5) {
-                        remainingClass += ' sessions-low';
-                    } else if (record.remaining_sessions <= 10) {
-                        remainingClass += ' sessions-medium';
-                    }
-                    
-                    let statusBadge = '';
-                    if (record.time_out) {
-                        statusBadge = '<span class="status-badge completed">Completed</span>';
-                    } else if (record.status == 'active' && record.time_in) {
-                        statusBadge = '<span class="status-badge active">Active</span>';
-                    } else if (record.status == 'approved') {
-                        statusBadge = '<span class="status-badge approved">Approved</span>';
-                    } else {
-                        statusBadge = '<span class="status-badge pending">Pending</span>';
-                    }
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${new Date(record.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</td>
-                        <td class="font-mono">${record.idno}</td>
-                        <td>${record.firstname} ${record.lastname}</td>
-                        <td>${record.purpose || 'Not specified'}</td>
-                        <td>Laboratory ${record.laboratory}</td>
-                        <td>${timeIn}</td>
-                        <td>${timeOut}</td>
-                        <td>${statusBadge}</td>
-                        <td><span class="${remainingClass}">${record.remaining_sessions} sessions</span></td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-                
-                // Update page info text
-                pageInfo.textContent = `Showing ${start + 1} to ${end} of ${filteredData.length} entries`;
-                
-                // Update pagination buttons
-                renderSitinPagination(totalPages);
-            }
-        }
-        
-        function renderSitinPagination(totalPages) {
-            pagination.innerHTML = '';
-            
-            // Previous button
-            const prevBtn = document.createElement('button');
-            prevBtn.className = 'page-btn';
-            prevBtn.textContent = 'Previous';
-            prevBtn.disabled = sitinCurrentPage === 1;
-            prevBtn.setAttribute('data-action', 'prev');
-            prevBtn.addEventListener('click', () => {
-                if (sitinCurrentPage > 1) {
-                    sitinCurrentPage--;
-                    renderSitinTable();
-                }
-            });
-            pagination.appendChild(prevBtn);
-            
-            // Page number buttons - show up to 5 pages
-            let startPage = Math.max(1, sitinCurrentPage - 2);
-            let endPage = Math.min(totalPages, startPage + 4);
-            
-            // Adjust if we're at the end
-            if (endPage - startPage < 4 && startPage > 1) {
-                startPage = Math.max(1, endPage - 4);
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = `page-btn ${i === sitinCurrentPage ? 'active' : ''}`;
-                pageBtn.textContent = i;
-                pageBtn.setAttribute('data-page', i);
-                pageBtn.addEventListener('click', () => {
-                    sitinCurrentPage = i;
-                    renderSitinTable();
-                });
-                pagination.appendChild(pageBtn);
-            }
-            
-            // Next button
-            const nextBtn = document.createElement('button');
-            nextBtn.className = 'page-btn';
-            nextBtn.textContent = 'Next';
-            nextBtn.disabled = sitinCurrentPage === totalPages;
-            nextBtn.setAttribute('data-action', 'next');
-            nextBtn.addEventListener('click', () => {
-                if (sitinCurrentPage < totalPages) {
-                    sitinCurrentPage++;
-                    renderSitinTable();
-                }
-            });
-            pagination.appendChild(nextBtn);
-        }
-        
-        function applySitinSearchFilter(data) {
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
-            if (!searchText) return data;
-            
-            return data.filter(record => {
-                if (!record) return false;
-                
-                // Search in various fields
-                const fullName = `${record.firstname || ''} ${record.lastname || ''}`.toLowerCase();
-                const idno = (record.idno || '').toLowerCase();
-                const purpose = (record.purpose || '').toLowerCase();
-                const laboratory = `Laboratory ${record.laboratory}`.toLowerCase();
-                
-                return fullName.includes(searchText) || 
-                       idno.includes(searchText) || 
-                       purpose.includes(searchText) ||
-                       laboratory.includes(searchText);
-            });
-        }
-        
-        // Initial render
-        renderSitinTable();
-    }
-    
-    // Tab switching with pagination setup
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Remove active class from all tabs
-            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-            // Add active class to clicked tab
-            this.classList.add('active');
-            // Hide all record containers
-            document.querySelectorAll('.records-container').forEach(container => {
-                container.classList.remove('active');
-            });
-            // Show the target container
-            const targetId = this.getAttribute('data-target');
-            document.getElementById(targetId).classList.add('active');
-            // Clear search input when switching tabs
-            document.getElementById('searchInput').value = '';
-        });
-    });
-    
-    // Helper functions for year level and course name - use existing ones
-    function getYearLevelDisplay(yearLevel) {
-        switch (parseInt(yearLevel)) {
-            case 1: return '1st Year';
-            case 2: return '2nd Year';
-            case 3: return '3rd Year';
-            case 4: return '4th Year';
-            default: return 'Not specified';
-        }
-    }
-    
-    function getCourseNameById(courseId) {
-        if (courseId === null || courseId === undefined) {
-            return 'Not specified';
-        }
-        
-        if (typeof courseId === 'string' && courseId.length > 2) {
-            return courseId; // Return the course name directly
-        }
-        
-        switch (parseInt(courseId)) {
-            case 1: return 'BS Computer Science';
-            case 2: return 'BS Information Technology';
-            case 3: return 'BS Information Systems';
-            case 4: return 'BS Computer Engineering';
-            default: return courseId ? 'Course #' + courseId : 'Not specified';
-        }
-    }
-    
-    // Initialize pagination on page load
+    // Initialize action buttons visibility on page load
     document.addEventListener('DOMContentLoaded', function() {
         setupStudentsPagination();
         setupSitinPagination();
+        // Set initial visibility of action buttons based on active tab
+        if (document.getElementById('student-records').classList.contains('active')) {
+            document.getElementById('student-records-actions').style.display = 'flex';
+            document.getElementById('sitin-records-actions').style.display = 'none';
+        } else {
+            document.getElementById('student-records-actions').style.display = 'none';
+            document.getElementById('sitin-records-actions').style.display = 'flex';
+        }
     });
     
-    // ...existing code...
-</script>
+    // ... existing code for pagination, search functionality, etc. ...
+    </script>
 </body>
 </html>
