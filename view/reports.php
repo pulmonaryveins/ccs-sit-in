@@ -97,6 +97,9 @@ if ($feedback_table_exists) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -151,6 +154,12 @@ if ($feedback_table_exists) {
             <div class="table-header">
                 <h2>Sit-in Reports</h2>
                 <div class="table-actions">
+                <div class="export-buttons">
+                    <button class="export-btn" id="exportCSV"><i class="ri-file-text-line"></i> CSV</button>
+                    <button class="export-btn" id="exportExcel"><i class="ri-file-excel-line"></i> Excel</button>
+                    <button class="export-btn" id="exportPDF"><i class="ri-file-pdf-line"></i> PDF</button>
+                    <button class="export-btn" id="printReport"><i class="ri-printer-line"></i> Print</button>
+                </div>
                     <div class="search-box">
                         <i class="ri-search-line"></i>
                         <input type="text" id="searchInput" placeholder="Search records...">
@@ -341,69 +350,150 @@ if ($feedback_table_exists) {
     </div>
 
     <style>
-        /* Star rating styles */
-        .star-rating {
+        /* Export buttons styling */
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-right: 15px;
+        }
+
+        .export-btn {
+            background-color:rgba(118, 86, 204, 0.26);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
             color: #7556CC;
             display: flex;
             align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .export-btn i {
             font-size: 1rem;
-            gap: 2px;
         }
-        
-        .report-container {
-            display: none;
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
         }
-        
-        .report-container.active {
-            display: block;
-        }
-        
-        .report-type-tabs {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
-        .report-type-tabs .filter-tab {
-            padding: 1rem 1.75rem;
-            font-weight: 600;
-        }
-        
-        /* Feedback message cell styling */
-        #feedback-table-body td:nth-child(7) {
-            max-width: 300px;
-            white-space: normal;
-            line-height: 1.4;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            position: relative;
-        }
-        
-        /* Add a class for expandable feedback messages */
-        .feedback-message {
-            max-height: 3em;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-            transition: max-height 0.3s ease;
-        }
-        
-        .feedback-message.expanded {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .feedback-message::after {
-            content: "...";
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(to right, transparent, white 40%);
-            padding-left: 20px;
-            display: block;
-        }
-        
-        .feedback-message.expanded::after {
-            display: none;
+
+        @media print {
+            @page {
+                size: landscape;
+                margin: 1cm;
+            }
+            
+            body {
+                font-family: Arial, sans-serif;
+            }
+            
+            .table-header h2 {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            
+            .modern-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            .modern-table th {
+                background-color: #7556CC !important;
+                color: white !important;
+                padding: 8px;
+                text-align: left;
+            }
+            
+            .modern-table td {
+                padding: 8px;
+                border-bottom: 1px solid #ddd;
+            }
+            
+            .modern-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            
+            .source-badge {
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+            }
+            
+            .source-badge.reservation {
+                background-color: #e0f2f1 !important;
+                color: #00796b !important;
+            }
+            
+            .source-badge.sit_in {
+                background-color: #e8eaf6 !important;
+                color: #3f51b5 !important;
+            }
+
+            .export-buttons {
+                display: flex;
+                gap: 10px;
+                margin-right: 15px;
+            }
+
+            .export-btn {
+                background-color: #7556CC;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 0.85rem;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                transition: background-color 0.2s;
+            }
+
+            .export-btn:hover {
+                background-color:rgba(99, 74, 173, 0.53);
+            }
+
+            .export-btn i {
+                font-size: 1rem;
+            }
+
+            .table-actions {
+                display: flex;
+                align-items: center;
+            }
+
+            @media print {
+                .nav-container, .filter-tabs, .pagination-controls, .table-actions, .export-buttons {
+                    display: none !important;
+                }
+                
+                .content-wrapper {
+                    margin: 0;
+                    padding: 0;
+                }
+                
+                .table-header h2 {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                
+                body {
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }
+            }
         }
     </style>
 
@@ -830,6 +920,157 @@ if ($feedback_table_exists) {
                     });
                 }
             });
+        }
+
+                // ===== EXPORT FUNCTIONS =====
+
+        // Initialize export buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize export buttons
+            document.getElementById('exportCSV').addEventListener('click', exportToCSV);
+            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            document.getElementById('exportPDF').addEventListener('click', exportToPDF);
+            document.getElementById('printReport').addEventListener('click', printReport);
+        });
+
+        // Function to get filtered and visible data from activity reports table
+        function getActivityReportData() {
+            const table = document.querySelector('#activity-reports table');
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            
+            // Get all visible rows (not filtered out)
+            const visibleRows = Array.from(table.querySelectorAll('tbody tr'))
+                .filter(row => row.style.display !== 'none' && !row.querySelector('.empty-state'));
+            
+            const data = visibleRows.map(row => {
+                return Array.from(row.querySelectorAll('td')).map(cell => {
+                    // Special handling for the badge in the last column
+                    if (cell.querySelector('.source-badge')) {
+                        return cell.textContent.trim();
+                    }
+                    return cell.textContent.trim();
+                });
+            });
+            
+            return { headers, data };
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            const { headers, data } = getActivityReportData();
+            
+            if (data.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            // Create CSV content
+            let csvContent = headers.join(',') + '\n';
+            
+            data.forEach(row => {
+                // Properly escape CSV values
+                const csvRow = row.map(cell => {
+                    // Quote values that contain commas, quotes, or newlines
+                    if (cell.includes(',') || cell.includes('"') || cell.includes('\n')) {
+                        return '"' + cell.replace(/"/g, '""') + '"';
+                    }
+                    return cell;
+                });
+                csvContent += csvRow.join(',') + '\n';
+            });
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'activity_report_' + new Date().toISOString().slice(0,10) + '.csv');
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            const { headers, data } = getActivityReportData();
+            
+            if (data.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            // Create workbook with worksheet
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Activity Report");
+            
+            // Column widths
+            const colWidths = headers.map(h => ({ wch: Math.max(h.length, 15) }));
+            ws['!cols'] = colWidths;
+            
+            // Save file
+            XLSX.writeFile(wb, 'activity_report_' + new Date().toISOString().slice(0,10) + '.xlsx');
+        }
+
+        // Export to PDF
+        function exportToPDF() {
+            const { headers, data } = getActivityReportData();
+            
+            if (data.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            // Create PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'pt', 'a4'); // landscape orientation
+            
+            // Add title
+            doc.setFontSize(16);
+            doc.text('Activity Report', 40, 40);
+            
+            // Add date
+            doc.setFontSize(10);
+            doc.text('Generated on: ' + new Date().toLocaleString(), 40, 60);
+            
+            // Create table
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 70,
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3,
+                    overflow: 'linebreak'
+                },
+                columnStyles: {
+                    0: { cellWidth: 70 }, // Date
+                    1: { cellWidth: 60 }, // ID Number
+                    2: { cellWidth: 90 }, // Name
+                    3: { cellWidth: 90 }, // Purpose
+                    4: { cellWidth: 80 }, // Laboratory
+                    5: { cellWidth: 60 }, // Time In
+                    6: { cellWidth: 60 }, // Time Out
+                    7: { cellWidth: 60 }  // Type
+                },
+                headStyles: {
+                    fillColor: [117, 86, 204],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 250]
+                }
+            });
+            
+            // Save file
+            doc.save('activity_report_' + new Date().toISOString().slice(0,10) + '.pdf');
+        }
+
+        // Print report
+        function printReport() {
+            window.print();
         }
     </script>
 </body>
