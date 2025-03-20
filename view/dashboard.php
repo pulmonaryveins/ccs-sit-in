@@ -1,6 +1,13 @@
 <?php
 session_start();
 
+// Add session flag check for welcome notification
+$show_welcome_notification = false;
+if (!isset($_SESSION['dashboard_welcome_shown'])) {
+    $show_welcome_notification = true;
+    $_SESSION['dashboard_welcome_shown'] = true;
+}
+
 // Check if user is not logged in
 if (!isset($_SESSION['username'])) {
     header("Location: ../auth/login.php");
@@ -87,6 +94,9 @@ $conn->close();
     </style>
 </head>
 <body>
+    <!-- Add notification container after body tag -->
+    <div id="notification-container"></div>
+    
     <!-- Navigation Bar -->
     <div class="nav-container">
         <div class="nav-wrapper">
@@ -329,68 +339,249 @@ $conn->close();
     </style>
 
     <script>
-        // Profile panel functionality
-        const profilePanel = document.getElementById('profile-panel');
-        const backdrop = document.getElementById('backdrop');
-        const profileTrigger = document.getElementById('profile-trigger');
-
-        function toggleProfile(show) {
-            profilePanel.classList.toggle('active', show);
-            backdrop.classList.toggle('active', show);
-            document.body.style.overflow = show ? 'hidden' : '';
+    // Add notification system functions at the start of scripts
+    function showNotification(title, message, type = 'info', duration = 5000) {
+        const notificationContainer = document.getElementById('notification-container');
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        let icon = 'information-line';
+        if (type === 'success') icon = 'check-line';
+        if (type === 'error') icon = 'error-warning-line';
+        if (type === 'warning') icon = 'alert-line';
+        
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="ri-${icon}"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            </div>
+            <button class="notification-close" onclick="closeNotification(this)">&times;</button>
+        `;
+        
+        notificationContainer.appendChild(notification);
+        notification.getBoundingClientRect();
+        notification.classList.add('show');
+        
+        if (duration > 0) {
+            setTimeout(() => closeNotification(notification), duration);
         }
-
-        profileTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleProfile(true);
-        });
-
-        // Close profile panel when clicking outside
-        document.addEventListener('click', (e) => {
-            if (profilePanel.classList.contains('active') && 
-                !profilePanel.contains(e.target) && 
-                !profileTrigger.contains(e.target)) {
-                toggleProfile(false);
-            }
-        });
-
-        // Prevent clicks inside panel from closing it
-        profilePanel.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // Close on backdrop click
-        backdrop.addEventListener('click', () => toggleProfile(false));
-
-        // Profile data update function
-        async function updateProfilePanel() {
-            try {
-                const response = await fetch('../profile/get_profile_data.php');
-                const data = await response.json();
-                
-                // Update profile image
-                const profileImages = document.querySelectorAll('.profile-image img');
-                profileImages.forEach(img => {
-                    img.src = data.profile_image + '?t=' + new Date().getTime();
-                });
-
-                // Update info
-                document.querySelector('.user-info h3').textContent = data.fullname;
-                
-                // Update info cards
-                const detailValues = document.querySelectorAll('.info-card .detail-value');
-                detailValues[0].textContent = data.idno;
-                detailValues[1].textContent = data.fullname;
-                detailValues[2].textContent = data.course;
-                detailValues[3].textContent = data.year_level;
-            } catch (error) {
-                console.error('Error updating profile:', error);
-            }
+        
+        return notification;
+    }
+    
+    function closeNotification(notification) {
+        if (!notification) return;
+        
+        if (notification.tagName === 'BUTTON') {
+            notification = notification.closest('.notification');
         }
+        
+        // Add hide class for out animation
+        notification.classList.add('hide');
+        notification.classList.remove('show');
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.parentElement.removeChild(notification);
+            }
+        }, 300); // Match animation duration
+    }
 
-        // Update profile when panel is opened
-        profileTrigger.addEventListener('click', updateProfilePanel);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show welcome notification only on fresh login
+        <?php if ($show_welcome_notification): ?>
+        showNotification(
+            "Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!", 
+            "You're now logged in to CCS Sit-In System.",
+            "success"
+        );
+        <?php endif; ?>
+
+        // Add notification styles
+        document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            #notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                width: 350px;
+                max-width: 90vw;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .notification {
+                display: flex;
+                align-items: flex-start;
+                background: white;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                margin-bottom: 10px;
+                transform: translateX(120%);
+                opacity: 0;
+                transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                            opacity 0.3s ease;
+                border-left: 4px solid #7556cc;
+                animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+            
+            @keyframes slideIn {
+                0% {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                100% {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                0% {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+
+            .notification.hide {
+                animation: slideOut 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+            
+            .notification.show {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            
+            .notification.info { border-left-color: #3b82f6; }
+            .notification.success { border-left-color: #10b981; }
+            .notification.warning { border-left-color: #f59e0b; }
+            .notification.error { border-left-color: #ef4444; }
+            
+            .notification-icon {
+                flex-shrink: 0;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 12px;
+            }
+            
+            .notification-icon i {
+                font-size: 24px;
+            }
+            
+            .notification.info .notification-icon i { color: #3b82f6; }
+            .notification.success .notification-icon i { color: #10b981; }
+            .notification.warning .notification-icon i { color: #f59e0b; }
+            .notification.error .notification-icon i { color: #ef4444; }
+            
+            .notification-content {
+                flex-grow: 1;
+            }
+            
+            .notification-title {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+                color: #111827;
+            }
+            
+            .notification-message {
+                font-size: 0.875rem;
+                color: #4b5563;
+            }
+            
+            .notification-close {
+                background: transparent;
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+                color: #9ca3af;
+                margin-left: 12px;
+                padding: 0;
+                line-height: 1;
+            }
+            
+            .notification-close:hover {
+                color: #4b5563;
+            }
+        </style>
+        `);
+    });
+
+    // Profile panel functionality
+    const profilePanel = document.getElementById('profile-panel');
+    const backdrop = document.getElementById('backdrop');
+    const profileTrigger = document.getElementById('profile-trigger');
+
+    function toggleProfile(show) {
+        profilePanel.classList.toggle('active', show);
+        backdrop.classList.toggle('active', show);
+        document.body.style.overflow = show ? 'hidden' : '';
+    }
+
+    profileTrigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleProfile(true);
+    });
+
+    // Close profile panel when clicking outside
+    document.addEventListener('click', (e) => {
+        if (profilePanel.classList.contains('active') && 
+            !profilePanel.contains(e.target) && 
+            !profileTrigger.contains(e.target)) {
+            toggleProfile(false);
+        }
+    });
+
+    // Prevent clicks inside panel from closing it
+    profilePanel.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    // Close on backdrop click
+    backdrop.addEventListener('click', () => toggleProfile(false));
+
+    // Profile data update function
+    async function updateProfilePanel() {
+        try {
+            const response = await fetch('../profile/get_profile_data.php');
+            const data = await response.json();
+            
+            // Update profile image
+            const profileImages = document.querySelectorAll('.profile-image img');
+            profileImages.forEach(img => {
+                img.src = data.profile_image + '?t=' + new Date().getTime();
+            });
+
+            // Update info
+            document.querySelector('.user-info h3').textContent = data.fullname;
+            
+            // Update info cards
+            const detailValues = document.querySelectorAll('.info-card .detail-value');
+            detailValues[0].textContent = data.idno;
+            detailValues[1].textContent = data.fullname;
+            detailValues[2].textContent = data.course;
+            detailValues[3].textContent = data.year_level;
+        } catch (error) {
+            console.error('Error updating profile:', error);
+        }
+    }
+
+    // Update profile when panel is opened
+    profileTrigger.addEventListener('click', updateProfilePanel);
     </script>
 </body>
 </html>

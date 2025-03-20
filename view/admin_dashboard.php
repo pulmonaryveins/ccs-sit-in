@@ -5,6 +5,13 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit();
 }
 
+// Check if this is the first time loading the dashboard after login
+$show_welcome_notification = false;
+if (!isset($_SESSION['dashboard_welcome_shown'])) {
+    $show_welcome_notification = true;
+    $_SESSION['dashboard_welcome_shown'] = true;
+}
+
 require_once '../config/db_connect.php';
 
 // Get statistics
@@ -329,9 +336,280 @@ if ($result) {
         </div>
     </div><!-- End of admin-dashboard div -->
 
+    <!-- Notification System -->
+    <div id="notification-container"></div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Announcement</h3>
+                <span class="close" onclick="closeDeleteModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this announcement?</p>
+                <p>This action cannot be undone.</p>
+                <input type="hidden" id="delete_id">
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                <button class="delete-btn" onclick="confirmDeleteAnnouncement()">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+    // Notification System Functions
+    function showNotification(title, message, type = 'info', duration = 5000) {
+        const notificationContainer = document.getElementById('notification-container');
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        // Set icon based on type
+        let icon = 'information-line';
+        if (type === 'success') icon = 'check-line';
+        if (type === 'error') icon = 'error-warning-line';
+        if (type === 'warning') icon = 'alert-line';
+        
+        // Create notification content
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="ri-${icon}"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            </div>
+            <button class="notification-close" onclick="closeNotification(this)">&times;</button>
+        `;
+        
+        notificationContainer.appendChild(notification);
+        
+        // Force reflow before adding the 'show' class for proper animation
+        notification.getBoundingClientRect();
+        
+        // Show notification with animation
+        notification.classList.add('show');
+        
+        // Auto dismiss after duration (if specified)
+        if (duration > 0) {
+            setTimeout(() => closeNotification(notification), duration);
+        }
+        
+        return notification;
+    }
+    
+    function closeNotification(notification) {
+        if (!notification) return;
+        
+        // If notification is a button, find its parent notification
+        if (notification.tagName === 'BUTTON') {
+            notification = notification.closest('.notification');
+        }
+        
+        // Add hide class for out animation
+        notification.classList.add('hide');
+        notification.classList.remove('show');
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.parentElement.removeChild(notification);
+            }
+        }, 300); // Match animation duration
+    }
+
     // Wait for DOM to be fully loaded before initializing charts
     document.addEventListener('DOMContentLoaded', function() {
+        // Show welcome notification only on fresh login
+        <?php if ($show_welcome_notification): ?>
+        showNotification(
+            "Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>", 
+            "You're now logged in to the CCS Sit-In Administrator Dashboard.",
+            "success"
+        );
+        <?php endif; ?>
+
+        // Add notification CSS styles
+        document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            #notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                width: 350px;
+                max-width: 90vw;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .notification {
+                display: flex;
+                align-items: flex-start;
+                background: white;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                margin-bottom: 10px;
+                transform: translateX(0);
+                opacity: 1;
+                transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                            opacity 0.3s ease;
+                border-left: 4px solid #7556cc;
+                animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+            
+            @keyframes slideIn {
+                0% {
+                    transform: translateX(120%);
+                    opacity: 0;
+                }
+                100% {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+             @keyframes slideOut {
+                0% {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateX(120%);
+                    opacity: 0;
+                }
+            }
+
+            .notification.hide {
+                animation: slideOut 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+            
+            .notification.show {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            
+            .notification.info {
+                border-left-color: #3b82f6;
+            }
+            
+            .notification.success {
+                border-left-color: #10b981;
+            }
+            
+            .notification.warning {
+                border-left-color: #f59e0b;
+            }
+            
+            .notification.error {
+                border-left-color: #ef4444;
+            }
+            
+            .notification-icon {
+                flex-shrink: 0;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 12px;
+            }
+            
+            .notification-icon i {
+                font-size: 24px;
+            }
+            
+            .notification.info .notification-icon i {
+                color: #3b82f6;
+            }
+            
+            .notification.success .notification-icon i {
+                color: #10b981;
+            }
+            
+            .notification.warning .notification-icon i {
+                color: #f59e0b;
+            }
+            
+            .notification.error .notification-icon i {
+                color: #ef4444;
+            }
+            
+            .notification-content {
+                flex-grow: 1;
+            }
+            
+            .notification-title {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+                color: #111827;
+            }
+            
+            .notification-message {
+                font-size: 0.875rem;
+                color: #4b5563;
+            }
+            
+            .notification-close {
+                background: transparent;
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+                color: #9ca3af;
+                margin-left: 12px;
+                padding: 0;
+                line-height: 1;
+            }
+            
+            .notification-close:hover {
+                color: #4b5563;
+            }
+            
+            /* Modal footer button styles */
+            .modal-footer {
+                display: flex;
+                justify-content: flex-end;
+                padding: 1rem;
+                gap: 10px;
+                border-top: 1px solid #e5e7eb;
+            }
+            
+            .cancel-btn {
+                background-color: #f3f4f6;
+                color: #1f2937;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 0.375rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+            
+            .cancel-btn:hover {
+                background-color: #e5e7eb;
+            }
+            
+            .delete-btn {
+                background-color: #ef4444;
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 0.375rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+            
+            .delete-btn:hover {
+                background-color: #dc2626;
+            }
+        </style>
+        `);
+        
         // Overall Statistics Chart
         const statsCtx = document.getElementById('statsChart');
         if (statsCtx) {
@@ -516,21 +794,34 @@ if ($result) {
             
             const result = await response.json();
             if (result.success) {
-                location.reload();
+                document.getElementById('content').value = ''; // Clear the form
+                showNotification("Success", "Announcement posted successfully", "success");
+                // Reload the page after a short delay to show the new announcement
+                setTimeout(() => location.reload(), 2000);
             } else {
-                alert('Error posting announcement');
+                showNotification("Error", "Error posting announcement", "error");
             }
         } catch (error) {
             console.error('Error:', error);
+            showNotification("Error", "An error occurred while posting the announcement", "error");
         }
     });
 
-    // Delete Announcement Handler
-    async function deleteAnnouncement(id) {
-        if (!confirm('Are you sure you want to delete this announcement?')) return;
+    // Delete Announcement Handler - Updated to use modal
+    function deleteAnnouncement(id) {
+        document.getElementById('delete_id').value = id;
+        document.getElementById('deleteModal').style.display = 'block';
+    }
+    
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+    
+    async function confirmDeleteAnnouncement() {
+        const id = document.getElementById('delete_id').value;
         
         try {
-            const response = await fetch('../admin/delete_announcement.php', {  // Updated path
+            const response = await fetch('../admin/delete_announcement.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -540,16 +831,19 @@ if ($result) {
             
             const result = await response.json();
             if (result.success) {
+                closeDeleteModal();
                 document.querySelector(`[data-id="${id}"]`).remove();
+                showNotification("Success", "Announcement deleted successfully", "success");
             } else {
-                alert('Error deleting announcement');
+                showNotification("Error", "Error deleting announcement", "error");
             }
         } catch (error) {
             console.error('Error:', error);
+            showNotification("Error", "An error occurred while deleting the announcement", "error");
         }
     }
 
-    // Modal Functions
+    // Modal Functions - Edit Modal
     function closeModal() {
         document.getElementById('editModal').style.display = 'none';
     }
@@ -562,7 +856,7 @@ if ($result) {
         document.getElementById('editModal').style.display = 'block';
     }
 
-    // Edit Announcement Form Handler
+    // Edit Announcement Form Handler - Updated to use notifications
     document.getElementById('editAnnouncementForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -583,20 +877,30 @@ if ($result) {
             
             const result = await response.json();
             if (result.success) {
-                location.reload();
+                closeModal();
+                showNotification("Success", "Announcement updated successfully", "success");
+                // Reload the page after a short delay to show updated content
+                setTimeout(() => location.reload(), 2000);
             } else {
-                alert('Error updating announcement');
+                showNotification("Error", "Error updating announcement", "error");
             }
         } catch (error) {
             console.error('Error:', error);
+            showNotification("Error", "An error occurred while updating the announcement", "error");
         }
     });
 
     // Close modal when clicking outside
     window.onclick = function(event) {
-        const modal = document.getElementById('editModal');
-        if (event.target == modal) {
+        const editModal = document.getElementById('editModal');
+        const deleteModal = document.getElementById('deleteModal');
+        
+        if (event.target == editModal) {
             closeModal();
+        }
+        
+        if (event.target == deleteModal) {
+            closeDeleteModal();
         }
     }
     </script>
