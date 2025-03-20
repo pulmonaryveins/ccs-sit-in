@@ -42,6 +42,27 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             --primary-color: #7556cc;
             --secondary-color: #d569a7;
         }
+        /* Add a new style for the active student warning */
+        .active-student-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .active-student-warning i {
+            color: #e6a210;
+            font-size: 24px;
+        }
+        
+        .active-student-warning p {
+            margin: 0;
+            color: #856404;
+        }
     </style>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/sit-in.css">
@@ -114,8 +135,8 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             
             <!-- Filter Tabs -->
             <div class="filter-tabs">
-                <div class="filter-tab active" data-target="current-students">Current Students in Laboratory</div>
-                <div class="filter-tab" data-target="add-sitin">Add Sit-in</div>
+                <div class="filter-tab active" data-target="current-students"><i class="ri-bar-chart-box-ai-fill"></i> Current Students in Laboratory</div>
+                <div class="filter-tab" data-target="add-sitin"><i class="ri-map-pin-add-fill"></i> Add Sit-in</div>
             </div>
             
             <!-- Current Students Container -->
@@ -548,6 +569,12 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         // Clear the previous search result
         studentInfo.style.display = 'none';
         
+        // Remove any previous active warning
+        const existingWarning = document.querySelector('.active-student-warning');
+        if (existingWarning) {
+            existingWarning.remove();
+        }
+        
         // Search for student with this ID
         fetch('../controller/search_student.php?idno=' + idno)
             .then(response => {
@@ -590,7 +617,28 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                     
                     // Show the student info section
                     studentInfo.style.display = 'grid';
-                    validateForm();
+                    
+                    // Check if student is already active in a laboratory
+                    if (student.is_active) {
+                        // Create warning message
+                        const warningDiv = document.createElement('div');
+                        warningDiv.className = 'active-student-warning';
+                        warningDiv.innerHTML = `
+                            <i class="ri-error-warning-line"></i>
+                            <p>This student is currently active in Laboratory ${student.active_lab} since ${student.active_time}. 
+                            They must be timed out before adding a new sit-in record.</p>
+                        `;
+                        
+                        // Add warning after student info
+                        studentInfo.parentNode.insertBefore(warningDiv, studentInfo.nextSibling);
+                        
+                        // Disable the submit button
+                        document.getElementById('submitSitinBtn').disabled = true;
+                        document.getElementById('submitSitinBtn').classList.remove('active');
+                    } else {
+                        // Enable the button if all fields are filled
+                        validateForm();
+                    }
                 } else {
                     studentInfo.style.display = 'none';
                     showNotification("Not Found", 'Student not found. Please check the ID number.', 'error');
@@ -625,7 +673,10 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         const isValid = requiredFields.every(field => field.check());
         const submitBtn = document.getElementById('submitSitinBtn');
         
-        if (isValid) {
+        // Check if there's an active warning
+        const hasActiveWarning = document.querySelector('.active-student-warning') !== null;
+        
+        if (isValid && !hasActiveWarning) {
             submitBtn.classList.add('active');
             submitBtn.disabled = false;
         } else {
@@ -633,7 +684,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             submitBtn.disabled = true;
         }
         
-        return isValid;
+        return isValid && !hasActiveWarning;
     }
 
     function submitAddSitIn() {

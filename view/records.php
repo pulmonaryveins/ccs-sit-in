@@ -756,10 +756,12 @@ function getYearLevelDisplay($yearLevel) {
         
         .bulk-action-btn.danger {
             background: #fee2e2;
+            margin-right: 1rem; 
             color: #dc2626;
         }
         
         .bulk-action-btn.warning {
+            margin-right: 1rem;
             background: #fff7ed;
             color: #ea580c;
         }
@@ -804,8 +806,8 @@ function getYearLevelDisplay($yearLevel) {
 
             <!-- Filter Tabs -->
             <div class="filter-tabs">
-                <div class="filter-tab active" data-target="student-records">Student Records</div>
-                <div class="filter-tab" data-target="sitin-records">Sit-in Records</div>
+                <div class="filter-tab active" data-target="student-records"><i class="ri-graduation-cap-fill"></i> Student Records</div>
+                <div class="filter-tab" data-target="sitin-records"><i class="ri-map-pin-add-fill"></i>  Sit-in Records</div>
             </div>
             
             <!-- Student Records Container -->

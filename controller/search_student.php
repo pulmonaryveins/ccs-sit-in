@@ -49,6 +49,29 @@ if (isset($_GET['idno']) && !empty($_GET['idno'])) {
             'profile_image' => $row['profile_image'] ?? '../assets/images/logo/AVATAR.png',
             'remaining_sessions' => $row['remaining_sessions'] ?? 30,
         ];
+        
+        // After retrieving student information, check if they're currently active in a laboratory
+        $active_query = "SELECT * FROM sit_ins WHERE idno = ? AND time_out IS NULL AND status = 'active'";
+        $stmt_active = $conn->prepare($active_query);
+        $stmt_active->bind_param("s", $idno);
+        $stmt_active->execute();
+        $active_result = $stmt_active->get_result();
+        $is_active = $active_result->num_rows > 0;
+
+        // If the student is active, get their current laboratory and time in
+        $active_lab = null;
+        $active_time = null;
+        if ($is_active) {
+            $active_data = $active_result->fetch_assoc();
+            $active_lab = $active_data['laboratory'];
+            $active_time = date('h:i A', strtotime($active_data['time_in']));
+        }
+
+        // Include the active status in the response
+        $student['is_active'] = $is_active;
+        $student['active_lab'] = $active_lab;
+        $student['active_time'] = $active_time;
+
         echo json_encode([
             'success' => true, 
             'student' => $student
