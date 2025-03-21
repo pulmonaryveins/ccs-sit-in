@@ -34,7 +34,7 @@ $conn->close();
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Removed SweetAlert2 script import as it's now redundant -->
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -81,6 +81,9 @@ $conn->close();
             </div>
         </div>
     </div>
+
+    <!-- Add notification container -->
+    <div class="notification-container" id="notification-container"></div>
 
     <!-- Add these elements -->
     <div class="backdrop" id="backdrop"></div>
@@ -163,125 +166,142 @@ $conn->close();
     <div class="profile-page-container">
         <div class="profile-card">
             <div class="profile-header">
-                <h2>Edit Profile</h2>
+                <h2>Profile Settings</h2>
                 <a href="dashboard.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
             </div>
 
-            <div class="profile-content">
-                <div class="profile-image-section">
-                    <div class="profile-image">
-                        <img src="<?php echo htmlspecialchars($user['profile_image'] ?? '../assets/images/logo/AVATAR.png'); ?>"
-                             alt="Profile Picture"
-                             id="profile-preview">
-                        <form id="image-upload-form" class="upload-form">
-                            <input type="file" id="profile-upload" name="profile_image" accept="image/*" class="hidden">
-                            <button type="button" class="change-photo-btn" onclick="document.getElementById('profile-upload').click()">
-                                <i class="fas fa-camera"></i>
-                            </button>
-                        </form>
-                    </div>
+            <div class="tabs-container">
+                <div class="tab-headers">
+                    <button class="tab-btn active" data-tab="profile-tab">
+                        <i class="fas fa-user-edit"></i> Edit Profile
+                    </button>
+                    <button class="tab-btn" data-tab="password-tab">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
                 </div>
 
-                <form id="profile-form" class="profile-form">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Student ID</label>
-                            <input type="text" name="idno" value="<?php echo htmlspecialchars($user['idno']); ?>" readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" value="<?php echo htmlspecialchars($user['lastname'] . ', ' . $user['firstname']); ?>" readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Email Address</label>
-                            <input type="email" name="email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" placeholder="Enter your email">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Course/Department</label>
-                            <select name="course">
-                                <?php
-                                $courses = [
-                                    "BS-Information Technology",
-                                    "BS-Computer Science",
-                                    "COE",
-                                    "CAS",
-                                    "SJH",
-                                    "CTE",
-                                    "CCA",
-                                    "CBA",
-                                    "CCJ",
-                                    "CON"
-                                ];
-                                
-                                foreach ($courses as $courseOption) {
-                                    $selected = ($user['course'] === $courseOption) ? 'selected' : '';
-                                    echo "<option value=\"" . htmlspecialchars($courseOption) . "\" $selected>" . 
-                                         htmlspecialchars($courseOption) . "</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Year Level</label>
-                            <select name="year">
-                                <?php
-                                for ($i = 1; $i <= 4; $i++) {
-                                    $selected = ($user['year'] == $i) ? 'selected' : '';
-                                    echo "<option value=\"$i\" $selected>{$i}" . 
-                                        ($i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th'))) . 
-                                        " Year</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>Home Address</label>
-                            <textarea name="address" rows="3" placeholder="Enter your complete address"><?php echo htmlspecialchars($user['address'] ?? ''); ?></textarea>
+                <div class="profile-content">
+                    <!-- Profile Image Section - Visible in both tabs -->
+                    <div class="profile-image-section">
+                        <div class="profile-image">
+                            <img src="<?php echo htmlspecialchars($user['profile_image'] ?? '../assets/images/logo/AVATAR.png'); ?>"
+                                 alt="Profile Picture"
+                                 id="profile-preview">
+                            <form id="image-upload-form" class="upload-form">
+                                <input type="file" id="profile-upload" name="profile_image" accept="image/*" class="hidden">
+                                <button type="button" class="change-photo-btn" onclick="document.getElementById('profile-upload').click()">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="save-btn">
-                            <i class="fas fa-save"></i> Save Changes
-                        </button>
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Edit Profile Tab -->
+                        <div id="profile-tab" class="tab-pane active">
+                            <form id="profile-form" class="profile-form">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Student ID</label>
+                                        <input type="text" name="idno" value="<?php echo htmlspecialchars($user['idno']); ?>" readonly>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Full Name</label>
+                                        <input type="text" value="<?php echo htmlspecialchars($user['lastname'] . ', ' . $user['firstname']); ?>" readonly>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Email Address</label>
+                                        <input type="email" name="email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" placeholder="Enter your email">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Username</label>
+                                        <input type="text" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Course/Department</label>
+                                        <select name="course">
+                                            <?php
+                                            $courses = [
+                                                "BS-Information Technology",
+                                                "BS-Computer Science",
+                                                "COE",
+                                                "CAS",
+                                                "SJH",
+                                                "CTE",
+                                                "CCA",
+                                                "CBA",
+                                                "CCJ",
+                                                "CON"
+                                            ];
+                                            
+                                            foreach ($courses as $courseOption) {
+                                                $selected = ($user['course'] === $courseOption) ? 'selected' : '';
+                                                echo "<option value=\"" . htmlspecialchars($courseOption) . "\" $selected>" . 
+                                                     htmlspecialchars($courseOption) . "</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Year Level</label>
+                                        <select name="year">
+                                            <?php
+                                            for ($i = 1; $i <= 4; $i++) {
+                                                $selected = ($user['year'] == $i) ? 'selected' : '';
+                                                echo "<option value=\"$i\" $selected>{$i}" . 
+                                                    ($i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th'))) . 
+                                                    " Year</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label>Home Address</label>
+                                        <textarea name="address" rows="3" placeholder="Enter your complete address"><?php echo htmlspecialchars($user['address'] ?? ''); ?></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="save-btn">
+                                        <i class="fas fa-save"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Change Password Tab -->
+                        <div id="password-tab" class="tab-pane">
+                            <form id="password-form" class="password-form">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Current Password</label>
+                                        <input type="password" name="current_password" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>New Password</label>
+                                        <input type="password" name="new_password" id="new_password" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Confirm New Password</label>
+                                        <input type="password" name="confirm_password" id="confirm_password" required>
+                                        <small id="password-match-message"></small>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="save-btn">
+                                        <i class="fas fa-key"></i> Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </form>
-                
-                <!-- Add Password Change Section -->
-                <div class="password-change-section">
-                    <h3>Change Password</h3>
-                    <form id="password-form" class="password-form">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Current Password</label>
-                                <input type="password" name="current_password" required>
-                            </div>
-                            <div class="form-group">
-                                <label>New Password</label>
-                                <input type="password" name="new_password" id="new_password" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Confirm New Password</label>
-                                <input type="password" name="confirm_password" id="confirm_password" required>
-                                <small id="password-match-message"></small>
-                            </div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="save-btn">
-                                <i class="fas fa-key"></i> Update Password
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
@@ -289,9 +309,18 @@ $conn->close();
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Profile panel toggle functionality
             const profilePanel = document.getElementById('profile-panel');
             const backdrop = document.getElementById('backdrop');
             const profileTrigger = document.getElementById('profile-trigger');
+            const passwordForm = document.getElementById('password-form');
+            const newPassword = document.getElementById('new_password');
+            const confirmPassword = document.getElementById('confirm_password');
+            const passwordMatchMessage = document.getElementById('password-match-message');
+            const profileForm = document.getElementById('profile-form');
+
+            // Store original form values for comparison
+            let originalProfileValues = {};
 
             // Function to toggle profile panel
             function toggleProfile(show) {
@@ -326,220 +355,386 @@ $conn->close();
             profilePanel.addEventListener('click', (e) => {
                 e.stopPropagation();
             });
-        });
 
-        // Profile image upload handling
-        const profileUpload = document.getElementById('profile-upload');
-        const profilePreview = document.getElementById('profile-preview');
-
-        profileUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const formData = new FormData();
-                formData.append('profile_image', file);
-
-                profilePreview.style.opacity = '0.5';
-                fetch('../profile/upload_image.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        profilePreview.src = data.image_path + '?t=' + new Date().getTime();
-                    } else {
-                        alert(data.message || 'Error uploading image');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error uploading image');
-                })
-                .finally(() => {
-                    profilePreview.style.opacity = '1';
+            // Store original profile form values
+            const captureOriginalValues = () => {
+                const formData = new FormData(profileForm);
+                formData.forEach((value, key) => {
+                    originalProfileValues[key] = value;
                 });
-            }
-        });
+            };
+            
+            // Capture initial values
+            captureOriginalValues();
 
-        // Update form submission handling with SweetAlert2
-        document.getElementById('profile-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            try {
-                const response = await fetch('../profile/update_profile.php', {
-                    method: 'POST',
-                    body: formData
-                });
+            // Reset password form
+            passwordForm.reset();
+
+            // Check if profile form has changes
+            function hasProfileChanges() {
+                const formData = new FormData(profileForm);
+                let hasChanges = false;
                 
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Show success message with SweetAlert2
-                    await Swal.fire({
-                        title: 'Success!',
-                        text: 'Profile successfully updated',
-                        icon: 'success',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#7556cc',
-                        position: 'top-end', // Position in top-right corner
-                        width: '300px', // Smaller width
-                        showConfirmButton: false, // Remove confirm button
-                        timer: 1000, // Auto close after 1 second
-                        toast: true, // Enable toast mode
-                        customClass: {
-                            popup: 'small-toast' // Custom class for additional styling
-                        }
-                    });
-                    // Refresh the page to show updated data
-                    setTimeout(() => window.location.reload(), 2000);
-                } else {
-                    // Show error message with SweetAlert2
-                    await Swal.fire({
-                        title: 'Error!',
-                        text: data.message || 'Error updating profile',
-                        icon: 'error',
-                        position: 'top-end',
-                        width: '300px',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        toast: true,
-                        customClass: {
-                            popup: 'small-toast'
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                // Show error message with SweetAlert2
-                await Swal.fire({
-                    title: 'Error!',
-                    text: 'An unexpected error occurred',
-                    icon: 'error',
-                    position: 'top-end',
-                    width: '300px',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    toast: true,
-                    customClass: {
-                        popup: 'small-toast'
+                formData.forEach((value, key) => {
+                    if (originalProfileValues[key] !== value) {
+                        hasChanges = true;
                     }
                 });
-            }
-        });
-
-        // Password change form handling
-        const passwordForm = document.getElementById('password-form');
-        const newPassword = document.getElementById('new_password');
-        const confirmPassword = document.getElementById('confirm_password');
-        const passwordMatchMessage = document.getElementById('password-match-message');
-
-        // Check if passwords match
-        function checkPasswordMatch() {
-            if (confirmPassword.value === '') {
-                passwordMatchMessage.textContent = '';
-                passwordMatchMessage.className = '';
-            } else if (newPassword.value === confirmPassword.value) {
-                passwordMatchMessage.textContent = 'Passwords match';
-                passwordMatchMessage.className = 'password-match success';
-            } else {
-                passwordMatchMessage.textContent = 'Passwords do not match';
-                passwordMatchMessage.className = 'password-match error';
-            }
-        }
-
-        // Add event listeners for password matching
-        newPassword.addEventListener('input', checkPasswordMatch);
-        confirmPassword.addEventListener('input', checkPasswordMatch);
-
-        // Password form submission
-        passwordForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Check if passwords match before submitting
-            if (newPassword.value !== confirmPassword.value) {
-                await Swal.fire({
-                    title: 'Error!',
-                    text: 'Passwords do not match',
-                    icon: 'error',
-                    position: 'top-end',
-                    width: '300px',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    toast: true,
-                    customClass: {
-                        popup: 'small-toast'
-                    }
-                });
-                return;
-            }
-            
-            const formData = new FormData(this);
-            
-            try {
-                const response = await fetch('../profile/change_password.php', {
-                    method: 'POST',
-                    body: formData
-                });
                 
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Show success message with SweetAlert2
-                    await Swal.fire({
-                        title: 'Success!',
-                        text: 'Password successfully updated',
-                        icon: 'success',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#7556cc',
-                        position: 'top-end',
-                        width: '300px',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        toast: true,
-                        customClass: {
-                            popup: 'small-toast'
-                        }
-                    });
-                    
-                    // Reset the form
-                    passwordForm.reset();
+                return hasChanges;
+            }
+
+            // Check if passwords match
+            function checkPasswordMatch() {
+                if (confirmPassword.value === '') {
                     passwordMatchMessage.textContent = '';
                     passwordMatchMessage.className = '';
+                } else if (newPassword.value === confirmPassword.value) {
+                    passwordMatchMessage.textContent = 'Passwords match';
+                    passwordMatchMessage.className = 'password-match success';
                 } else {
-                    // Show error message
-                    await Swal.fire({
-                        title: 'Error!',
-                        text: data.message || 'Error updating password',
-                        icon: 'error',
-                        position: 'top-end',
-                        width: '300px',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        toast: true,
-                        customClass: {
-                            popup: 'small-toast'
-                        }
-                    });
+                    passwordMatchMessage.textContent = 'Passwords do not match';
+                    passwordMatchMessage.className = 'password-match error';
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                await Swal.fire({
-                    title: 'Error!',
-                    text: 'An unexpected error occurred',
-                    icon: 'error',
-                    position: 'top-end',
-                    width: '300px',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    toast: true,
-                    customClass: {
-                        popup: 'small-toast'
-                    }
+            }
+
+            // Add event listeners for password matching
+            newPassword.addEventListener('input', checkPasswordMatch);
+            confirmPassword.addEventListener('input', checkPasswordMatch);
+
+            // Notification display function
+            function showNotification(message, type = 'success') {
+                const notificationContainer = document.getElementById('notification-container');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                
+                // Create notification content
+                notification.innerHTML = `
+                    <div class="notification-icon">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    </div>
+                    <div class="notification-message">${message}</div>
+                    <button class="notification-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                // Add to container
+                notificationContainer.appendChild(notification);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    notification.classList.add('fade-out');
+                    setTimeout(() => notification.remove(), 500);
+                }, 5000);
+                
+                // Close button event
+                notification.querySelector('.notification-close').addEventListener('click', () => {
+                    notification.classList.add('fade-out');
+                    setTimeout(() => notification.remove(), 500);
                 });
             }
+
+            // Profile image upload handling
+            const profileUpload = document.getElementById('profile-upload');
+            const profilePreview = document.getElementById('profile-preview');
+
+            profileUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('profile_image', file);
+
+                    profilePreview.style.opacity = '0.5';
+                    fetch('../profile/upload_image.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            profilePreview.src = data.image_path + '?t=' + new Date().getTime();
+                            showNotification('Profile image successfully uploaded');
+                        } else {
+                            showNotification(data.message || 'Error uploading image', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Error uploading image', 'error');
+                    })
+                    .finally(() => {
+                        profilePreview.style.opacity = '1';
+                    });
+                }
+            });
+
+            // PROFILE FORM SUBMISSION HANDLER
+            profileForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Check if any changes were made
+                if (!hasProfileChanges()) {
+                    showNotification('No changes were made to your profile', 'error');
+                    return;
+                }
+                
+                const formData = new FormData(this);
+                
+                try {
+                    const response = await fetch('../profile/update_profile.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Show success notification
+                        showNotification('Profile successfully updated');
+                        
+                        // Update original values to new values
+                        captureOriginalValues();
+                        
+                        // Refresh the page after short delay
+                        setTimeout(() => window.location.reload(), 2000);
+                    } else {
+                        // Show error notification
+                        showNotification(data.message || 'Error updating profile', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('An unexpected error occurred', 'error');
+                }
+            });
+
+            // PASSWORD FORM SUBMISSION HANDLER
+            passwordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Check if passwords match before submitting
+                if (newPassword.value !== confirmPassword.value) {
+                    showNotification('Passwords do not match', 'error');
+                    return;
+                }
+                
+                // Check if password fields are empty
+                if (!newPassword.value || !document.querySelector('input[name="current_password"]').value) {
+                    showNotification('Please enter all password fields', 'error');
+                    return;
+                }
+                
+                const formData = new FormData(this);
+                
+                try {
+                    const response = await fetch('../profile/change_password.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Show success notification
+                        showNotification('Password successfully updated');
+                        
+                        // Reset the form
+                        passwordForm.reset();
+                        passwordMatchMessage.textContent = '';
+                        passwordMatchMessage.className = '';
+                    } else {
+                        // Show error notification
+                        showNotification(data.message || 'Error updating password', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('An unexpected error occurred', 'error');
+                }
+            });
+
+            // Tab switching functionality
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons and panes
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding pane
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
         });
+
+        // Add CSS for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            .notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 350px;
+            }
+            
+            .notification {
+                display: flex;
+                align-items: center;
+                padding: 12px 15px;
+                border-radius: 8px;
+                background-color: #fff;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+                margin-bottom: 10px;
+                animation: slide-in 0.3s ease-out forwards;
+                border-left: 5px solid;
+            }
+            
+            .notification.success {
+                border-left-color: #4CAF50;
+            }
+            
+            .notification.error {
+                border-left-color: #F44336;
+            }
+            
+            .notification-icon {
+                margin-right: 12px;
+                font-size: 18px;
+            }
+            
+            .notification.success .notification-icon {
+                color: #4CAF50;
+            }
+            
+            .notification.error .notification-icon {
+                color: #F44336;
+            }
+            
+            .notification-message {
+                flex: 1;
+                font-size: 14px;
+            }
+            
+            .notification-close {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 14px;
+                color: #777;
+                padding: 0;
+                margin-left: 10px;
+            }
+            
+            .notification-close:hover {
+                color: #333;
+            }
+            
+            .notification.fade-out {
+                opacity: 0;
+                transform: translateX(30px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+            
+            @keyframes slide-in {
+                from {
+                    opacity: 0;
+                    transform: translateX(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            .tabs-container {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .tab-headers {
+                display: flex;
+                border-bottom: 1px solid #ddd;
+                margin-bottom: 20px;
+            }
+            
+            .tab-btn {
+                padding: 12px 20px;
+                background: transparent;
+                border: none;
+                border-bottom: 3px solid transparent;
+                color: #555;
+                font-weight: 600;
+                font-size: 15px;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .tab-btn:hover {
+                color: #7556cc;
+                background-color: rgba(117, 86, 204, 0.05);
+            }
+            
+            .tab-btn.active {
+                color: #7556cc;
+                border-bottom-color: #7556cc;
+            }
+            
+            .tab-btn i {
+                font-size: 16px;
+            }
+            
+            .tab-content {
+                flex: 1;
+            }
+            
+            .tab-pane {
+                display: none;
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            
+            .tab-pane.active {
+                display: block;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            /* Profile image section adjustments */
+            .profile-image-section {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 25px;
+            }
+            
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .tab-headers {
+                    flex-direction: row;
+                    overflow-x: auto;
+                }
+                
+                .tab-btn {
+                    flex: 1;
+                    white-space: nowrap;
+                    padding: 10px 15px;
+                    font-size: 14px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

@@ -1577,7 +1577,6 @@ input[type="submit"]:active {
 
 .password-match {
     display: block;
-    margin-top: 5px;
     font-size: 12px;
 }
 
