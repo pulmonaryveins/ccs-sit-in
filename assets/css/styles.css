@@ -1557,6 +1557,38 @@ input[type="submit"]:active {
     -webkit-text-fill-color: transparent;
 }
 
+/* Password Change Section Styles */
+.password-change-section {
+    margin-top: 30px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 20px;
+}
+
+.password-change-section h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.password-form .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.password-match {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.password-match.success {
+    color: green;
+}
+
+.password-match.error {
+    color: red;
+}
+
 .chart-container {
     background: white;
     padding: 2rem;

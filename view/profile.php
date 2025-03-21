@@ -256,6 +256,33 @@ $conn->close();
                         </button>
                     </div>
                 </form>
+                
+                <!-- Add Password Change Section -->
+                <div class="password-change-section">
+                    <h3>Change Password</h3>
+                    <form id="password-form" class="password-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" name="current_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" name="new_password" id="new_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm New Password</label>
+                                <input type="password" name="confirm_password" id="confirm_password" required>
+                                <small id="password-match-message"></small>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="save-btn">
+                                <i class="fas fa-key"></i> Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -386,6 +413,118 @@ $conn->close();
             } catch (error) {
                 console.error('Error:', error);
                 // Show error message with SweetAlert2
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'An unexpected error occurred',
+                    icon: 'error',
+                    position: 'top-end',
+                    width: '300px',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    toast: true,
+                    customClass: {
+                        popup: 'small-toast'
+                    }
+                });
+            }
+        });
+
+        // Password change form handling
+        const passwordForm = document.getElementById('password-form');
+        const newPassword = document.getElementById('new_password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const passwordMatchMessage = document.getElementById('password-match-message');
+
+        // Check if passwords match
+        function checkPasswordMatch() {
+            if (confirmPassword.value === '') {
+                passwordMatchMessage.textContent = '';
+                passwordMatchMessage.className = '';
+            } else if (newPassword.value === confirmPassword.value) {
+                passwordMatchMessage.textContent = 'Passwords match';
+                passwordMatchMessage.className = 'password-match success';
+            } else {
+                passwordMatchMessage.textContent = 'Passwords do not match';
+                passwordMatchMessage.className = 'password-match error';
+            }
+        }
+
+        // Add event listeners for password matching
+        newPassword.addEventListener('input', checkPasswordMatch);
+        confirmPassword.addEventListener('input', checkPasswordMatch);
+
+        // Password form submission
+        passwordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Check if passwords match before submitting
+            if (newPassword.value !== confirmPassword.value) {
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'Passwords do not match',
+                    icon: 'error',
+                    position: 'top-end',
+                    width: '300px',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    toast: true,
+                    customClass: {
+                        popup: 'small-toast'
+                    }
+                });
+                return;
+            }
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('../profile/change_password.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message with SweetAlert2
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'Password successfully updated',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#7556cc',
+                        position: 'top-end',
+                        width: '300px',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        toast: true,
+                        customClass: {
+                            popup: 'small-toast'
+                        }
+                    });
+                    
+                    // Reset the form
+                    passwordForm.reset();
+                    passwordMatchMessage.textContent = '';
+                    passwordMatchMessage.className = '';
+                } else {
+                    // Show error message
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Error updating password',
+                        icon: 'error',
+                        position: 'top-end',
+                        width: '300px',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        toast: true,
+                        customClass: {
+                            popup: 'small-toast'
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
                 await Swal.fire({
                     title: 'Error!',
                     text: 'An unexpected error occurred',
