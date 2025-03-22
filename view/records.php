@@ -149,6 +149,29 @@ function getYearLevelDisplay($yearLevel) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Add page opening animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-wrapper {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .table-wrapper {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .filter-tabs {
+            animation: fadeIn 0.7s ease-out forwards;
+        }
+        
+        .records-container {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->

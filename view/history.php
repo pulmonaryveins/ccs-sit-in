@@ -107,6 +107,29 @@ $conn->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+        /* Add page opening animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .history-container {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .content-card {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .card-header {
+            animation: fadeIn 0.7s ease-out forwards;
+        }
+        
+        .card-content {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->

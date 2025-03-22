@@ -63,6 +63,28 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             margin: 0;
             color: #856404;
         }
+        
+        /* Add page opening animation matching request.php */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-wrapper {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .table-wrapper {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .filter-tabs {
+            animation: fadeIn 0.7s ease-out forwards;
+        }
+        
+        .view-container {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
     </style>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/sit-in.css">
@@ -208,9 +230,11 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                             <div class="search-container">
                                 <div class="search-field">
                                     <input type="text" id="student_idno" name="idno" placeholder="Enter student ID number..." autocomplete="off">
-                                    <button type="button" id="searchStudentBtn">
-                                        <i class="ri-search-line"></i> Search
-                                    </button>
+                                    <div class="search-button-wrapper">
+                                        <button type="button" id="searchStudentBtn">
+                                            <i class="ri-search-line"></i> Search
+                                        </button>
+                                    </div>
                                 </div>
                             
                                 <!-- Student info with redesigned layout -->

@@ -100,6 +100,30 @@ if ($feedback_table_exists) {
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        /* Add page opening animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-wrapper {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .table-wrapper {
+            animation: fadeIn 0.6s ease-out forwards;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .filter-tabs {
+            animation: fadeIn 0.7s ease-out forwards;
+        }
+        
+        .report-container {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->

@@ -10,11 +10,11 @@
         .table-wrapper {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             width: 100%;
             max-width: 1600px;
             padding: 0;
             overflow: hidden;
+            border: 1px solid #e0e0e0;
         }
 
         .table-header {
