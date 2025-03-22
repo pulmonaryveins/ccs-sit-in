@@ -155,8 +155,92 @@ if ($result) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Page animation styles */
+        body {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .admin-dashboard {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUpFade 0.8s ease-out 0.2s forwards;
+        }
+        
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .nav-container {
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: navSlideDown 0.5s ease-out forwards;
+        }
+        
+        @keyframes navSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stats-grid .stat-card {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: cardFadeIn 0.5s ease-out forwards;
+        }
+        
+        .stats-grid .stat-card:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+        
+        .stats-grid .stat-card:nth-child(2) {
+            animation-delay: 0.45s;
+        }
+        
+        .stats-grid .stat-card:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Add notification container after body tag -->
+    <div id="notification-container"></div>
+    
     <!-- Navigation Bar -->
     <div class="nav-container">
         <div class="nav-wrapper">
@@ -606,6 +690,33 @@ if ($result) {
             
             .delete-btn:hover {
                 background-color: #dc2626;
+            }
+            
+            /* Additional staggered animations for dashboard elements */
+            .announcements-grid {
+                opacity: 0;
+                animation: fadeUp 0.7s ease-out 0.7s forwards;
+            }
+            
+            .chart-card {
+                opacity: 0;
+                animation: fadeUp 0.7s ease-out 0.9s forwards;
+            }
+            
+            .charts-grid {
+                opacity: 0;
+                animation: fadeUp 0.7s ease-out 1.1s forwards;
+            }
+            
+            @keyframes fadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(15px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
         </style>
         `);

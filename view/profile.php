@@ -172,12 +172,8 @@ $conn->close();
 
             <div class="tabs-container">
                 <div class="tab-headers">
-                    <button class="tab-btn active" data-tab="profile-tab">
-                        <i class="fas fa-user-edit"></i> Edit Profile
-                    </button>
-                    <button class="tab-btn" data-tab="password-tab">
-                        <i class="fas fa-key"></i> Change Password
-                    </button>
+                    <button class="tab-btn active" data-tab="profile-tab">Edit Profile</button>
+                    <button class="tab-btn" data-tab="password-tab">Change Password</button>
                 </div>
 
                 <div class="profile-content">
@@ -671,8 +667,8 @@ $conn->close();
                 border: none;
                 border-bottom: 3px solid transparent;
                 color: #555;
-                font-weight: 600;
-                font-size: 15px;
+                font-weight: 400;
+                font-size: 13px;
                 cursor: pointer;
                 transition: all 0.3s;
                 display: flex;
@@ -682,7 +678,6 @@ $conn->close();
             
             .tab-btn:hover {
                 color: #7556cc;
-                background-color: rgba(117, 86, 204, 0.05);
             }
             
             .tab-btn.active {

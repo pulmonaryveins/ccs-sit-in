@@ -81,7 +81,7 @@ $conn->close();
         /* Add styles for sessions count */
         .sessions-count {
             font-weight: 600;
-            color: #16a34a;
+            color: #7556cc;
         }
         
         .sessions-count.low {
@@ -90,6 +90,75 @@ $conn->close();
         
         .sessions-count.medium {
             color: #ea580c;
+        }
+        
+        /* Enhanced announcement styles */
+        .announcement-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
+        }
+        
+        .announcement-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .announcement-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .announcement-list::-webkit-scrollbar-thumb {
+            background-color: rgba(117, 86, 204, 0.5);
+            border-radius: 10px;
+        }
+        
+        .announcement-item {
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .announcement-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .announcement-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .announcement-title i {
+            color: #7556cc;
+            font-size: 1.25rem;
+            margin-right: 8px;
+        }
+        
+        .announcement-title h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #334155;
+            margin: 0;
+        }
+        
+        .announcement-details {
+            padding-left: 32px;
+        }
+        
+        .announcement-details p {
+            margin-bottom: 10px;
+            color: #475569;
+            line-height: 1.5;
+        }
+        
+        .timestamp {
+            display: block;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-align: right;
         }
     </style>
 </head>
@@ -326,15 +395,26 @@ $conn->close();
             height: 750px; /* Increased from 700px */
         }
 
-        .announcement-container {
-            height: 750px; /* Match container height */
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
         /* Ensure consistent scrolling behavior */
         .rules-container {
             height: 700px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
+            padding-right: 10px;
+        }
+        
+        .rules-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .rules-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .rules-container::-webkit-scrollbar-thumb {
+            background-color: rgba(117, 86, 204, 0.5);
+            border-radius: 10px;
         }
     </style>
 
