@@ -590,8 +590,9 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         document.getElementById('searchStudentBtn').innerHTML = '<i class="ri-loader-4-line"></i> Searching...';
         document.getElementById('searchStudentBtn').disabled = true;
         
-        // Clear the previous search result
+        // Reset animation by hiding and removing animation classes
         studentInfo.style.display = 'none';
+        studentInfo.classList.remove('animated');
         
         // Remove any previous active warning
         const existingWarning = document.querySelector('.active-student-warning');
@@ -639,8 +640,14 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                     if (existingField) existingField.remove();
                     document.getElementById('addSitInForm').appendChild(hiddenIdField);
                     
-                    // Show the student info section
-                    studentInfo.style.display = 'grid';
+                    // Show the student info section with animation
+                    studentInfo.style.display = 'flex'; // Changed from 'grid' to 'flex'
+                    
+                    // Force a reflow to ensure animation triggers properly
+                    void studentInfo.offsetWidth;
+                    
+                    // Add animation class to trigger the animation
+                    studentInfo.classList.add('animated');
                     
                     // Check if student is already active in a laboratory
                     if (student.is_active) {

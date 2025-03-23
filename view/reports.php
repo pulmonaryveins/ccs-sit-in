@@ -522,104 +522,281 @@ if ($feedback_table_exists) {
     </style>
 
     <script>
+        // Add the missing updateClock function
+        function updateClock() {
+            // Simple placeholder for clock functionality
+        }
+        
         // Update realtime elements
         function updateRealTimeElements() {
-            // Update clock
-            updateClock();
-            
-            // Update time out for active sessions
-            const realTimeOuts = document.querySelectorAll('.realtime-out');
-            if (realTimeOuts.length > 0) {
-                // Get current time in Asia/Manila timezone
-                const now = new Date();
-                const options = {
-                    hour: '2-digit', 
-                    minute: '2-digit', 
-                    hour12: true,
-                    timeZone: 'Asia/Manila'
-                };
-                const currentTime = now.toLocaleTimeString('en-US', options);
-                
-                realTimeOuts.forEach(element => {
-                    element.innerHTML = `${currentTime} (PST)`;
-                });
-            }
+            // Simple placeholder for clock functionality
         }
 
-        // Filter functionality
-        document.querySelectorAll('.filter-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all tabs
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                // Add active class to clicked tab
-                this.classList.add('active');
-                
-                // Get filter value
-                const filterValue = this.getAttribute('data-filter');
-                
-                // Filter table rows
-                const rows = document.querySelectorAll('#reports-table-body tr');
-                rows.forEach(row => {
-                    if (row.querySelector('.empty-state')) return; // Skip empty state row
+        // Pagination functionality - FIXED
+        let currentPage = 1;
+        let entriesPerPage = 10;
+        let feedbackCurrentPage = 1;
+        let feedbackEntriesPerPage = 10;
+        let currentFilter = 'all'; // Track the current filter
+        let currentFeedbackFilter = 'all'; // Track the current feedback filter
+        
+        // COMPLETELY REWRITTEN TAB NAVIGATION CODE
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM Loaded - Setting up tab navigation");
+            
+            // REMOVE ALL EXISTING CLICK HANDLERS to prevent duplicates
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                const clone = tab.cloneNode(true);
+                tab.parentNode.replaceChild(clone, tab);
+            });
+            
+            // 1. MAIN TABS (Activity vs Feedback)
+            const mainTabs = document.querySelectorAll('.report-type-tabs .filter-tab');
+            mainTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const reportType = this.getAttribute('data-report');
+                    console.log(`Main tab clicked: ${reportType}`);
                     
-                    const rowType = row.getAttribute('data-type');
-                    if (filterValue === 'all' || filterValue === rowType) {
-                        row.style.display = '';
+                    // Update active states
+                    mainTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show/hide containers
+                    document.querySelectorAll('.report-container').forEach(container => {
+                        container.classList.remove('active');
+                    });
+                    
+                    const targetContainer = document.getElementById(`${reportType}-reports`);
+                    targetContainer.classList.add('active');
+                    
+                    // Reset search
+                    document.getElementById('searchInput').value = '';
+                    
+                    // Apply correct pagination
+                    if (reportType === 'activity') {
+                        filterActivityRows(currentFilter);
+                        applyPagination();
                     } else {
-                        row.style.display = 'none';
+                        filterFeedbackRows(currentFeedbackFilter);
+                        applyFeedbackPagination();
                     }
                 });
-                
-                // Reset pagination to first page and update
-                currentPage = 1;
-                applyPagination();
             });
+            
+            // 2. ACTIVITY FILTER TABS (All/Reservations/Direct Sit-ins)
+            const activityFilterTabs = document.querySelectorAll('#activity-reports .filter-tabs .filter-tab');
+            activityFilterTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const filterValue = this.getAttribute('data-filter');
+                    console.log(`Activity filter clicked: ${filterValue}`);
+                    
+                    // Update active states
+                    activityFilterTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Apply filter
+                    filterActivityRows(filterValue);
+                    applyPagination();
+                });
+            });
+            
+            // 3. FEEDBACK FILTER TABS (All/5 Stars/4 Stars/etc)
+            const feedbackFilterTabs = document.querySelectorAll('#feedback-reports .filter-tabs .filter-tab');
+            feedbackFilterTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const filterValue = this.getAttribute('data-feedback-filter');
+                    console.log(`Feedback filter clicked: ${filterValue}`);
+                    
+                    // Update active states
+                    feedbackFilterTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Apply filter
+                    filterFeedbackRows(filterValue);
+                    applyFeedbackPagination();
+                });
+            });
+            
+            // Initialize pagination controls
+            initPaginationControls();
+            
+            // Apply initial filters and pagination
+            filterActivityRows('all');
+            filterFeedbackRows('all');
+            applyPagination();
+            applyFeedbackPagination();
+            
+            // Update realtime elements
+            updateClock();
+            setInterval(updateRealTimeElements, 1000);
+            
+            // Initialize search
+            setupSearch();
+            
+            // Make feedback messages expandable
+            initializeFeedbackMessages();
+            
+            // Initialize export buttons
+            document.getElementById('exportCSV').addEventListener('click', exportToCSV);
+            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            document.getElementById('exportPDF').addEventListener('click', exportToPDF);
+            document.getElementById('printReport').addEventListener('click', printReport);
         });
-
-        // Search functionality
-        document.getElementById('searchInput')?.addEventListener('keyup', function() {
-            let searchText = this.value.toLowerCase();
+        
+        // FILTER FUNCTIONS
+        function filterActivityRows(filterValue, resetPage = true) {
+            // Update current filter
+            currentFilter = filterValue;
+            console.log(`Filtering activity rows by: ${filterValue}`);
+            
             const rows = document.querySelectorAll('#reports-table-body tr');
             
             rows.forEach(row => {
                 if (row.querySelector('.empty-state')) return; // Skip empty state row
                 
-                let text = row.textContent.toLowerCase();
-                const filterValue = document.querySelector('.filter-tab.active').getAttribute('data-filter');
                 const rowType = row.getAttribute('data-type');
-                
-                // Check if row matches both filter and search
-                if ((filterValue === 'all' || filterValue === rowType) && text.includes(searchText)) {
-                    row.style.display = '';
+                if (filterValue === 'all' || filterValue === rowType) {
+                    row.classList.remove('filtered-out');
                 } else {
-                    row.style.display = 'none';
+                    row.classList.add('filtered-out');
                 }
             });
             
-            // Reset pagination to first page and update
-            currentPage = 1;
-            applyPagination();
-        });
-
-        // Pagination functionality
-        let currentPage = 1;
-        let entriesPerPage = 10;
+            // Reset pagination to first page if requested
+            if (resetPage) {
+                currentPage = 1;
+            }
+        }
         
-        function applyPagination() {
-            // Get visible rows (after filtering)
-            const visibleRows = Array.from(document.querySelectorAll('#reports-table-body tr'))
-                .filter(row => row.style.display !== 'none' && !row.querySelector('.empty-state'));
+        function filterFeedbackRows(filterValue, resetPage = true) {
+            // Update current filter
+            currentFeedbackFilter = filterValue;
+            console.log(`Filtering feedback rows by: ${filterValue}`);
             
-            const totalPages = Math.ceil(visibleRows.length / entriesPerPage);
+            const rows = document.querySelectorAll('#feedback-table-body tr');
+            
+            rows.forEach(row => {
+                if (row.querySelector('.empty-state')) return; // Skip empty state row
+                
+                const rowRating = row.getAttribute('data-rating');
+                if (filterValue === 'all' || filterValue === rowRating) {
+                    row.classList.remove('filtered-out');
+                } else {
+                    row.classList.add('filtered-out');
+                }
+            });
+            
+            // Reset pagination to first page if requested
+            if (resetPage) {
+                feedbackCurrentPage = 1;
+            }
+        }
+        
+        // SEARCH FUNCTIONALITY
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    const searchText = this.value.toLowerCase();
+                    
+                    // Determine which tab is active
+                    const isActivityActive = document.getElementById('activity-reports').classList.contains('active');
+                    
+                    if (isActivityActive) {
+                        // Apply both filter and search for activity records
+                        const rows = document.querySelectorAll('#reports-table-body tr');
+                        
+                        rows.forEach(row => {
+                            if (row.querySelector('.empty-state')) return; // Skip empty state row
+                            
+                            const text = row.textContent.toLowerCase();
+                            const rowType = row.getAttribute('data-type');
+                            
+                            // Apply both current filter and search
+                            if ((currentFilter === 'all' || currentFilter === rowType) && text.includes(searchText)) {
+                                row.classList.remove('filtered-out');
+                            } else {
+                                row.classList.add('filtered-out');
+                            }
+                        });
+                        
+                        // Reset to first page and apply pagination
+                        currentPage = 1;
+                        applyPagination();
+                    } else {
+                        // Apply both filter and search for feedback records
+                        const rows = document.querySelectorAll('#feedback-table-body tr');
+                        
+                        rows.forEach(row => {
+                            if (row.querySelector('.empty-state')) return; // Skip empty state row
+                            
+                            const text = row.textContent.toLowerCase();
+                            const rowRating = row.getAttribute('data-rating');
+                            
+                            // Apply both current filter and search
+                            if ((currentFeedbackFilter === 'all' || currentFeedbackFilter === rowRating) && text.includes(searchText)) {
+                                row.classList.remove('filtered-out');
+                            } else {
+                                row.classList.add('filtered-out');
+                            }
+                        });
+                        
+                        // Reset to first page and apply pagination
+                        feedbackCurrentPage = 1;
+                        applyFeedbackPagination();
+                    }
+                });
+            }
+        }
+        
+        // PAGINATION FUNCTIONS
+        function applyPagination() {
+            // Get all rows first
+            const allRows = Array.from(document.querySelectorAll('#reports-table-body tr'))
+                .filter(row => !row.querySelector('.empty-state'));
+            
+            // Apply current filter to determine visible rows
+            allRows.forEach(row => {
+                const rowType = row.getAttribute('data-type');
+                if (currentFilter === 'all' || currentFilter === rowType) {
+                    row.classList.remove('filtered-out');
+                } else {
+                    row.classList.add('filtered-out');
+                }
+            });
+            
+            // Get filtered rows
+            const visibleRows = allRows.filter(row => !row.classList.contains('filtered-out'));
+            
+            const totalPages = Math.max(1, Math.ceil(visibleRows.length / entriesPerPage));
+            
+            // Ensure current page is valid
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            
             const startIndex = (currentPage - 1) * entriesPerPage;
             const endIndex = Math.min(startIndex + entriesPerPage, visibleRows.length);
             
             // Hide all rows first
-            visibleRows.forEach(row => row.style.display = 'none');
+            allRows.forEach(row => {
+                row.style.display = 'none';
+            });
             
-            // Show only rows for current page
-            for (let i = startIndex; i < endIndex; i++) {
-                visibleRows[i].style.display = '';
+            // Empty state handling
+            if (visibleRows.length === 0) {
+                const emptyRow = document.querySelector('#reports-table-body tr .empty-state');
+                if (emptyRow) {
+                    emptyRow.closest('tr').style.display = '';
+                }
+            } else {
+                // Show only rows for current page
+                for (let i = startIndex; i < endIndex; i++) {
+                    visibleRows[i].style.display = '';
+                }
             }
             
             // Update page info
@@ -637,6 +814,7 @@ if ($feedback_table_exists) {
             // Previous button
             const prevBtn = document.createElement('button');
             prevBtn.className = 'page-btn';
+            prevBtn.setAttribute('data-action', 'prev');
             prevBtn.textContent = 'Previous';
             prevBtn.disabled = currentPage === 1;
             prevBtn.addEventListener('click', () => {
@@ -647,17 +825,19 @@ if ($feedback_table_exists) {
             });
             paginationContainer.appendChild(prevBtn);
             
-            // Page number buttons
-            let startPage = Math.max(1, currentPage - 2);
-            let endPage = Math.min(totalPages, startPage + 4);
+            // Page number buttons - show up to 5 pages
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
             
-            if (endPage - startPage < 4 && startPage > 1) {
-                startPage = Math.max(1, endPage - 4);
+            if (endPage - startPage < maxButtons - 1 && startPage > 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
             }
             
             for (let i = startPage; i <= endPage; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.setAttribute('data-page', i);
                 pageBtn.textContent = i;
                 pageBtn.addEventListener('click', () => {
                     currentPage = i;
@@ -669,6 +849,7 @@ if ($feedback_table_exists) {
             // Next button
             const nextBtn = document.createElement('button');
             nextBtn.className = 'page-btn';
+            nextBtn.setAttribute('data-action', 'next');
             nextBtn.textContent = 'Next';
             nextBtn.disabled = currentPage === totalPages || totalPages === 0;
             nextBtn.addEventListener('click', () => {
@@ -680,108 +861,40 @@ if ($feedback_table_exists) {
             paginationContainer.appendChild(nextBtn);
         }
         
-        // Update entries per page
-        document.getElementById('entries-per-page')?.addEventListener('change', function() {
-            entriesPerPage = parseInt(this.value);
-            currentPage = 1; // Reset to first page
-            applyPagination();
-        });
-
-        // Initialize functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Start the clock
-            updateClock();
-            setInterval(updateRealTimeElements, 1000);
-            
-            // Initialize pagination
-            applyPagination();
-        });
-        
-        // Report type tab switching
-        document.querySelectorAll('.report-type-tabs .filter-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all report type tabs
-                document.querySelectorAll('.report-type-tabs .filter-tab').forEach(t => t.classList.remove('active'));
-                // Add active class to clicked tab
-                this.classList.add('active');
-                
-                // Get report type
-                const reportType = this.getAttribute('data-report');
-                
-                // Hide all report containers
-                document.querySelectorAll('.report-container').forEach(container => {
-                    container.classList.remove('active');
-                });
-                
-                // Show the selected report container
-                document.getElementById(reportType + '-reports').classList.add('active');
-                
-                // Reset search input when switching report types
-                document.getElementById('searchInput').value = '';
-                
-                // Initialize appropriate pagination
-                if (reportType === 'activity') {
-                    currentPage = 1;
-                    applyPagination();
-                } else if (reportType === 'feedback') {
-                    feedbackCurrentPage = 1;
-                    applyFeedbackPagination();
-                }
-            });
-        });
-        
-        // Feedback filter functionality
-        document.querySelectorAll('[data-feedback-filter]').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all feedback filter tabs
-                document.querySelectorAll('[data-feedback-filter]').forEach(t => t.classList.remove('active'));
-                // Add active class to clicked tab
-                this.classList.add('active');
-                
-                // Get filter value (rating)
-                const filterValue = this.getAttribute('data-feedback-filter');
-                
-                // Filter feedback table rows
-                const rows = document.querySelectorAll('#feedback-table-body tr');
-                rows.forEach(row => {
-                    if (row.querySelector('.empty-state')) return; // Skip empty state row
-                    
-                    const rowRating = row.getAttribute('data-rating');
-                    if (filterValue === 'all' || filterValue === rowRating) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-                
-                // Reset pagination to first page and update
-                feedbackCurrentPage = 1;
-                applyFeedbackPagination();
-            });
-        });
-        
-        // Activity tab pagination functionality (existing)
-        // Note: currentPage and entriesPerPage are already declared above
-        
-        // Feedback tab pagination functionality
-        let feedbackCurrentPage = 1;
-        let feedbackEntriesPerPage = 10;
-        
         function applyFeedbackPagination() {
-            // Get visible rows (after filtering)
-            const visibleRows = Array.from(document.querySelectorAll('#feedback-table-body tr'))
-                .filter(row => row.style.display !== 'none' && !row.querySelector('.empty-state'));
+            // Get all rows first
+            const allRows = Array.from(document.querySelectorAll('#feedback-table-body tr'))
+                .filter(row => !row.querySelector('.empty-state'));
             
-            const totalPages = Math.ceil(visibleRows.length / feedbackEntriesPerPage);
+            // Get filtered rows
+            const visibleRows = allRows.filter(row => !row.classList.contains('filtered-out'));
+            
+            const totalPages = Math.max(1, Math.ceil(visibleRows.length / feedbackEntriesPerPage));
+            
+            // Ensure current page is valid
+            if (feedbackCurrentPage > totalPages) {
+                feedbackCurrentPage = totalPages;
+            }
+            
             const startIndex = (feedbackCurrentPage - 1) * feedbackEntriesPerPage;
             const endIndex = Math.min(startIndex + feedbackEntriesPerPage, visibleRows.length);
             
             // Hide all rows first
-            visibleRows.forEach(row => row.style.display = 'none');
+            allRows.forEach(row => {
+                row.style.display = 'none';
+            });
             
-            // Show only rows for current page
-            for (let i = startIndex; i < endIndex; i++) {
-                visibleRows[i].style.display = '';
+            // Empty state handling
+            if (visibleRows.length === 0) {
+                const emptyRow = document.querySelector('#feedback-table-body tr .empty-state');
+                if (emptyRow) {
+                    emptyRow.closest('tr').style.display = '';
+                }
+            } else {
+                // Show only rows for current page
+                for (let i = startIndex; i < endIndex; i++) {
+                    visibleRows[i].style.display = '';
+                }
             }
             
             // Update page info
@@ -799,6 +912,7 @@ if ($feedback_table_exists) {
             // Previous button
             const prevBtn = document.createElement('button');
             prevBtn.className = 'page-btn';
+            prevBtn.setAttribute('data-action', 'prev');
             prevBtn.textContent = 'Previous';
             prevBtn.disabled = feedbackCurrentPage === 1;
             prevBtn.addEventListener('click', () => {
@@ -809,17 +923,19 @@ if ($feedback_table_exists) {
             });
             paginationContainer.appendChild(prevBtn);
             
-            // Page number buttons
-            let startPage = Math.max(1, feedbackCurrentPage - 2);
-            let endPage = Math.min(totalPages, startPage + 4);
+            // Page number buttons - show up to 5 pages
+            const maxButtons = 5;
+            let startPage = Math.max(1, feedbackCurrentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
             
-            if (endPage - startPage < 4 && startPage > 1) {
-                startPage = Math.max(1, endPage - 4);
+            if (endPage - startPage < maxButtons - 1 && startPage > 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
             }
             
             for (let i = startPage; i <= endPage; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.className = `page-btn ${i === feedbackCurrentPage ? 'active' : ''}`;
+                pageBtn.setAttribute('data-page', i);
                 pageBtn.textContent = i;
                 pageBtn.addEventListener('click', () => {
                     feedbackCurrentPage = i;
@@ -831,6 +947,7 @@ if ($feedback_table_exists) {
             // Next button
             const nextBtn = document.createElement('button');
             nextBtn.className = 'page-btn';
+            nextBtn.setAttribute('data-action', 'next');
             nextBtn.textContent = 'Next';
             nextBtn.disabled = feedbackCurrentPage === totalPages || totalPages === 0;
             nextBtn.addEventListener('click', () => {
@@ -842,81 +959,34 @@ if ($feedback_table_exists) {
             paginationContainer.appendChild(nextBtn);
         }
         
-        // Update entries per page for feedback
-        document.getElementById('feedback-entries-per-page')?.addEventListener('change', function() {
-            feedbackEntriesPerPage = parseInt(this.value);
-            feedbackCurrentPage = 1; // Reset to first page
-            applyFeedbackPagination();
-        });
-        
-        // Apply search to both tables
-        document.getElementById('searchInput')?.addEventListener('keyup', function() {
-            let searchText = this.value.toLowerCase();
+        function initPaginationControls() {
+            const entriesPerPageSelect = document.getElementById('entries-per-page');
+            const feedbackEntriesPerPageSelect = document.getElementById('feedback-entries-per-page');
             
-            // If activity reports are active
-            if (document.getElementById('activity-reports').classList.contains('active')) {
-                const rows = document.querySelectorAll('#reports-table-body tr');
-                
-                rows.forEach(row => {
-                    if (row.querySelector('.empty-state')) return; // Skip empty state row
+            if (entriesPerPageSelect) {
+                entriesPerPageSelect.value = entriesPerPage;
+                entriesPerPageSelect.addEventListener('change', function() {
+                    entriesPerPage = parseInt(this.value);
+                    currentPage = 1; // Reset to first page
                     
-                    let text = row.textContent.toLowerCase();
-                    const filterValue = document.querySelector('#activity-reports .filter-tab.active').getAttribute('data-filter');
-                    const rowType = row.getAttribute('data-type');
-                    
-                    // Check if row matches both filter and search
-                    if ((filterValue === 'all' || filterValue === rowType) && text.includes(searchText)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                    // Apply current filter when entries per page changes
+                    filterActivityRows(currentFilter, false);
+                    applyPagination();
                 });
-                
-                // Reset pagination to first page and update
-                currentPage = 1;
-                applyPagination();
             }
             
-            // If feedback reports are active
-            if (document.getElementById('feedback-reports').classList.contains('active')) {
-                const rows = document.querySelectorAll('#feedback-table-body tr');
-                
-                rows.forEach(row => {
-                    if (row.querySelector('.empty-state')) return; // Skip empty state row
+            if (feedbackEntriesPerPageSelect) {
+                feedbackEntriesPerPageSelect.value = feedbackEntriesPerPage;
+                feedbackEntriesPerPageSelect.addEventListener('change', function() {
+                    feedbackEntriesPerPage = parseInt(this.value);
+                    feedbackCurrentPage = 1; // Reset to first page
                     
-                    let text = row.textContent.toLowerCase();
-                    const filterValue = document.querySelector('#feedback-reports .filter-tab.active').getAttribute('data-feedback-filter');
-                    const rowRating = row.getAttribute('data-rating');
-                    
-                    // Check if row matches both filter and search
-                    if ((filterValue === 'all' || filterValue === rowRating) && text.includes(searchText)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                    // Apply current filter when entries per page changes
+                    filterFeedbackRows(currentFeedbackFilter, false);
+                    applyFeedbackPagination();
                 });
-                
-                // Reset pagination to first page and update
-                feedbackCurrentPage = 1;
-                applyFeedbackPagination();
             }
-        });
-
-        // Initialize functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Start the clock
-            updateClock();
-            setInterval(updateRealTimeElements, 1000);
-            
-            // Initialize activity pagination
-            applyPagination();
-            
-            // Initialize feedback pagination
-            applyFeedbackPagination();
-            
-            // Make feedback messages expandable
-            initializeFeedbackMessages();
-        });
+        }
         
         // Function to make feedback messages expandable
         function initializeFeedbackMessages() {
@@ -946,18 +1016,7 @@ if ($feedback_table_exists) {
             });
         }
 
-                // ===== EXPORT FUNCTIONS =====
-
-        // Initialize export buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize export buttons
-            document.getElementById('exportCSV').addEventListener('click', exportToCSV);
-            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
-            document.getElementById('exportPDF').addEventListener('click', exportToPDF);
-            document.getElementById('printReport').addEventListener('click', printReport);
-        });
-
-        // Function to get filtered and visible data from activity reports table
+        // EXPORT FUNCTIONS
         function getActivityReportData() {
             const table = document.querySelector('#activity-reports table');
             const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
@@ -979,7 +1038,6 @@ if ($feedback_table_exists) {
             return { headers, data };
         }
 
-        // Export to CSV
         function exportToCSV() {
             const { headers, data } = getActivityReportData();
             
@@ -1015,7 +1073,6 @@ if ($feedback_table_exists) {
             document.body.removeChild(link);
         }
 
-        // Export to Excel
         function exportToExcel() {
             const { headers, data } = getActivityReportData();
             
@@ -1037,7 +1094,6 @@ if ($feedback_table_exists) {
             XLSX.writeFile(wb, 'activity_report_' + new Date().toISOString().slice(0,10) + '.xlsx');
         }
 
-        // Export to PDF
         function exportToPDF() {
             const { headers, data } = getActivityReportData();
             
@@ -1092,7 +1148,6 @@ if ($feedback_table_exists) {
             doc.save('activity_report_' + new Date().toISOString().slice(0,10) + '.pdf');
         }
 
-        // Print report
         function printReport() {
             window.print();
         }

@@ -314,7 +314,7 @@ function getYearLevelDisplay($yearLevel) {
                                         <td><span class="<?php echo $sessionsClass; ?>"><?php echo $remaining_sessions; ?> sessions</span></td>
                                         <td>
                                             <div class="action-buttons">
-                                                <button class="action-button edit" onclick="openEditModal(<?php echo json_encode($student); ?>)">
+                                                <button class="action-button edit" onclick="openEditModal('<?php echo htmlspecialchars(json_encode($student), ENT_QUOTES, 'UTF-8'); ?>')">
                                                     <i class="ri-edit-line"></i>
                                                 </button>
                                                 <button class="action-button delete" onclick="confirmDelete('<?php echo $student['id']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
@@ -485,12 +485,18 @@ function getYearLevelDisplay($yearLevel) {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="edit_course_id">Course</label>
+                        <label for="edit_course_id">Course/Department</label>
                         <select id="edit_course_id" name="course_id" required>
-                            <option value="1">Bachelor of Science in Computer Science</option>
-                            <option value="2">Bachelor of Science in Information Technology</option>
-                            <option value="3">Bachelor of Science in Information Systems</option>
-                            <option value="4">Bachelor of Science in Computer Engineering</option>
+                            <option value="BS-Information Technology">BS-Information Technology</option>
+                            <option value="BS-Computer Science">BS-Computer Science</option>
+                            <option value="COE">COE</option>
+                            <option value="CAS">CAS</option>
+                            <option value="SJH">SJH</option>
+                            <option value="CTE">CTE</option>
+                            <option value="CCA">CCA</option>
+                            <option value="CBA">CBA</option>
+                            <option value="CCJ">CCJ</option>
+                            <option value="CON">CON</option>
                         </select>
                     </div>
                 </form>
@@ -501,7 +507,7 @@ function getYearLevelDisplay($yearLevel) {
             </div>
         </div>
     </div>
-    
+
     <!-- Other modals remain the same -->
     <!-- Delete Confirmation Modal -->
     <div class="modal-backdrop" id="deleteModal">
@@ -967,6 +973,395 @@ function getYearLevelDisplay($yearLevel) {
             });
         };
     });
+    
+    // Add these functions to make the edit student feature work
+    
+    // Function to open edit modal and populate with student data
+    function openEditModal(studentJson) {
+        try {
+            // Parse the student data from JSON string
+            const student = JSON.parse(studentJson);
+            console.log("Student data:", student); // Debug logging
+            
+            // Populate form fields with student data
+            document.getElementById('edit_id').value = student.id;
+            document.getElementById('edit_idno').value = student.idno;
+            document.getElementById('edit_firstname').value = student.firstname;
+            document.getElementById('edit_lastname').value = student.lastname;
+            
+            // Handle year level - check for both possible field names
+            const yearLevel = student.year_level || student.year || 1;
+            document.getElementById('edit_year_level').value = yearLevel;
+            
+            // Handle course - check for multiple possible field names and match with available options
+            const courseValue = student.course_id || student.course || student.department || student.course_name || '';
+            
+            // Set course value - handle both numeric and string values
+            const courseSelect = document.getElementById('edit_course_id');
+            
+            // Try to find the option matching the course value
+            let found = false;
+            for (let i = 0; i < courseSelect.options.length; i++) {
+                // Try to match either by value or by text content
+                if (courseSelect.options[i].value.toLowerCase() === courseValue.toString().toLowerCase() || 
+                    courseSelect.options[i].text.toLowerCase().includes(courseValue.toString().toLowerCase())) {
+                    courseSelect.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            
+            // If not found, default to first option
+            if (!found && courseSelect.options.length > 0) {
+                courseSelect.selectedIndex = 0;
+            }
+            
+            // Show the modal
+            document.getElementById('editModal').classList.add('active');
+        } catch (error) {
+            console.error("Error parsing student data:", error);
+            showNotification("Error", "Failed to load student data. Please try again.", "error");
+        }
+    }
+    
+    // Function to close edit modal
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
+    
+    // Function to save student changes
+    function saveStudentChanges() {
+        // Get form data
+        const form = document.getElementById('editStudentForm');
+        const formData = new FormData(form);
+        
+        console.log("Form data being sent:"); // Debug log
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+        
+        // Send data to server
+        fetch('../controller/update_student.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Response from server:", data); // Debug log
+            if (data.success) {
+                // Close modal
+                closeEditModal();
+                
+                // Show success notification
+                showNotification(
+                    "Success", 
+                    `Student ${formData.get('firstname')} ${formData.get('lastname')} has been updated successfully`,
+                    "success"
+                );
+                
+                // Reload the page after delay
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                showNotification("Error", data.message || "Failed to update student", "error");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification("Error", "An error occurred while updating the student: " + error.message, "error");
+        });
+    }
+    
+    // Add these functions to handle pagination properly
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize pagination for both tables
+        initPagination();
+        
+        // Add CSS for notifications
+        // ...existing code...
+    });
+    
+    // Pagination variables for student records
+    let studentsCurrentPage = 1;
+    let studentsPerPage = 10;
+    let studentsTotalPages = 1;
+    
+    // Pagination variables for sit-in records
+    let sitinsCurrentPage = 1;
+    let sitinsPerPage = 10;
+    let sitinsTotalPages = 1;
+    
+    function initPagination() {
+        // Initialize students pagination
+        document.getElementById('students-per-page').value = studentsPerPage;
+        document.getElementById('students-per-page').addEventListener('change', function() {
+            studentsPerPage = parseInt(this.value);
+            studentsCurrentPage = 1; // Reset to first page
+            applyStudentsPagination();
+        });
+        
+        // Initialize sitins pagination
+        document.getElementById('sitins-per-page').value = sitinsPerPage;
+        document.getElementById('sitins-per-page').addEventListener('change', function() {
+            sitinsPerPage = parseInt(this.value);
+            sitinsCurrentPage = 1; // Reset to first page
+            applySitinsPagination();
+        });
+        
+        // Apply initial pagination
+        applyStudentsPagination();
+        applySitinsPagination();
+        
+        // Set up tab switching to preserve pagination state
+        document.querySelectorAll('.filter-tab[data-target]').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                if (target === 'student-records') {
+                    setTimeout(applyStudentsPagination, 100);
+                } else if (target === 'sitin-records') {
+                    setTimeout(applySitinsPagination, 100);
+                }
+            });
+        });
+        
+        // Set up search to reset pagination
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            
+            // Determine which tab is active
+            const activeTab = document.querySelector('.filter-tab[data-target].active').getAttribute('data-target');
+            
+            if (activeTab === 'student-records') {
+                filterStudentRows(searchText);
+                studentsCurrentPage = 1;
+                applyStudentsPagination();
+            } else if (activeTab === 'sitin-records') {
+                filterSitinRows(searchText);
+                sitinsCurrentPage = 1;
+                applySitinsPagination();
+            }
+        });
+    }
+    
+    function filterStudentRows(searchText) {
+        const rows = document.querySelectorAll('#students-table-body tr');
+        
+        rows.forEach(row => {
+            if (row.querySelector('.empty-state')) return; // Skip empty state row
+            
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchText)) {
+                row.classList.remove('filtered-out');
+            } else {
+                row.classList.add('filtered-out');
+            }
+        });
+    }
+    
+    function filterSitinRows(searchText) {
+        const rows = document.querySelectorAll('#sitin-records-body tr');
+        
+        rows.forEach(row => {
+            if (row.querySelector('.empty-state')) return; // Skip empty state row
+            
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchText)) {
+                row.classList.remove('filtered-out');
+            } else {
+                row.classList.add('filtered-out');
+            }
+        });
+    }
+    
+    function applyStudentsPagination() {
+        // Get visible rows (after filtering)
+        const visibleRows = Array.from(document.querySelectorAll('#students-table-body tr'))
+            .filter(row => !row.classList.contains('filtered-out') && !row.querySelector('.empty-state'));
+        
+        studentsTotalPages = Math.max(1, Math.ceil(visibleRows.length / studentsPerPage));
+        
+        // Ensure current page is valid
+        if (studentsCurrentPage > studentsTotalPages) {
+            studentsCurrentPage = studentsTotalPages;
+        }
+        
+        const startIndex = (studentsCurrentPage - 1) * studentsPerPage;
+        const endIndex = Math.min(startIndex + studentsPerPage, visibleRows.length);
+        
+        // Hide all rows first
+        visibleRows.forEach(row => row.style.display = 'none');
+        
+        // Empty state handling
+        if (visibleRows.length === 0) {
+            const emptyRow = document.querySelector('#students-table-body tr .empty-state');
+            if (emptyRow) {
+                emptyRow.closest('tr').style.display = '';
+            }
+        } else {
+            // Show only rows for current page
+            for (let i = startIndex; i < endIndex; i++) {
+                visibleRows[i].style.display = '';
+            }
+        }
+        
+        // Update page info
+        document.getElementById('students-page-info').textContent = 
+            `Showing ${visibleRows.length > 0 ? startIndex + 1 : 0} to ${endIndex} of ${visibleRows.length} entries`;
+            
+        // Update pagination buttons
+        updateStudentsPaginationButtons();
+    }
+    
+    function updateStudentsPaginationButtons() {
+        const paginationContainer = document.getElementById('students-pagination');
+        paginationContainer.innerHTML = '';
+        
+        // Previous button
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'page-btn';
+        prevBtn.setAttribute('data-action', 'prev');
+        prevBtn.textContent = 'Previous';
+        prevBtn.disabled = studentsCurrentPage === 1;
+        prevBtn.addEventListener('click', () => {
+            if (studentsCurrentPage > 1) {
+                studentsCurrentPage--;
+                applyStudentsPagination();
+            }
+        });
+        paginationContainer.appendChild(prevBtn);
+        
+        // Page number buttons - show up to 5 pages
+        const maxButtons = 5;
+        let startPage = Math.max(1, studentsCurrentPage - Math.floor(maxButtons / 2));
+        let endPage = Math.min(studentsTotalPages, startPage + maxButtons - 1);
+        
+        if (endPage - startPage < maxButtons - 1 && startPage > 1) {
+            startPage = Math.max(1, endPage - maxButtons + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = `page-btn ${i === studentsCurrentPage ? 'active' : ''}`;
+            pageBtn.setAttribute('data-page', i);
+            pageBtn.textContent = i;
+            pageBtn.addEventListener('click', () => {
+                studentsCurrentPage = i;
+                applyStudentsPagination();
+            });
+            paginationContainer.appendChild(pageBtn);
+        }
+        
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'page-btn';
+        nextBtn.setAttribute('data-action', 'next');
+        nextBtn.textContent = 'Next';
+        nextBtn.disabled = studentsCurrentPage === studentsTotalPages || studentsTotalPages === 0;
+        nextBtn.addEventListener('click', () => {
+            if (studentsCurrentPage < studentsTotalPages) {
+                studentsCurrentPage++;
+                applyStudentsPagination();
+            }
+        });
+        paginationContainer.appendChild(nextBtn);
+    }
+    
+    function applySitinsPagination() {
+        // Get visible rows (after filtering)
+        const visibleRows = Array.from(document.querySelectorAll('#sitin-records-body tr'))
+            .filter(row => !row.classList.contains('filtered-out') && !row.querySelector('.empty-state'));
+        
+        sitinsTotalPages = Math.max(1, Math.ceil(visibleRows.length / sitinsPerPage));
+        
+        // Ensure current page is valid
+        if (sitinsCurrentPage > sitinsTotalPages) {
+            sitinsCurrentPage = sitinsTotalPages;
+        }
+        
+        const startIndex = (sitinsCurrentPage - 1) * sitinsPerPage;
+        const endIndex = Math.min(startIndex + sitinsPerPage, visibleRows.length);
+        
+        // Hide all rows first
+        visibleRows.forEach(row => row.style.display = 'none');
+        
+        // Empty state handling
+        if (visibleRows.length === 0) {
+            const emptyRow = document.querySelector('#sitin-records-body tr .empty-state');
+            if (emptyRow) {
+                emptyRow.closest('tr').style.display = '';
+            }
+        } else {
+            // Show only rows for current page
+            for (let i = startIndex; i < endIndex; i++) {
+                visibleRows[i].style.display = '';
+            }
+        }
+        
+        // Update page info
+        document.getElementById('sitins-page-info').textContent = 
+            `Showing ${visibleRows.length > 0 ? startIndex + 1 : 0} to ${endIndex} of ${visibleRows.length} entries`;
+            
+        // Update pagination buttons
+        updateSitinsPaginationButtons();
+    }
+    
+    function updateSitinsPaginationButtons() {
+        const paginationContainer = document.getElementById('sitins-pagination');
+        paginationContainer.innerHTML = '';
+        
+        // Previous button
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'page-btn';
+        prevBtn.setAttribute('data-action', 'prev');
+        prevBtn.textContent = 'Previous';
+        prevBtn.disabled = sitinsCurrentPage === 1;
+        prevBtn.addEventListener('click', () => {
+            if (sitinsCurrentPage > 1) {
+                sitinsCurrentPage--;
+                applySitinsPagination();
+            }
+        });
+        paginationContainer.appendChild(prevBtn);
+        
+        // Page number buttons - show up to 5 pages
+        const maxButtons = 5;
+        let startPage = Math.max(1, sitinsCurrentPage - Math.floor(maxButtons / 2));
+        let endPage = Math.min(sitinsTotalPages, startPage + maxButtons - 1);
+        
+        if (endPage - startPage < maxButtons - 1 && startPage > 1) {
+            startPage = Math.max(1, endPage - maxButtons + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = `page-btn ${i === sitinsCurrentPage ? 'active' : ''}`;
+            pageBtn.setAttribute('data-page', i);
+            pageBtn.textContent = i;
+            pageBtn.addEventListener('click', () => {
+                sitinsCurrentPage = i;
+                applySitinsPagination();
+            });
+            paginationContainer.appendChild(pageBtn);
+        }
+        
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'page-btn';
+        nextBtn.setAttribute('data-action', 'next');
+        nextBtn.textContent = 'Next';
+        nextBtn.disabled = sitinsCurrentPage === sitinsTotalPages || sitinsTotalPages === 0;
+        nextBtn.addEventListener('click', () => {
+            if (sitinsCurrentPage < sitinsTotalPages) {
+                sitinsCurrentPage++;
+                applySitinsPagination();
+            }
+        });
+        paginationContainer.appendChild(nextBtn);
+    }
     </script>
 </body>
 </html>
