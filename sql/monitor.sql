@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 23, 2025 at 06:03 AM
+-- Generation Time: Mar 23, 2025 at 01:49 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,277 @@ SET time_zone = "+00:00";
 --
 -- Database: `monitor`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin_users`
+--
+
+CREATE TABLE `admin_users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin_users`
+--
+
+INSERT INTO `admin_users` (`id`, `username`, `password`, `created_at`) VALUES
+(1, 'admin', '$2y$10$YourHashedPasswordHere', '2025-03-03 09:43:54');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `announcements`
+--
+
+CREATE TABLE `announcements` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `announcements`
+--
+
+INSERT INTO `announcements` (`id`, `title`, `content`, `created_at`, `created_by`) VALUES
+(10, 'CCS ADMIN', 'Important Announcement We are excited to announce the launch of our new website! 🎉 Explore our latest products and services now!', '2025-03-04 15:11:41', 'admin'),
+(12, 'CCS ADMIN', 'Miming', '2025-03-23 03:46:12', 'admin');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `computer_status`
+--
+
+CREATE TABLE `computer_status` (
+  `id` int(11) NOT NULL,
+  `laboratory` varchar(10) NOT NULL,
+  `pc_number` int(11) NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'available',
+  `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `computer_status`
+--
+
+INSERT INTO `computer_status` (`id`, `laboratory`, `pc_number`, `status`, `last_updated`) VALUES
+(1, '524', 15, 'available', '2025-03-04 12:58:51'),
+(3, '524', 1, 'in-use', '2025-03-09 13:19:36'),
+(4, '526', 2, 'in-use', '2025-03-09 13:19:43'),
+(5, '528', 3, 'in-use', '2025-03-09 13:22:20'),
+(6, '542', 4, 'in-use', '2025-03-09 13:19:55'),
+(7, '524', 9, 'in-use', '2025-03-09 13:19:39'),
+(8, '524', 16, 'available', '2025-03-09 09:44:38'),
+(9, '524', 20, 'available', '2025-03-09 09:44:37'),
+(10, '526', 33, 'available', '2025-03-09 09:44:47'),
+(11, '526', 26, 'available', '2025-03-09 09:44:46'),
+(12, '526', 30, 'available', '2025-03-09 09:44:47'),
+(13, '528', 11, 'in-use', '2025-03-09 13:22:23'),
+(14, '528', 23, 'available', '2025-03-09 09:44:52'),
+(15, '528', 26, 'available', '2025-03-09 09:44:52'),
+(16, '528', 38, 'available', '2025-03-09 09:44:53'),
+(17, '528', 30, 'available', '2025-03-09 09:44:53'),
+(18, '530', 15, 'available', '2025-03-09 09:44:56'),
+(19, '530', 18, 'available', '2025-03-09 09:44:57'),
+(20, '530', 16, 'available', '2025-03-09 09:44:57'),
+(21, '530', 33, 'available', '2025-03-09 09:44:58'),
+(22, '530', 31, 'available', '2025-03-09 09:44:59'),
+(23, '542', 25, 'available', '2025-03-09 09:45:04'),
+(24, '542', 21, 'available', '2025-03-09 09:45:04'),
+(25, '542', 27, 'available', '2025-03-09 09:45:04'),
+(26, '542', 34, 'available', '2025-03-09 09:45:05'),
+(27, '542', 36, 'available', '2025-03-09 09:45:06'),
+(28, '526', 10, 'in-use', '2025-03-09 13:19:45'),
+(29, '530', 1, 'in-use', '2025-03-09 13:19:48'),
+(30, '524', 2, 'in-use', '2025-03-09 13:19:36'),
+(31, '526', 12, 'available', '2025-03-09 09:44:45'),
+(32, '524', 3, 'in-use', '2025-03-09 13:19:36'),
+(33, '524', 7, 'in-use', '2025-03-09 13:19:38'),
+(34, '530', 2, 'in-use', '2025-03-09 13:19:50'),
+(35, '526', 1, 'in-use', '2025-03-09 13:19:43'),
+(36, '530', 10, 'in-use', '2025-03-09 13:19:49'),
+(71, '524', 13, 'available', '2025-03-09 11:09:50'),
+(72, '524', 11, 'in-use', '2025-03-09 16:01:46'),
+(73, '528', 28, 'available', '2025-03-09 11:21:37'),
+(75, '530', 8, 'in-use', '2025-03-09 13:19:52'),
+(77, '542', 5, 'in-use', '2025-03-09 13:19:54'),
+(83, '524', 40, 'available', '2025-03-09 13:19:34'),
+(84, '524', 39, 'available', '2025-03-09 13:19:34'),
+(90, '524', 4, 'in-use', '2025-03-09 13:19:37'),
+(93, '524', 5, 'in-use', '2025-03-09 13:19:38'),
+(94, '524', 6, 'in-use', '2025-03-09 13:19:38'),
+(96, '524', 8, 'in-use', '2025-03-09 13:19:39'),
+(98, '524', 10, 'in-use', '2025-03-09 13:19:39'),
+(101, '526', 3, 'in-use', '2025-03-09 13:19:44'),
+(102, '526', 4, 'in-use', '2025-03-09 13:19:44'),
+(103, '526', 5, 'in-use', '2025-03-09 13:19:44'),
+(105, '526', 9, 'in-use', '2025-03-09 13:19:45'),
+(106, '526', 8, 'in-use', '2025-03-09 13:19:45'),
+(107, '526', 6, 'in-use', '2025-03-09 13:19:46'),
+(108, '526', 7, 'in-use', '2025-03-09 13:19:46'),
+(112, '530', 3, 'in-use', '2025-03-09 13:19:50'),
+(113, '530', 5, 'in-use', '2025-03-09 13:19:51'),
+(114, '530', 4, 'in-use', '2025-03-09 13:19:51'),
+(115, '530', 9, 'in-use', '2025-03-09 13:19:52'),
+(117, '530', 7, 'in-use', '2025-03-09 13:19:52'),
+(118, '530', 6, 'in-use', '2025-03-09 13:19:52'),
+(121, '542', 3, 'in-use', '2025-03-09 13:19:55'),
+(122, '542', 2, 'in-use', '2025-03-09 13:19:56'),
+(123, '542', 1, 'in-use', '2025-03-09 13:19:56'),
+(124, '542', 6, 'in-use', '2025-03-09 13:19:56'),
+(125, '542', 10, 'in-use', '2025-03-09 13:19:57'),
+(126, '542', 9, 'in-use', '2025-03-09 13:19:57'),
+(127, '542', 7, 'in-use', '2025-03-09 13:19:58'),
+(128, '528', 1, 'in-use', '2025-03-09 13:22:19'),
+(129, '528', 2, 'in-use', '2025-03-09 13:22:20'),
+(131, '528', 4, 'in-use', '2025-03-09 13:22:20'),
+(132, '528', 5, 'in-use', '2025-03-09 13:22:21'),
+(133, '528', 15, 'in-use', '2025-03-09 13:22:21'),
+(134, '528', 14, 'in-use', '2025-03-09 13:22:21'),
+(135, '528', 13, 'in-use', '2025-03-09 13:22:22'),
+(136, '528', 12, 'in-use', '2025-03-09 13:22:22'),
+(138, '524', 25, 'in-use', '2025-03-09 14:41:14'),
+(139, '528', 7, 'in-use', '2025-03-13 09:27:20'),
+(140, '530', 12, 'in-use', '2025-03-13 09:28:34'),
+(141, '524', 12, 'in-use', '2025-03-23 12:14:44');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `current_sessions`
+--
+
+CREATE TABLE `current_sessions` (
+  `date` date NOT NULL,
+  `count` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `current_sessions`
+--
+
+INSERT INTO `current_sessions` (`date`, `count`) VALUES
+('2025-03-04', 4),
+('2025-03-05', 0),
+('2025-03-09', 13),
+('2025-03-13', 2),
+('2025-03-23', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `feedback`
+--
+
+CREATE TABLE `feedback` (
+  `id` int(11) NOT NULL,
+  `reservation_id` int(11) DEFAULT NULL,
+  `sit_in_id` int(11) DEFAULT NULL,
+  `rating` int(11) NOT NULL,
+  `message` text DEFAULT NULL,
+  `created_at` datetime NOT NULL
+) ;
+
+--
+-- Dumping data for table `feedback`
+--
+
+INSERT INTO `feedback` (`id`, `reservation_id`, `sit_in_id`, `rating`, `message`, `created_at`) VALUES
+(4, NULL, 40, 5, 'Nice!', '0000-00-00 00:00:00'),
+(5, NULL, 41, 2, 'Eh', '0000-00-00 00:00:00'),
+(6, NULL, 42, 5, 'Wow!', '0000-00-00 00:00:00'),
+(7, NULL, 46, 4, 'Good!', '0000-00-00 00:00:00'),
+(8, NULL, 36, 1, 'Okay', '0000-00-00 00:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `announcement_id` int(11) NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reservations`
+--
+
+CREATE TABLE `reservations` (
+  `id` int(11) NOT NULL,
+  `idno` varchar(20) NOT NULL,
+  `fullname` varchar(100) NOT NULL,
+  `purpose` varchar(50) NOT NULL,
+  `laboratory` varchar(10) NOT NULL,
+  `pc_number` int(11) NOT NULL,
+  `time_in` time NOT NULL,
+  `time_out` time DEFAULT NULL,
+  `date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` varchar(20) NOT NULL DEFAULT 'pending'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reservations`
+--
+
+INSERT INTO `reservations` (`id`, `idno`, `fullname`, `purpose`, `laboratory`, `pc_number`, `time_in`, `time_out`, `date`, `created_at`, `status`) VALUES
+(1, '20952503', 'Cabunilas, Vince Bryant N.', 'c_programming', '524', 12, '10:12:00', '20:15:50', '2025-03-23', '2025-03-23 12:12:42', 'completed');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sit_ins`
+--
+
+CREATE TABLE `sit_ins` (
+  `id` int(11) NOT NULL,
+  `idno` varchar(20) NOT NULL,
+  `fullname` varchar(100) NOT NULL,
+  `purpose` varchar(50) NOT NULL,
+  `laboratory` varchar(10) NOT NULL,
+  `pc_number` int(11) NOT NULL,
+  `time_in` time NOT NULL,
+  `time_out` time DEFAULT NULL,
+  `date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` varchar(20) NOT NULL DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sit_ins`
+--
+
+INSERT INTO `sit_ins` (`id`, `idno`, `fullname`, `purpose`, `laboratory`, `pc_number`, `time_in`, `time_out`, `date`, `created_at`, `status`) VALUES
+(36, '20952503', '', 'ASP.Net', '524', 1, '18:33:11', '18:33:46', '2025-03-20', '2025-03-20 10:33:11', 'completed'),
+(37, '20914241', '', 'Java Programming', '542', 1, '18:35:19', '18:43:43', '2025-03-20', '2025-03-20 10:35:19', 'completed'),
+(38, '29892812', '', 'C Programming', '542', 1, '18:44:05', '18:44:10', '2025-03-20', '2025-03-20 10:44:05', 'completed'),
+(39, '28617809', '', 'PHP', '524', 1, '20:50:39', '20:50:44', '2025-03-20', '2025-03-20 12:50:39', 'completed'),
+(40, '20952503', '', 'Java Programming', '524', 1, '23:09:18', '23:09:22', '2025-03-20', '2025-03-20 15:09:18', 'completed'),
+(41, '20952503', '', 'C#', '524', 1, '11:07:35', '11:54:22', '2025-03-23', '2025-03-23 03:07:35', 'completed'),
+(42, '92863763', '', 'ASP.Net', '526', 1, '11:19:49', '11:57:13', '2025-03-23', '2025-03-23 03:19:49', 'completed'),
+(43, '20934721', '', 'Java Programming', '542', 1, '11:38:00', '11:57:09', '2025-03-23', '2025-03-23 03:38:00', 'completed'),
+(44, '29892812', '', 'C#', '526', 1, '11:38:22', '11:53:36', '2025-03-23', '2025-03-23 03:38:22', 'completed'),
+(45, '08726712', '', 'C Programming', '530', 1, '11:38:51', '11:57:05', '2025-03-23', '2025-03-23 03:38:51', 'completed'),
+(46, '98767229', '', 'PHP', '526', 1, '11:43:19', '11:57:01', '2025-03-23', '2025-03-23 03:43:19', 'completed'),
+(47, '28763712', '', 'C Programming', '524', 1, '11:45:16', '11:56:58', '2025-03-23', '2025-03-23 03:45:17', 'completed'),
+(48, '21387321', '', 'PHP', '526', 1, '11:55:00', '11:56:54', '2025-03-23', '2025-03-23 03:55:00', 'completed'),
+(49, '28617809', '', 'C Programming', '542', 1, '11:58:04', '12:12:06', '2025-03-23', '2025-03-23 03:58:04', 'completed'),
+(50, '20914241', '', 'C Programming', '528', 1, '11:58:19', '12:12:02', '2025-03-23', '2025-03-23 03:58:19', 'completed');
 
 -- --------------------------------------------------------
 
@@ -72,6 +343,59 @@ INSERT INTO `users` (`id`, `idno`, `lastname`, `firstname`, `middlename`, `cours
 --
 
 --
+-- Indexes for table `admin_users`
+--
+ALTER TABLE `admin_users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
+-- Indexes for table `announcements`
+--
+ALTER TABLE `announcements`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `computer_status`
+--
+ALTER TABLE `computer_status`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `lab_pc` (`laboratory`,`pc_number`);
+
+--
+-- Indexes for table `current_sessions`
+--
+ALTER TABLE `current_sessions`
+  ADD PRIMARY KEY (`date`);
+
+--
+-- Indexes for table `feedback`
+--
+ALTER TABLE `feedback`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `reservation_id` (`reservation_id`),
+  ADD KEY `sit_in_id` (`sit_in_id`);
+
+--
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `reservations`
+--
+ALTER TABLE `reservations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `sit_ins`
+--
+ALTER TABLE `sit_ins`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -83,10 +407,69 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `admin_users`
+--
+ALTER TABLE `admin_users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `announcements`
+--
+ALTER TABLE `announcements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `computer_status`
+--
+ALTER TABLE `computer_status`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=142;
+
+--
+-- AUTO_INCREMENT for table `feedback`
+--
+ALTER TABLE `feedback`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `reservations`
+--
+ALTER TABLE `reservations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `sit_ins`
+--
+ALTER TABLE `sit_ins`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `feedback`
+--
+ALTER TABLE `feedback`
+  ADD CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `feedback_ibfk_2` FOREIGN KEY (`sit_in_id`) REFERENCES `sit_ins` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
