@@ -129,11 +129,110 @@ $conn->close();
         .card-content {
             animation: fadeIn 0.8s ease-out forwards;
         }
+
+        /* Add these styles to your existing <style> section */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .notification-container.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .notification-popup {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            width: 320px;
+            max-width: 90vw;
+            overflow: hidden;
+            position: relative;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .notification-popup.success {
+            border-left-color: #10b981;
+        }
+
+        .notification-popup.error {
+            border-left-color: #ef4444;
+        }
+
+        .notification-popup.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .notification-popup.info {
+            border-left-color: #3b82f6;
+        }
+
+        .notification-icon {
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .notification-popup.success .notification-icon {
+            color: #10b981;
+        }
+
+        .notification-popup.error .notification-icon {
+            color: #ef4444;
+        }
+
+        .notification-popup.warning .notification-icon {
+            color: #f59e0b;
+        }
+
+        .notification-popup.info .notification-icon {
+            color: #3b82f6;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-content h3 {
+            margin: 0 0 4px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
     </style>
 </head>
 <body>
     <!-- Include notification system -->
     <?php include '../includes/notification.php'; ?>
+    
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer">
+        <div class="notification-popup" id="notificationPopup">
+            <div class="notification-icon">
+                <i class="fas fa-check-circle" id="notificationIcon"></i>
+            </div>
+            <div class="notification-content">
+                <h3 id="notificationTitle">Success</h3>
+                <p id="notificationMessage">Operation completed successfully!</p>
+            </div>
+        </div>
+    </div>
     
     <!-- Navigation Bar -->
     <div class="nav-container">
@@ -317,18 +416,19 @@ $conn->close();
                 <?php else: ?>
                     <div class="table-container">
                         <table class="modern-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Laboratory</th>
-                                    <th>Time In</th>
-                                    <th>Time Out</th>
-                                    <th>Purpose</th>
-                                    <th>Activity</th>
-                                    <th>Status</th>
-                                    <th>Feedback</th>
-                                </tr>
-                            </thead>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Laboratory</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Purpose</th>
+                                <th>Activity</th>
+                                <th>Status</th>
+                                <th>Rating</th>
+                                <th>Feedback</th>
+                            </tr>
+                        </thead>
                             <tbody id="history-table-body">
                                 <?php foreach ($history_records as $record): ?>
                                     <tr data-type="<?php echo htmlspecialchars($record['source']); ?>">
@@ -1228,10 +1328,58 @@ $conn->close();
             font-size: 0.9rem;
         }
 
+        .feedback-text {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.85rem;
+            color: #4a5568;
+        }
+
+        .feedback-text:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
 
     </style>
 
     <script>
+
+        // Add this function to your JavaScript code, preferably near the top of your script section
+        function showNotification(title, message, type = 'success', duration = 3000) {
+            const container = document.getElementById('notificationContainer');
+            const popup = document.getElementById('notificationPopup');
+            const titleElement = document.getElementById('notificationTitle');
+            const messageElement = document.getElementById('notificationMessage');
+            const iconElement = document.getElementById('notificationIcon');
+            
+            // Set content
+            titleElement.textContent = title;
+            messageElement.textContent = message;
+            
+            // Set appropriate icon
+            iconElement.className = type === 'success' 
+                ? 'fas fa-check-circle' 
+                : type === 'error' 
+                    ? 'fas fa-times-circle' 
+                    : type === 'warning' 
+                        ? 'fas fa-exclamation-circle' 
+                        : 'fas fa-info-circle';
+            
+            // Add class based on notification type
+            popup.className = 'notification-popup';
+            popup.classList.add(type);
+            
+            // Show notification
+            container.classList.add('active');
+            
+            // Hide after duration
+            setTimeout(() => {
+                container.classList.remove('active');
+            }, duration);
+        }
         // Notification functionality
         const notificationToggle = document.getElementById('notification-toggle');
         const notificationDropdown = document.getElementById('notification-dropdown');
@@ -1509,18 +1657,18 @@ $conn->close();
                     // Close modal
                     closeFeedbackModal();
                     
-                    // Show success message using shared notification system
-                    showNotification('Success', 'Thank you for your feedback!', 'success');
+                    // Show success notification
+                    showNotification('Success', 'Thank you for your feedback!', 'success', 3000);
                     
                     // Reload page to show updated data
                     setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    showNotification('Error', result.message || 'Failed to submit feedback', 'error');
+                    showNotification('Error', result.message || 'Failed to submit feedback', 'error', 4000);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Error', 'An error occurred while submitting your feedback', 'error');
+                showNotification('Error', 'An error occurred while submitting your feedback', 'error', 4000);
             })
             .finally(() => {
                 // Reset button state
@@ -1642,24 +1790,35 @@ $conn->close();
                     }
                     
                     // Create feedback column content
+                    let ratingContent = '';
                     let feedbackContent = '';
+                    
                     if (record.time_out && !record.has_feedback) {
-                        feedbackContent = `
+                        ratingContent = `
                             <button class="feedback-btn" 
                                     data-id="${record.id}"
                                     data-type="${record.source}">
                                 Rate Experience
                             </button>
                         `;
+                        feedbackContent = '<span class="feedback-unavailable">No feedback</span>';
                     } else if (record.has_feedback) {
+                        ratingContent = `
+                            <div class="star-display">
+                                ${generateStars(record.rating)}
+                            </div>
+                        `;
                         feedbackContent = `
-                            <div class="feedback-given">
-                                <div class="star-display">
-                                    ${generateStars(record.rating)}
-                                </div>
+                            <div class="feedback-text" title="${record.feedback_message || 'No comment provided'}">
+                                ${record.feedback_message ? 
+                                (record.feedback_message.length > 30 ? 
+                                record.feedback_message.substring(0, 30) + '...' : 
+                                record.feedback_message) : 
+                                '<span class="feedback-unavailable">No comment</span>'}
                             </div>
                         `;
                     } else if (!record.time_out) {
+                        ratingContent = '<span class="feedback-unavailable">Not completed</span>';
                         feedbackContent = '<span class="feedback-unavailable">Not completed</span>';
                     }
                     
@@ -1675,6 +1834,7 @@ $conn->close();
                             </span>
                         </td>
                         <td>${statusBadge}</td>
+                        <td>${ratingContent}</td>
                         <td>${feedbackContent}</td>
                     `;
                     

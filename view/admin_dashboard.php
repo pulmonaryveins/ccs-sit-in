@@ -235,6 +235,137 @@ if ($result) {
                 transform: translateY(0);
             }
         }
+
+        /* Critical CSS for announcement items - ensures styles are applied */
+        .announcement-list {
+            max-height: 380px !important;
+            overflow-y: auto !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(117, 86, 204, 0.5) transparent !important;
+            padding: 1rem 1.5rem !important;
+        }
+        
+        .announcement-item {
+            display: flex !important;
+            background: white !important;
+            border-radius: 10px !important;
+            margin-bottom: 15px !important;
+            padding: 0 !important;
+            border: none !important;
+            overflow: hidden !important;
+            border-left: 4px solid #7556cc !important;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .announcement-item:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .announcement-date {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 70px !important;
+            padding: 15px 0 !important;
+            background: rgba(117, 86, 204, 0.08) !important;
+            border-right: 1px solid rgba(117, 86, 204, 0.15) !important;
+        }
+        
+        .date-day {
+            font-size: 1.8rem !important;
+            font-weight: 700 !important;
+            color: #7556cc !important;
+            line-height: 1 !important;
+        }
+        
+        .date-month {
+            font-size: 0.9rem !important;
+            color: #7556cc !important;
+            font-weight: 500 !important;
+            text-transform: uppercase !important;
+        }
+        
+        .announcement-content {
+            flex: 1 !important;
+            padding: 15px 20px !important;
+        }
+        
+        .announcement-header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 8px !important;
+        }
+        
+        .announcement-content h3 {
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            color: #1e293b !important;
+            margin: 0 !important;
+        }
+        
+        .announcement-content p {
+            font-size: 0.95rem !important;
+            color: #475569 !important;
+            margin: 0 0 12px 0 !important;
+            line-height: 1.5 !important;
+        }
+        
+        .announcement-meta {
+            display: flex !important;
+            font-size: 0.8rem !important;
+            color: #94a3b8 !important;
+        }
+        
+        .announcement-meta span {
+            display: flex !important;
+            align-items: center !important;
+        }
+        
+        .announcement-meta i {
+            margin-right: 4px !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* Enhanced scrollbar styles for announcement lists */
+        .announcement-list {
+            max-height: 400px !important;
+            overflow-y: auto !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(117, 86, 204, 0.5) transparent !important;
+        }
+        
+        /* WebKit browser scrollbar styles (Chrome, Safari, etc.) */
+        .announcement-list::-webkit-scrollbar {
+            width: 6px !important;
+        }
+        
+        .announcement-list::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+        
+        .announcement-list::-webkit-scrollbar-thumb {
+            background-color: rgba(117, 86, 204, 0.5) !important;
+            border-radius: 6px !important;
+        }
+        
+        .announcement-list::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(117, 86, 204, 0.8) !important;
+        }
+        
+        /* For Firefox browsers */
+        .announcement-list {
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(117, 86, 204, 0.5) transparent !important;
+        }
+        
+        /* Add padding to ensure content doesn't touch scrollbar */
+        .announcement-list {
+            padding-right: 10px !important;
+        }
     </style>
 </head>
 <body>
@@ -340,26 +471,37 @@ if ($result) {
                     <span>Recent Announcements</span>
                 </div>
                 <div class="announcement-list">
-                    <?php foreach ($announcements as $announcement): ?>
-                        <div class="announcement-item" data-id="<?php echo $announcement['id']; ?>">
-                            <div class="announcement-title">
-                                <i class="ri-notification-3-fill"></i>
-                                <h3><?php echo htmlspecialchars($announcement['title']); ?></h3>
-                                <div class="announcement-actions">
-                                    <button class="edit-announcement" onclick="editAnnouncement(<?php echo $announcement['id']; ?>, '<?php echo addslashes(htmlspecialchars($announcement['title'])); ?>', '<?php echo addslashes(htmlspecialchars($announcement['content'])); ?>')">
-                                        <i class="ri-edit-line"></i>
-                                    </button>
-                                    <button class="delete-announcement" onclick="deleteAnnouncement(<?php echo $announcement['id']; ?>)">
-                                        <i class="ri-delete-bin-line"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="announcement-details">
-                                <p><?php echo htmlspecialchars($announcement['content']); ?></p>
-                                <span class="timestamp"><?php echo date('F d, Y', strtotime($announcement['created_at'])); ?></span>
+                    <?php if (empty($announcements)): ?>
+                        <div class="announcement-item">
+                            <div class="announcement-empty">
+                                <i class="ri-information-line"></i>
+                                <p>No announcements available at this time.</p>
                             </div>
                         </div>
-                    <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php foreach ($announcements as $announcement): ?>
+                            <div class="announcement-item" data-id="<?php echo $announcement['id']; ?>">
+                                <div class="announcement-date">
+                                    <div class="date-day"><?php echo date('d', strtotime($announcement['created_at'])); ?></div>
+                                    <div class="date-month"><?php echo date('M', strtotime($announcement['created_at'])); ?></div>
+                                </div>
+                                <div class="announcement-content">
+                                    <div class="announcement-header">
+                                        <h3><?php echo htmlspecialchars($announcement['title']); ?></h3>
+                                        <div class="announcement-actions">
+                                            <button class="edit-announcement" onclick="editAnnouncement(<?php echo $announcement['id']; ?>, '<?php echo addslashes(htmlspecialchars($announcement['title'])); ?>', '<?php echo addslashes(htmlspecialchars($announcement['content'])); ?>')">
+                                                <i class="ri-edit-line"></i>
+                                            </button>
+                                            <button class="delete-announcement" onclick="deleteAnnouncement(<?php echo $announcement['id']; ?>)">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p><?php echo htmlspecialchars($announcement['content']); ?></p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -411,10 +553,13 @@ if ($result) {
                         <label for="edit_content">Content</label>
                         <textarea id="edit_content" name="content" rows="4" required></textarea>
                     </div>
-                    <button type="submit" class="edit-btn2">
-                        <i class="ri-save-line"></i>
-                        <span>Update Announcement</span>
-                    </button>
+                    <div class="modal-footer">
+                        <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="edit-btn2">
+                            <i class="ri-save-line"></i>
+                            <span>Update Announcement</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -868,25 +1013,25 @@ if ($result) {
                                 padding: 20,
                                 boxWidth: 12,
                                 font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
+                                        size: 11
                                     }
-                                    label += context.raw + ' student' + (context.raw !== 1 ? 's' : '');
-                                    return label;
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.raw + ' student' + (context.raw !== 1 ? 's' : '');
+                                        return label;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
+                });
         }
         
         // ...existing code...

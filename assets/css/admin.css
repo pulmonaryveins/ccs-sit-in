@@ -57,28 +57,52 @@
     color: #7556cc;
 }
 
-.announcement-actions {
+.modal-body {
+    margin-bottom: 20px;
+}
+
+.modal-body p {
+    margin: 10px 0;
+    color: #333;
+    line-height: 1.5;
+}
+
+.modal-footer {
     display: flex;
-    gap: 8px;
-    margin-left: auto;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
 }
 
-.edit-announcement, .delete-announcement {
-    background: none;
+.cancel-btn {
+    background-color: #f3f4f6;
+    color: #1f2937;
     border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 500;
     cursor: pointer;
-    font-size: 1rem;
-    color: #555;
-    transition: color 0.2s;
-    padding: 4px;
+    transition: background-color 0.2s;
 }
 
-.edit-announcement:hover {
-    color: #7556cc;
+.cancel-btn:hover {
+    background-color: #e5e7eb;
 }
 
-.delete-announcement:hover {
-    color: #ff5555;
+.delete-btn {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #dc2626;
 }
 
 /* Form styling in modal */
@@ -377,51 +401,154 @@
     box-shadow: 0 4px 12px rgba(117, 86, 204, 0.3);
 }
 
-/* Modernized announcement items */
+/* Modernized announcement items - matched with student dashboard */
 .announcement-list {
     max-height: 380px;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
+    padding: 1rem 1.5rem;
 }
 
+.announcement-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.announcement-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.announcement-list::-webkit-scrollbar-thumb {
+    background-color: rgba(117, 86, 204, 0.5);
+    border-radius: 10px;
+}
+
+/* Force announcement styles to apply */
 .announcement-item {
-    border-bottom: 1px solid #eee;
-    padding: 1rem 0;
+    display: flex !important;
+    background: white !important;
+    border-radius: 10px !important;
+    margin-bottom: 15px !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.3s ease !important;
+    overflow: hidden !important;
+    border-left: 4px solid #7556cc !important;
 }
 
-.announcement-item:first-child {
-    padding-top: 0;
+.announcement-item:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
 }
 
-.announcement-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+.announcement-date {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 70px !important;
+    padding: 15px 0 !important;
+    background: rgba(117, 86, 204, 0.08) !important;
+    border-right: 1px solid rgba(117, 86, 204, 0.15) !important;
 }
 
-.announcement-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+.date-day {
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    color: #7556cc !important;
+    line-height: 1 !important;
 }
 
-.announcement-title i {
-    color: #7556cc;
+.date-month {
+    font-size: 0.9rem !important;
+    color: #7556cc !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
 }
 
-.announcement-title h3 {
+/* Add !important to ensure these styles take precedence */
+.announcement-content {
+    flex: 1 !important;
+    padding: 15px 20px !important;
+}
+
+.announcement-content h3 {
+    font-size: 1.1rem;
     font-weight: 600;
-    color: #333;
-    font-size: 1rem;
+    color: #1e293b;
     margin: 0;
 }
 
-.announcement-details p {
-    color: #555;
-    margin-bottom: 0.5rem;
-    line-height: 1.4;
+.announcement-content p {
+    font-size: 0.95rem;
+    color: #475569;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
 }
 
-.announcement-details .timestamp {
+.announcement-meta {
+    display: flex;
     font-size: 0.8rem;
-    color: #888;
+    color: #94a3b8;
+}
+
+.announcement-meta span {
+    display: flex;
+    align-items: center;
+}
+
+.announcement-meta i {
+    margin-right: 4px;
+    font-size: 0.9rem;
+}
+
+.announcement-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-announcement, .delete-announcement {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #94a3b8;
+    transition: color 0.2s;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.edit-announcement:hover {
+    color: #7556cc;
+    background-color: rgba(117, 86, 204, 0.1);
+}
+
+.delete-announcement:hover {
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Empty announcement state */
+.announcement-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    color: #94a3b8;
+    text-align: center;
+    width: 100%;
+}
+
+.announcement-empty i {
+    font-size: 2.5rem;
+    color: #cbd5e1;
+    margin-bottom: 15px;
+}
+
+.announcement-empty p {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0;
 }

@@ -1,12 +1,9 @@
 <?php
 session_start();
 
-// Check if user is already logged in, redirect appropriately
-if (isset($_SESSION['admin_logged_in'])) {
-    header('Location: view/admin_dashboard.php');
-    exit();
-} elseif (isset($_SESSION['user_logged_in'])) {
-    header('Location: view/dashboard.php');
+// If user is already logged in, redirect to dashboard
+if (isset($_SESSION['username'])) {
+    header("Location: view/dashboard.php");
     exit();
 }
 ?>
@@ -14,172 +11,608 @@ if (isset($_SESSION['admin_logged_in'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCS Sit-In Monitoring System</title>
+    <title>CCS Sit-In System | University of Cebu</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <style>
         :root {
             --primary-color: #7556cc;
-            --secondary-color: #d569a7;
-            --accent-color: #9b5fb9;
-            --text-dark: #1f2937;
-            --text-light: #f9fafb;
-            --bg-light: #f3f4f6;
-            --bg-white: #ffffff;
+            --secondary-color: #9556cc;
+            --accent-color: #6200ea;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --text-color: #334155;
+            --light-text: #64748b;
+            --bg-color: #f1f5f9;
         }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-dark);
-            background-color: var(--bg-light);
-            overflow-x: hidden;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out forwards;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
         }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Header and Navigation - Updated to match dashboard style */
-        .header {
-            background-color: var(--bg-white);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            opacity: 0;
-            transform: translateY(-10px);
-            animation: navSlideDown 0.5s ease-out forwards;
-        }
-        
-        @keyframes navSlideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .header-container {
-            max-width: 1200px;
+
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0.75rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 0 1.5rem;
         }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 1.25rem;
-            gap: 0.5rem;
-        }
-        
-        .logo i {
-            font-size: 1.5rem;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-        
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 500;
-            transition: all 0.3s;
+
+        /* Hero Section */
+        .hero {
             position: relative;
+            min-height: 550px;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            padding: 80px 0 60px;
+            overflow: hidden;
+            color: white;
+        }
+
+        .hero-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .logos-container {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
-        
-        .nav-link:hover {
-            color: var(--primary-color);
-            background-color: rgba(117, 86, 204, 0.05);
-        }
-        
-        .nav-link i {
-            font-size: 1.25rem;
-        }
-        
-        .auth-buttons {
+
+        .hero-logo {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 50%;
             display: flex;
-            gap: 0.75rem;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
-        
+
+        .hero-logo img {
+            width: 65px;
+            height: auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #ffffff, #f0f0f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .hero h2 {
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
         .btn {
-            padding: 0.5rem 1.25rem;
-            border-radius: 0.375rem;
-            font-weight: 500;
-            transition: all 0.3s;
-            cursor: pointer;
-            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 1rem;
+            cursor: pointer;
         }
-        
-        .btn-outline {
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            background: transparent;
-        }
-        
-        .btn-outline:hover {
-            background-color: var(--primary-color);
-            color: var(--bg-white);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(117, 86, 204, 0.2);
-        }
-        
+
         .btn-primary {
-            background-color: var(--primary-color);
-            color: var(--bg-white);
-            border: 1px solid var(--primary-color);
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
         }
-        
+
         .btn-primary:hover {
-            background-color: #6445b8;
-            border-color: #6445b8;
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(117, 86, 204, 0.3);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
         }
-        
-        /* Hero Section - Updated with dashboard-like elements */
-        .hero {
-            padding: 9rem 2rem 6rem;
-            background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+
+        .btn-secondary {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Features section */
+        .features {
+            padding: 5rem 0;
+        }
+
+        .section-header {
             text-align: center;
-            opacity: 0;
-            animation: fadeUp 1s ease-out 0.3s forwards;
+            margin-bottom: 3.5rem;
         }
-        
-        @keyframes fadeUp {
+
+        .section-header h2 {
+            font-size: 2.25rem;
+            color: var( --primary-color);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--light-text);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .feature-card {
+            display: flex;
+            align-items: flex-start;
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            transform: translateX(5px);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-card:hover::after {
+            transform: translateX(0);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(117, 86, 204, 0.1);
+            border-radius: 12px;
+            margin-right: 1rem;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            background: #7556cc;
+            color: white;
+        }
+
+        .feature-content {
+            flex: 1;
+        }
+
+        .feature-content h3 {
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            margin: 0 0 8px 0;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .feature-content p {
+            color: var(--light-text);
+            font-size: 0.95rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .feature-card:hover .feature-content h3 {
+            color: #7556cc;
+        }
+
+        /* How it works section */
+        .how-it-works {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 300px;
+            padding: 1.5rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.25rem;
+            box-shadow: 0 5px 15px rgba(117, 86, 204, 0.3);
+        }
+
+        .step h3 {
+            font-size: 1.25rem;
+            color: var(--dark-color);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .step p {
+            color: var(--light-text);
+            line-height: 1.6;
+        }
+
+        /* About section */
+        .about {
+            padding: 5rem 0;
+            background-color: #f8fafc;
+        }
+
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .about-text {
+            flex: 1;
+        }
+
+        .about-text h3 {
+            font-size: 2rem;
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .about-text p {
+            color: var(--text-color);
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .about-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .about-image img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        /* Call to action section */
+        .cta {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .cta-content {
+            position: relative;
+            max-width: 700px;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            color: #cbd5e1;
+            padding: 4rem 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-logo img {
+            width: 45px;
+            height: auto;
+        }
+
+        .footer-logo span {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .footer-info p {
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+        }
+
+        .footer-links-group h3 {
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-links-group ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links-group ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links-group ul li a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links-group ul li a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.23);
+            padding-top: 2rem;
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .about-content {
+                flex-direction: column;
+            }
+            
+            .about-image {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 500px;
+                padding: 60px 0 40px;
+            }
+            
+            .hero h1 {
+                font-size: 2.25rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.15rem;
+            }
+            
+            .section-header h2 {
+                font-size: 2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .cta h2 {
+                font-size: 2rem;
+            }
+            
+            .step {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-logo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .hero-logo img {
+                width: 70px;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .section-header h2 {
+                font-size: 1.75rem;
+            }
+            
+            .features {
+                padding: 3rem 0;
+            }
+            
+            .how-it-works, .about, .cta {
+                padding: 3rem 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -189,594 +622,230 @@ if (isset($_SESSION['admin_logged_in'])) {
                 transform: translateY(0);
             }
         }
-        
-        .hero-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: var(--bg-white);
-            border-radius: 0.5rem;
-            padding: 3rem 2rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            color: var(--text-dark);
-            line-height: 1.2;
-        }
-        
-        .hero-title span {
-            color: var(--primary-color);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.125rem;
-            color: #4b5563;
-            max-width: 700px;
-            margin: 0 auto 2.5rem;
-            line-height: 1.6;
-        }
-        
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-        
-        /* Features Section - With dashboard card styling */
-        .features {
-            padding: 5rem 2rem;
-            background-color: var(--bg-light);
+
+        .animate-fade-up {
             opacity: 0;
-            animation: fadeUp 1s ease-out 0.6s forwards;
+            animation: fadeInUp 0.8s ease-out forwards;
         }
-        
-        .section-title {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 3rem;
-            color: var(--text-dark);
-            position: relative;
-            padding-bottom: 1rem;
+
+        .delay-1 {
+            animation-delay: 0.1s;
         }
-        
-        .section-title:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            border-radius: 3px;
+
+        .delay-2 {
+            animation-delay: 0.3s;
         }
-        
-        .section-title span {
-            color: var(--primary-color);
+
+        .delay-3 {
+            animation-delay: 0.5s;
         }
-        
-        .features-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .feature-card {
-            background-color: var(--bg-white);
-            border-radius: 0.5rem;
-            padding: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.3s, box-shadow 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            border-top: 4px solid var(--primary-color);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        .feature-icon {
-            margin-bottom: 1.5rem;
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(117, 86, 204, 0.1);
-            color: var(--primary-color);
-        }
-        
-        .feature-icon i {
-            font-size: 2rem;
-        }
-        
-        .feature-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-        }
-        
-        .feature-description {
-            color: #4b5563;
-            line-height: 1.6;
-        }
-        
-        /* How It Works Section - Updated with consistent style */
-        .how-it-works {
-            padding: 5rem 2rem;
-            background-color: var(--bg-white);
-            opacity: 0;
-            animation: fadeUp 1s ease-out 0.9s forwards;
-        }
-        
-        .steps-container {
-            max-width: 900px;
-            margin: 0 auto;
-            background-color: var(--bg-white);
-            border-radius: 0.5rem;
-            padding: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        .step {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-            align-items: center;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.3s;
-        }
-        
-        .step:hover {
-            background-color: rgba(117, 86, 204, 0.05);
-        }
-        
-        .step:last-child {
-            margin-bottom: 0;
-        }
-        
-        .step:nth-child(even) {
-            flex-direction: row-reverse;
-        }
-        
-        .step-number {
-            flex-shrink: 0;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--bg-white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            font-weight: 700;
-            box-shadow: 0 4px 6px rgba(117, 86, 204, 0.3);
-        }
-        
-        .step-content {
-            flex-grow: 1;
-        }
-        
-        .step-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-dark);
-        }
-        
-        .step-description {
-            color: #4b5563;
-            line-height: 1.6;
-        }
-        
-        /* About Section - Updated with dashboard styling */
-        .about {
-            padding: 5rem 2rem;
-            background-color: var(--bg-light);
-            opacity: 0;
-            animation: fadeUp 1s ease-out 1.2s forwards;
-        }
-        
-        .about-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: flex;
-            gap: 3rem;
-            align-items: center;
-            background-color: var(--bg-white);
-            border-radius: 0.5rem;
-            padding: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        .about-image {
-            flex: 1;
-            max-width: 450px;
-        }
-        
-        .about-image img {
-            width: 100%;
-            height: auto;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        .about-content {
-            flex: 1;
-        }
-        
-        .about-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-            color: var (--text-dark);
-        }
-        
-        .about-description {
-            color: #4b5563;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Footer - Updated to match dashboard styling */
-        .footer {
-            background-color: #1f2937;
-            color: var(--text-light);
-            padding: 4rem 2rem 2rem;
-            opacity: 0;
-            animation: fadeUp 1s ease-out 1.5s forwards;
-        }
-        
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .footer-top {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-        
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--bg-white);
-            gap: 0.5rem;
-        }
-        
-        .footer-tagline {
-            color: #d1d5db;
-            line-height: 1.6;
-        }
-        
-        .footer-links-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1.25rem;
-            color: var(--bg-white);
-            position: relative;
-            padding-bottom: 0.75rem;
-        }
-        
-        .footer-links-title:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 40px;
-            height: 2px;
-            background-color: var(--primary-color);
-        }
-        
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .footer-link {
-            margin-bottom: 0.75rem;
-        }
-        
-        .footer-link a {
-            color: #d1d5db;
-            text-decoration: none;
-            transition: color 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .footer-link a:hover {
-            color: var(--bg-white);
-        }
-        
-        .footer-link a i {
-            font-size: 0.875rem;
-        }
-        
-        .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid #374151;
-            color: #9ca3af;
-        }
-        
-        /* Media Queries */
-        @media (max-width: 768px) {
-            .header-container {
-                padding: 0.75rem 1rem;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .hero {
-                padding: 7rem 1rem 4rem;
-            }
-            
-            .hero-container {
-                padding: 2rem 1rem;
-            }
-            
-            .hero-title {
-                font-size: 1.75rem;
-            }
-            
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-                gap: 0.75rem;
-            }
-            
-            .about-container {
-                flex-direction: column;
-                padding: 1.5rem;
-            }
-            
-            .about-image {
-                order: 1;
-            }
-            
-            .about-content {
-                order: 2;
-            }
-            
-            .step {
-                flex-direction: column !important;
-                text-align: center;
-                gap: 1rem;
-                padding: 1.5rem 1rem;
-            }
+
+        .delay-4 {
+            animation-delay: 0.7s;
         }
     </style>
 </head>
 <body>
-    <!-- Header and Navigation - Updated to match dashboard -->
-    <header class="header">
-        <div class="header-container">
-            <a href="#" class="logo">
-                <i class="ri-computer-line"></i>
-                <span>CCS Sit-In</span>
-            </a>
-            
-            <nav class="nav-links">
-                <a href="#features" class="nav-link">
-                    <i class="ri-layout-grid-line"></i>
-                    <span>Features</span>
-                </a>
-                <a href="#how-it-works" class="nav-link">
-                    <i class="ri-question-line"></i>
-                    <span>How It Works</span>
-                </a>
-                <a href="#about" class="nav-link">
-                    <i class="ri-information-line"></i>
-                    <span>About</span>
-                </a>
-            </nav>
-            
-            <div class="auth-buttons">
-                <a href="auth/login.php" class="btn btn-outline">
-                    <i class="ri-login-box-line"></i>
-                    <span>Login</span>
-                </a>
-                <a href="auth/register.php" class="btn btn-primary">
-                    <i class="ri-user-add-line"></i>
-                    <span>Register</span>
-                </a>
-            </div>
-        </div>
-    </header>
-    
-    <!-- Hero Section - Updated with card style -->
+    <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-container">
-            <h1 class="hero-title">Welcome to <span>CCS Sit-In</span> Monitoring System</h1>
-            <p class="hero-subtitle">A seamless way to manage and track computer laboratory usage for students. Reserve your spot, track your time, and enhance your academic experience.</p>
-            <div class="hero-buttons">
-                <a href="auth/login.php" class="btn btn-primary">
-                    <i class="ri-login-box-line"></i>
-                    <span>Student Login</span>
-                </a>
-                <a href="auth/register.php" class="btn btn-outline">
-                    <i class="ri-user-add-line"></i>
-                    <span>Create Account</span>
-                </a>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Features Section - Updated with consistent styling -->
-    <section class="features" id="features">
-        <h2 class="section-title">Why Choose <span>CCS Sit-In</span></h2>
-        <div class="features-container">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="ri-calendar-check-line"></i>
+        <div class="hero-pattern"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="logos-container animate-fade-up">
+                    <div class="hero-logo">
+                        <img src="assets/images/logo/ccs.png" alt="CCS Logo">
+                    </div>
+                    <div class="hero-logo">
+                        <img src="assets/images/logo/uc.png" alt="UC Logo">
+                    </div>
                 </div>
-                <h3 class="feature-title">Easy Reservations</h3>
-                <p class="feature-description">Book your laboratory sessions in advance with our user-friendly reservation system. Secure your spot for study sessions, project work, or research.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="ri-time-line"></i>
-                </div>
-                <h3 class="feature-title">Time Tracking</h3>
-                <p class="feature-description">Monitor your laboratory usage time effectively. Our system automatically tracks check-in and check-out times for better time management.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="ri-notification-4-line"></i>
-                </div>
-                <h3 class="feature-title">Instant Updates</h3>
-                <p class="feature-description">Stay informed with real-time notifications about your reservations, administrative announcements, and laboratory availability.</p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- How It Works Section - Updated with dashboard-like styling -->
-    <section class="how-it-works" id="how-it-works">
-        <h2 class="section-title">How It <span>Works</span></h2>
-        <div class="steps-container">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <h3 class="step-title">Create an Account</h3>
-                    <p class="step-description">Register with your student information to access the CCS Sit-In system. Simply provide your basic details, and you're ready to go.</p>
-                </div>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <h3 class="step-title">Make a Reservation</h3>
-                    <p class="step-description">Book your laboratory session in advance by selecting your preferred date and time, then state your purpose for laboratory use.</p>
-                </div>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <h3 class="step-title">Check-In at the Lab</h3>
-                    <p class="step-description">When you arrive, simply check in through the system. The administrator will verify your reservation and record your entry.</p>
-                </div>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">4</div>
-                <div class="step-content">
-                    <h3 class="step-title">Check-Out When Done</h3>
-                    <p class="step-description">Once you've completed your work, check out through the system to record your usage duration and free up space for other students.</p>
+                <h1 class="animate-fade-up delay-1">CCS SIT-IN MONITORING SYSTEM</h1>
+                <h2 class="animate-fade-up delay-2">A modern platform for managing laboratory reservations at the College of Computer Studies</h2>
+                <div class="cta-buttons animate-fade-up delay-3">
+                    <a href="auth/login.php" class="btn btn-primary">
+                        <i class="ri-login-circle-line"></i> Login
+                    </a>
+                    <a href="auth/register.php" class="btn btn-secondary">
+                        <i class="ri-user-add-line"></i> Register
+                    </a>
                 </div>
             </div>
         </div>
     </section>
-    
-    <!-- About Section - Updated with dashboard card styling -->
-    <section class="about" id="about">
-        <div class="about-container">
-            <div class="about-image">
-                <img src="assets/images/lab-image.jpg" alt="Computer Laboratory" 
-                     onerror="this.src='https://via.placeholder.com/450x300?text=CCS+Computer+Laboratory'">
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Key Features</h2>
+                <p>Our system provides everything you need to manage your laboratory sessions efficiently</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="ri-calendar-check-line"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Easy Reservations</h3>
+                        <p>Reserve laboratory sessions with just a few clicks. Select your preferred time slot and laboratory room.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="ri-history-line"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Session History</h3>
+                        <p>Track your complete history of laboratory usage and reservations for better planning.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="ri-computer-line"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Lab Availability</h3>
+                        <p>Check real-time availability of laboratories and computer systems before making reservations.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="ri-profile-line"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Student Dashboard</h3>
+                        <p>Access a personalized dashboard showing your session statistics and upcoming reservations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+                <p>Getting started with the CCS Sit-In System is quick and easy</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Create an Account</h3>
+                    <p>Register with your student details and verification information to join the system.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Choose a Laboratory</h3>
+                    <p>Browse available laboratories and select one that meets your requirements.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Reserve a Time Slot</h3>
+                    <p>Pick an available time slot that fits your schedule for the laboratory session.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Receive Confirmation</h3>
+                    <p>Get instant confirmation and reminder notifications about your reservation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>About CCS Sit-In System</h2>
+                <p>Learn more about our system and its purpose</p>
             </div>
             <div class="about-content">
-                <h2 class="about-title">About CCS Sit-In System</h2>
-                <p class="about-description">
-                    The College of Computer Studies (CCS) Sit-In Monitoring System streamlines the process of 
-                    laboratory usage tracking for both students and administrators. Our goal is to maximize 
-                    laboratory resources by ensuring proper scheduling, monitoring, and utilization.
-                </p>
-                <p class="about-description">
-                    With features like real-time availability tracking, purpose documentation, and usage analytics, 
-                    we aim to improve the overall laboratory experience for the entire CCS community.
-                </p>
-                <a href="auth/login.php" class="btn btn-primary">
-                    <i class="ri-arrow-right-line"></i>
-                    <span>Get Started</span>
-                </a>
+                <div class="about-text">
+                    <h3>Empowering Students with Technology</h3>
+                    <p>The CCS Sit-In System was developed to streamline the process of laboratory reservations for the College of Computer Studies. Our goal is to provide students with easy access to computing resources while maintaining efficient laboratory management.</p>
+                    <p>This platform helps students maximize their learning opportunities by ensuring fair and organized access to laboratory resources. With features designed specifically for the needs of computer science and IT students, the system supports both educational requirements and practical skill development.</p>
+                </div>
+                <div class="about-image">
+                    <img src="assets/images/lab-image.jpg" alt="Computer Laboratory" onerror="this.src='https://via.placeholder.com/600x400?text=Computer+Laboratory'">
+                </div>
             </div>
         </div>
     </section>
-    
-    <!-- Footer - Updated with more consistent styling -->
+
+    <!-- Footer -->
     <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-top">
-                <div>
+        <div class="footer-pattern"></div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
                     <div class="footer-logo">
-                        <i class="ri-computer-line"></i>
-                        <span>CCS Sit-In</span>
+                        <span>CCS SIT-IN MONITORING SYSTEM</span>
                     </div>
-                    <p class="footer-tagline">Streamlining laboratory access and usage monitoring for a better academic experience.</p>
+                    <p>A modern laboratory reservation system for the College of Computer Studies at University of Cebu.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="ri-facebook-fill"></i></a>
+                        <a href="#"><i class="ri-twitter-fill"></i></a>
+                        <a href="#"><i class="ri-instagram-line"></i></a>
+                        <a href="#"><i class="ri-linkedin-fill"></i></a>
+                    </div>
                 </div>
-                
-                <div>
-                    <h3 class="footer-links-title">Quick Links</h3>
-                    <ul class="footer-links">
-                        <li class="footer-link"><a href="#features"><i class="ri-arrow-right-s-line"></i> Features</a></li>
-                        <li class="footer-link"><a href="#how-it-works"><i class="ri-arrow-right-s-line"></i> How It Works</a></li>
-                        <li class="footer-link"><a href="#about"><i class="ri-arrow-right-s-line"></i> About</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h3 class="footer-links-title">Resources</h3>
-                    <ul class="footer-links">
-                        <li class="footer-link"><a href="#"><i class="ri-arrow-right-s-line"></i> Help Center</a></li>
-                        <li class="footer-link"><a href="#"><i class="ri-arrow-right-s-line"></i> Lab Guidelines</a></li>
-                        <li class="footer-link"><a href="#"><i class="ri-arrow-right-s-line"></i> Privacy Policy</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h3 class="footer-links-title">Get Started</h3>
-                    <ul class="footer-links">
-                        <li class="footer-link"><a href="auth/login.php"><i class="ri-login-box-line"></i> Login</a></li>
-                        <li class="footer-link"><a href="auth/register.php"><i class="ri-user-add-line"></i> Register</a></li>
-                        <li class="footer-link"><a href="auth/admin-login.php"><i class="ri-admin-line"></i> Admin Access</a></li>
-                    </ul>
+                <div class="footer-links">
+                    <div class="footer-links-group">
+                        <h3>Quick Links</h3>
+                        <ul>
+                            <li><a href="auth/login.php">Login</a></li>
+                            <li><a href="auth/register.php">Register</a></li>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links-group">
+                        <h3>Resources</h3>
+                        <ul>
+                            <li><a href="#">User Guide</a></li>
+                            <li><a href="#">FAQ</a></li>
+                            <li><a href="#">Lab Rules</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links-group">
+                        <h3>Contact</h3>
+                        <ul>
+                            <li><a href="#">Help Desk</a></li>
+                            <li><a href="#">Report Issues</a></li>
+                            <li><a href="#">Feedback</a></li>
+                            <li><a href="#">Support</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            
             <div class="footer-bottom">
-                <p>&copy; <?php echo date('Y'); ?> CCS Sit-In Monitoring System. All rights reserved.</p>
+                <p>&copy; <?php echo date('Y'); ?> University of Cebu - College of Computer Studies. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Notification Container - Matching dashboard notifications -->
-    <div id="notification-container"></div>
-
-    <!-- Smooth scroll functionality -->
     <script>
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
+        document.addEventListener('DOMContentLoaded', function() {
+            // Intersection Observer to trigger animations when elements come into view
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-fade-up');
+                        observer.unobserve(entry.target);
+                    }
                 });
+            }, observerOptions);
+            
+            // Observe feature cards, steps, and other elements
+            document.querySelectorAll('.feature-card, .step, .about-text, .about-image').forEach(el => {
+                observer.observe(el);
             });
         });
     </script>

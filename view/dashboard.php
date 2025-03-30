@@ -53,6 +53,34 @@ if ($row = $result->fetch_assoc()) {
     $_SESSION['remaining_sessions'] = $row['remaining_sessions'] ?? 30;
 }
 
+// Get student statistics for dashboard
+$stats = [
+    'total_sitins' => 0,
+    'remaining_sessions' => $_SESSION['remaining_sessions'],
+    'pending_reservations' => 0
+];
+
+// Get total completed sit-ins for this student
+$id = $_SESSION['idno'];
+$query = "SELECT COUNT(*) as count FROM sit_ins WHERE idno = ? AND status = 'completed'";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result && $row = $result->fetch_assoc()) {
+    $stats['total_sitins'] = $row['count'];
+}
+
+// Get count of pending reservations
+$query = "SELECT COUNT(*) as count FROM reservations WHERE idno = ? AND status = 'pending'";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result && $row = $result->fetch_assoc()) {
+    $stats['pending_reservations'] = $row['count'];
+}
+
 // Fetch announcements
 $announcements = [];
 $query = "SELECT * FROM announcements ORDER BY created_at DESC";
@@ -74,6 +102,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
@@ -90,75 +119,6 @@ $conn->close();
         
         .sessions-count.medium {
             color: #ea580c;
-        }
-        
-        /* Enhanced announcement styles */
-        .announcement-list {
-            max-height: 600px;
-            overflow-y: auto;
-            padding-right: 10px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
-        }
-        
-        .announcement-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .announcement-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .announcement-list::-webkit-scrollbar-thumb {
-            background-color: rgba(117, 86, 204, 0.5);
-            border-radius: 10px;
-        }
-        
-        .announcement-item {
-            background-color: white;
-            padding: 15px;
-            transition: all 0.2s ease;
-            border-left: #7556cc solid 4px;
-        }
-
-        .announcement-item:hover {
-            transform: translateY(-2px);
-        }
-        
-        .announcement-title {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .announcement-title i {
-            color: #7556cc;
-            font-size: 1.25rem;
-            margin-right: 8px;
-        }
-        
-        .announcement-title h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #334155;
-            margin: 0;
-        }
-        
-        .announcement-details {
-            padding-left: 32px;
-        }
-        
-        .announcement-details p {
-            margin-bottom: 10px;
-            color: #475569;
-            line-height: 1.5;
-        }
-        
-        .timestamp {
-            display: block;
-            font-size: 0.8rem;
-            color: #94a3b8;
-            text-align: right;
         }
         
         /* Notification styles */
@@ -274,6 +234,19 @@ $conn->close();
             display: flex;
             align-items: flex-start;
         }
+
+        .notification-item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 4px 0;
+        }
+
+        .notification-item p {
+            font-size: 0.875rem;
+            color: #475569;
+            margin: 0;
+        }
         
         .notification-item:hover {
             background-color: #f8fafc;
@@ -305,19 +278,6 @@ $conn->close();
             flex-grow: 1;
         }
         
-        .notification-content h4 {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin: 0 0 4px 0;
-            color: #334155;
-        }
-        
-        .notification-content p {
-            font-size: 0.8rem;
-            margin: 0 0 6px 0;
-            color: #64748b;
-        }
-        
         .notification-time {
             font-size: 0.75rem;
             color: #94a3b8;
@@ -328,6 +288,420 @@ $conn->close();
             text-align: center;
             color: #64748b;
             font-size: 0.9rem;
+        }
+        
+        /* Add animations for new dashboard elements */
+        .student-dashboard {
+            display: none; /* Hide old container */
+        }
+        
+        .admin-dashboard {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUpFade 0.8s ease-out 0.2s forwards;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .admin-dashboard .stat-card {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: cardFadeIn 0.5s ease-out forwards;
+        }
+        
+        .admin-dashboard .stat-card:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+        
+        .admin-dashboard .stat-card:nth-child(2) {
+            animation-delay: 0.45s;
+        }
+        
+        .admin-dashboard .stat-card:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .announcements-grid {
+            opacity: 0;
+            animation: fadeUp 0.7s ease-out 0.7s forwards;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        @media (max-width: 992px) {
+            .announcements-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .announcements-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .announcements-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            padding: 1.5rem 1.5rem 0.75rem;
+            border-bottom: 1px solid #eee;
+            flex-shrink: 0;
+        }
+        
+        /* Modern announcement list styles */
+        .announcement-list {
+            max-height: 300px; /* Reduced height */
+            height: 300px; /* Fixed height */
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
+            padding: 1rem 1.5rem;
+            flex-grow: 1;
+        }
+        
+        .announcement-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .announcement-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .announcement-list::-webkit-scrollbar-thumb {
+            background-color: rgba(117, 86, 204, 0.5);
+            border-radius: 10px;
+        }
+        
+        /* Announcement Items */
+        .announcement-list .announcement-item {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            padding: 0;
+            border: none;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border-left: 4px solid #7556cc;
+        }
+        
+        .announcement-list .announcement-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .announcement-date {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 70px;
+            padding: 15px 0;
+            background: rgba(117, 86, 204, 0.08);
+            border-right: 1px solid rgba(117, 86, 204, 0.15);
+        }
+        
+        .date-day {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #7556cc;
+            line-height: 1;
+        }
+        
+        .date-month {
+            font-size: 0.9rem;
+            color: #7556cc;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .announcement-content {
+            flex: 1;
+            padding: 15px 20px;
+        }
+        
+        .announcement-content h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 8px 0;
+        }
+        
+        .announcement-content p {
+            font-size: 0.95rem;
+            color: #475569;
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+        }
+        
+        .announcement-meta {
+            display: flex;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        
+        .announcement-meta span {
+            display: flex;
+            align-items: center;
+        }
+        
+        .announcement-meta i {
+            margin-right: 4px;
+            font-size: 0.9rem;
+        }
+        
+        /* Empty announcement state */
+        .announcement-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            color: #94a3b8;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .announcement-empty i {
+            font-size: 2.5rem;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+        
+        .announcement-empty p {
+            font-size: 1rem;
+            color: #64748b;
+            margin: 0;
+        }
+        
+        .rules-container {
+            height: 300px; /* Reduced to match announcement-list */
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
+            padding: 0 1.5rem 1.5rem;
+        }
+        
+        .rules-header {
+            padding-top: 1rem;
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+        
+        .rules-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: #1e293b;
+        }
+        
+        .rules-header h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        .rules-intro {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            color: #475569;
+        }
+        
+        .rules-list {
+            padding-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .rules-list li {
+            margin-bottom: 0.75rem;
+            color: #334155;
+            line-height: 1.5;
+        }
+        
+        .rules-list ul {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+        }
+        
+        .rules-list ul li {
+            margin-bottom: 0.35rem;
+            color: #475569;
+        }
+        
+        .disciplinary-section {
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #7556cc;
+            margin-top: 1.5rem;
+        }
+        
+        .disciplinary-section h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #1e293b;
+        }
+        
+        .disciplinary-section ul {
+            padding-left: 1.25rem;
+            margin-bottom: 0;
+        }
+        
+        .disciplinary-section li {
+            margin-bottom: 0.5rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+        
+        /* System Selection Section */
+        .system-selection {
+            max-width: 1400px;
+            margin: 0 auto 3rem;
+            padding: 0 1.5rem;
+        }
+        
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .selection-card {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .selection-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            transform: translateX(5px);
+            transition: transform 0.3s ease;
+        }
+        
+        .selection-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        .selection-card:hover::after {
+            transform: translateX(0);
+        }
+        
+        .selection-icon {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(117, 86, 204, 0.1);
+            border-radius: 12px;
+            margin-right: 1rem;
+            color: #7556cc;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .selection-card:hover .selection-icon {
+            background: #7556cc;
+            color: white;
+        }
+        
+        .selection-details h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 5px 0;
+            transition: color 0.3s ease;
+        }
+        
+        .selection-details p {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .selection-card:hover .selection-details h3 {
+            color: #7556cc;
+        }
+        
+        @media (max-width: 767px) {
+            .selection-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -486,52 +860,74 @@ $conn->close();
         </div>
     </div>
 
-    <!-- Dashboard Grid Container -->
-    <div class="dashboard-grid" style="margin-top: 80px;">
-        <!-- Left Column - Announcements -->
-        <div class="dashboard-column">
-            <div class="profile-card">
-                <div class="profile-header centered-header">
-                    <h2>CCS Announcements</h2>
+    <!-- Student Dashboard Header and Stats -->
+    <div class="admin-dashboard">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                Student Dashboard
+                
+            </div>
+        </div>
+        
+        <!-- Stats Grid - Modernized -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Total Sit-ins</div>
+                <div class="stat-value"><?php echo $stats['total_sitins']; ?></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Remaining Sessions</div>
+                <div class="stat-value <?php echo $stats['remaining_sessions'] <= 5 ? 'low' : ($stats['remaining_sessions'] <= 10 ? 'medium' : ''); ?>">
+                    <?php echo $stats['remaining_sessions']; ?>
                 </div>
-                <div class="profile-content">
-                    <div class="announcement-list">
-                        <?php if (empty($announcements)): ?>
-                            <div class="announcement-item">
-                                <div class="announcement-title">
-                                    <i class="ri-information-line"></i>
-                                    <h3>No Announcements</h3>
-                                </div>
-                                <div class="announcement-details">
-                                    <p>There are no announcements at this time.</p>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <?php foreach ($announcements as $announcement): ?>
-                                <div class="announcement-item">
-                                    <div class="announcement-title">
-                                        <i class="ri-notification-3-fill"></i>
-                                        <h3><?php echo htmlspecialchars($announcement['title']); ?></h3>
-                                    </div>
-                                    <div class="announcement-details">
-                                        <p><?php echo htmlspecialchars($announcement['content']); ?></p>
-                                        <span class="timestamp"><?php echo date('F d, Y', strtotime($announcement['created_at'])); ?></span>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Pending Reservations</div>
+                <div class="stat-value"><?php echo $stats['pending_reservations']; ?></div>
             </div>
         </div>
 
-        <!-- Right Column - Rules -->
-        <div class="dashboard-column">
-            <div class="profile-card">
-                <div class="profile-header centered-header">
-                    <h2>Laboratory Rules and Regulations</h2>
+        <!-- Announcements and Rules Grid -->
+        <div class="announcements-grid">
+            <!-- Left Column - Announcements -->
+            <div class="announcements-card">
+                <div class="announcements-header">
+                    <i class="ri-notification-3-line"></i>
+                    <span>CCS Announcements</span>
                 </div>
-                <div class="profile-content rules-container">
+                <div class="announcement-list">
+                    <?php if (empty($announcements)): ?>
+                        <div class="announcement-item">
+                            <div class="announcement-empty">
+                                <i class="ri-information-line"></i>
+                                <p>No announcements available at this time.</p>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($announcements as $announcement): ?>
+                            <div class="announcement-item">
+                                <div class="announcement-date">
+                                    <div class="date-day"><?php echo date('d', strtotime($announcement['created_at'])); ?></div>
+                                    <div class="date-month"><?php echo date('M', strtotime($announcement['created_at'])); ?></div>
+                                </div>
+                                <div class="announcement-content">
+                                    <h3><?php echo htmlspecialchars($announcement['title']); ?></h3>
+                                    <p><?php echo htmlspecialchars($announcement['content']); ?></p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Right Column - Rules -->
+            <div class="announcements-card">
+                <div class="announcements-header">
+                    <i class="ri-file-list-3-line"></i>
+                    <span>Laboratory Rules and Regulations</span>
+                </div>
+                <div class="rules-container">
                     <div class="rules-header">
                         <h3>UNIVERSITY OF CEBU</h3>
                         <h4>COLLEGE OF INFORMATION & COMPUTER STUDIES</h4>
@@ -574,37 +970,52 @@ $conn->close();
                 </div>
             </div>
         </div>
+
+        <!-- System Selection Section -->
+        <div class="system-selection">
+            <div class="selection-header">
+            </div>
+            <div class="selection-grid">
+                <a href="reservation.php" class="selection-card">
+                    <div class="selection-icon">
+                        <i class="ri-calendar-check-line"></i>
+                    </div>
+                    <div class="selection-details">
+                        <h3>Make Reservation</h3>
+                        <p>Schedule a laboratory session</p>
+                    </div>
+                </a>
+                <a href="history.php" class="selection-card">
+                    <div class="selection-icon">
+                        <i class="ri-history-line"></i>
+                    </div>
+                    <div class="selection-details">
+                        <h3>View History</h3>
+                        <p>See your past lab activities</p>
+                    </div>
+                </a>
+                <a href="profile.php" class="selection-card">
+                    <div class="selection-icon">
+                        <i class="ri-user-settings-line"></i>
+                    </div>
+                    <div class="selection-details">
+                        <h3>Profile Settings</h3>
+                        <p>Update your account information</p>
+                    </div>
+                </a>
+                <a href="#" class="selection-card" onclick="document.getElementById('notification-toggle').click(); return false;">
+                    <div class="selection-icon">
+                        <i class="ri-notification-4-line"></i>
+                    </div>
+                    <div class="selection-details">
+                        <h3>Notifications</h3>
+                        <p>Check your recent alerts</p>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
     
-    <style>
-        /* Update card height */
-        .dashboard-column .profile-card {
-            height: 750px; /* Increased from 700px */
-        }
-
-        /* Ensure consistent scrolling behavior */
-        .rules-container {
-            height: 700px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
-            padding-right: 10px;
-        }
-        
-        .rules-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .rules-container::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .rules-container::-webkit-scrollbar-thumb {
-            background-color: rgba(117, 86, 204, 0.5);
-            border-radius: 10px;
-        }
-    </style>
-
     <script>
     // Add notification system functions at the start of scripts
     function showNotification(title, message, type = 'info', duration = 5000) {
@@ -632,7 +1043,7 @@ $conn->close();
         notificationContainer.appendChild(notification);
         notification.getBoundingClientRect();
         notification.classList.add('show');
-        
+            
         if (duration > 0) {
             setTimeout(() => closeNotification(notification), duration);
         }
@@ -745,9 +1156,6 @@ $conn->close();
                 margin-right: 12px;
             }
             
-            .notification-icon i {
-                font-size: 18px;
-            }
             
             .notification.info .notification-icon i { color: #3b82f6; }
             .notification.success .notification-icon i { color: #10b981; }

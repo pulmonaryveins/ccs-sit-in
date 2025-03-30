@@ -65,8 +65,8 @@
                     <option value="BS-Information Technology">BS-Information Technology</option>
                     <option value="BS-Computer Science">BS-Computer Science</option>
                     <option value="COE">COE</option>
-                    <option value="CAS">CASs</option>
-                    <option value="SJH">SJH</option>
+                    <option value="CAS">CAS</option>
+                    <option value="CHM">CHM</option>
                     <option value="CTE">CTE</option>
                     <option value="CCA">CCA</option>
                     <option value="CBA">CBA</option>

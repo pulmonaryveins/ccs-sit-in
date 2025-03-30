@@ -533,10 +533,10 @@ $conn->close();
             position: relative;
             width: 24px;
             height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
+            display: flex; /* Ensure proper alignment */
+            align-items: center; /* Vertically align with logout icon */
+            justify-content: center; /* Horizontally center the icon */
+            margin-right: 15px; /* Add spacing similar to logout icon */
         }
         
         .notification-dropdown {
@@ -672,6 +672,14 @@ $conn->close();
             color: #64748b;
             font-size: 0.9rem;
         }
+
+        .nav-actions {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
     </style>
 
     <script>
