@@ -552,3 +552,247 @@
     color: #64748b;
     margin: 0;
 }
+
+/* Student Feedback and Rating Section */
+.feedback-section {
+    margin-bottom: 2rem;
+    animation: fadeUp 0.7s ease-out 0.8s forwards;
+    opacity: 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding-bottom: 0.75rem;
+}
+
+.section-header i {
+    margin-right: 0.5rem;
+    color: #7556cc;
+}
+
+.feedback-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+}
+
+.feedback-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feedback-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* Overall Rating Card */
+.overall-rating {
+    text-align: center;
+}
+
+.rating-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 170px;
+}
+
+.rating-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #7556cc;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+
+.rating-stars {
+    font-size: 1.5rem;
+    color: #ffb800;
+    margin-bottom: 1rem;
+}
+
+.rating-count {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* Rating Distribution */
+.distribution-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.dist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dist-label {
+    width: 40px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: #333;
+}
+
+.dist-label i {
+    font-size: 0.9rem;
+    margin-left: 3px;
+    color: #ffb800;
+}
+
+.dist-bar-container {
+    flex: 1;
+    height: 10px;
+    background-color: #f1f5f9;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.dist-bar {
+    height: 100%;
+    background: linear-gradient(to right, #7556cc, #9556cc);
+    border-radius: 5px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dist-count {
+    width: 40px;
+    text-align: right;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* Recent Feedback */
+.recent-feedback {
+    grid-column: span 2;
+}
+
+.feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 350px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
+    padding-right: 0.5rem;
+}
+
+.feedback-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.feedback-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.feedback-list::-webkit-scrollbar-thumb {
+    background-color: rgba(117, 86, 204, 0.5);
+    border-radius: 6px;
+}
+
+.feedback-item {
+    background-color: #f8fafc;
+    border-radius: 10px;
+    padding: 1rem;
+    border-left: 4px solid #7556cc;
+}
+
+.feedback-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7556cc, #9556cc);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.user-stars {
+    font-size: 0.85rem;
+    color: #ffb800;
+}
+
+.feedback-text {
+    color: #475569;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+.feedback-date {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-align: right;
+}
+
+/* Feedback Categories */
+.feedback-categories {
+    grid-column: span 2;
+}
+
+/* Responsive layout */
+@media (max-width: 992px) {
+    .feedback-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .recent-feedback, 
+    .feedback-categories {
+        grid-column: span 1;
+    }
+}

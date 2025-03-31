@@ -13,6 +13,7 @@ if (isset($_SESSION['username'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CCS Sit-In System | University of Cebu</title>
+    <link rel="icon" href="assets/images/logo/ccs.png" type="image/png">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
@@ -330,43 +331,118 @@ if (isset($_SESSION['username'])) {
         .about {
             padding: 5rem 0;
             background-color: #f8fafc;
+            position: relative;
+            overflow: hidden;
         }
 
         .about-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            justify-content: center; /* Center the cards horizontally */
+        }
+
+        @media (max-width: 768px) {
+            .about-content {
+                grid-template-columns: 1fr;
+                justify-content: center; /* Ensure cards remain centered on smaller screens */
+            }
+        }
+
+        .about-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .about-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+        }
+
+        .about-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .about-card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
             display: flex;
             align-items: center;
-            gap: 3rem;
-            margin-top: 3rem;
         }
 
-        .about-text {
-            flex: 1;
+        .about-card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: rgba(117, 86, 204, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--primary-color);
+            font-size: 1.5rem;
         }
 
-        .about-text h3 {
-            font-size: 2rem;
-            color: var(--dark-color);
-            margin-bottom: 1.5rem;
-            font-weight: 700;
+        .about-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
         }
 
-        .about-text p {
+        .about-card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .about-card-body p {
             color: var(--text-color);
-            font-size: 1.05rem;
-            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .about-card-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .about-main {
+            grid-column: 1 / -1;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .about-main p {
+            color: var(--text-color);
+            font-size: 1.1rem;
             line-height: 1.7;
         }
 
-        .about-image {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
-
-        .about-image img {
-            max-width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        @media (max-width: 768px) {
+            .about-content {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Call to action section */
@@ -541,10 +617,6 @@ if (isset($_SESSION['username'])) {
             .about-content {
                 flex-direction: column;
             }
-            
-            .about-image {
-                order: -1;
-            }
         }
 
         @media (max-width: 768px) {
@@ -653,10 +725,10 @@ if (isset($_SESSION['username'])) {
             <div class="hero-content">
                 <div class="logos-container animate-fade-up">
                     <div class="hero-logo">
-                        <img src="assets/images/logo/ccs.png" alt="CCS Logo">
+                        <img src="assets/images/logo/uc.png" alt="UC Logo">
                     </div>
                     <div class="hero-logo">
-                        <img src="assets/images/logo/uc.png" alt="UC Logo">
+                        <img src="assets/images/logo/ccs.png" alt="CCS Logo">
                     </div>
                 </div>
                 <h1 class="animate-fade-up delay-1">CCS SIT-IN MONITORING SYSTEM</h1>
@@ -755,19 +827,51 @@ if (isset($_SESSION['username'])) {
 
     <!-- About Section -->
     <section class="about">
+        <div class="about-pattern"></div>
         <div class="container">
             <div class="section-header">
                 <h2>About CCS Sit-In System</h2>
                 <p>Learn more about our system and its purpose</p>
             </div>
             <div class="about-content">
-                <div class="about-text">
-                    <h3>Empowering Students with Technology</h3>
-                    <p>The CCS Sit-In System was developed to streamline the process of laboratory reservations for the College of Computer Studies. Our goal is to provide students with easy access to computing resources while maintaining efficient laboratory management.</p>
-                    <p>This platform helps students maximize their learning opportunities by ensuring fair and organized access to laboratory resources. With features designed specifically for the needs of computer science and IT students, the system supports both educational requirements and practical skill development.</p>
+                <div class="about-main">
+                    <p>The CCS Sit-In System was developed to streamline the process of laboratory reservations for the College of Computer Studies at University of Cebu. Our goal is to provide students with easy access to computing resources while maintaining efficient laboratory management.</p>
                 </div>
-                <div class="about-image">
-                    <img src="assets/images/lab-image.jpg" alt="Computer Laboratory" onerror="this.src='https://via.placeholder.com/600x400?text=Computer+Laboratory'">
+                <div class="about-card">
+                    <div class="about-card-header">
+                        <div class="about-card-icon">
+                            <i class="ri-database-2-line"></i>
+                        </div>
+                        <h3 class="about-card-title">Resource Management</h3>
+                    </div>
+                    <div class="about-card-body">
+                        <p>Our system efficiently allocates laboratory resources, ensuring that all students have fair and equal access to computing facilities when they need them most.</p>
+                        <p>By optimizing laboratory usage and scheduling, we maximize the availability of resources to support your educational needs.</p>
+                    </div>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-header">
+                        <div class="about-card-icon">
+                            <i class="ri-user-settings-line"></i>
+                        </div>
+                        <h3 class="about-card-title">Student-Centered</h3>
+                    </div>
+                    <div class="about-card-body">
+                        <p>Designed with students in mind, our platform focuses on providing a seamless experience that supports both educational requirements and practical skill development.</p>
+                        <p>Every feature is built to enhance your learning journey and help you make the most of laboratory resources.</p>
+                    </div>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-header">
+                        <div class="about-card-icon">
+                            <i class="ri-shield-check-line"></i>
+                        </div>
+                        <h3 class="about-card-title">Reliability & Security</h3>
+                    </div>
+                    <div class="about-card-body">
+                        <p>Our secure platform ensures that your data and reservations are protected while providing consistent and reliable access to laboratory sessions.</p>
+                        <p>Built with modern technologies, the system maintains high standards of performance and data integrity.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -819,7 +923,6 @@ if (isset($_SESSION['username'])) {
                         </ul>
                     </div>
                 </div>
-            </div>
             <div class="footer-bottom">
                 <p>&copy; <?php echo date('Y'); ?> University of Cebu - College of Computer Studies. All rights reserved.</p>
             </div>
@@ -844,7 +947,7 @@ if (isset($_SESSION['username'])) {
             }, observerOptions);
             
             // Observe feature cards, steps, and other elements
-            document.querySelectorAll('.feature-card, .step, .about-text, .about-image').forEach(el => {
+            document.querySelectorAll('.feature-card, .step, .about-card').forEach(el => {
                 observer.observe(el);
             });
         });

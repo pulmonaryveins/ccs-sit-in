@@ -75,9 +75,12 @@ $year_level_stats = [
     '4th Year' => 0
 ];
 
-$query = "SELECT year, COUNT(*) as count FROM users GROUP BY year ORDER BY year";
+$query = "SELECT year, COUNT(*) as count FROM users 
+          WHERE year BETWEEN 1 AND 4 
+          GROUP BY year 
+          ORDER BY year";
 $result = $conn->query($query);
-if ($result) {
+if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $year = (int)$row['year'];
         switch ($year) {
@@ -140,6 +143,121 @@ if ($result) {
     while ($row = $result->fetch_assoc()) {
         $announcements[] = $row;
     }
+}
+
+// Fetch feedback data
+$feedback_data = [
+    'total_count' => 0,
+    'average_rating' => 0,
+    'distribution' => [
+        1 => 0, // 1 star
+        2 => 0, // 2 stars
+        3 => 0, // 3 stars
+        4 => 0, // 4 stars
+        5 => 0  // 5 stars
+    ],
+    'recent_feedback' => []
+];
+
+// Get overall ratings count and average
+$query = "SELECT COUNT(*) as total, AVG(rating) as average FROM feedback";
+$result = $conn->query($query);
+if ($result && $row = $result->fetch_assoc()) {
+    $feedback_data['total_count'] = (int)$row['total'];
+    $feedback_data['average_rating'] = round($row['average'], 1);
+}
+
+// Get rating distribution
+$query = "SELECT rating, COUNT(*) as count FROM feedback GROUP BY rating ORDER BY rating";
+$result = $conn->query($query);
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $rating = (int)$row['rating'];
+        $feedback_data['distribution'][$rating] = (int)$row['count'];
+    }
+}
+
+// Calculate distribution percentages
+if ($feedback_data['total_count'] > 0) {
+    foreach ($feedback_data['distribution'] as $rating => $count) {
+        $feedback_data['percentage'][$rating] = round(($count / $feedback_data['total_count']) * 100);
+    }
+} else {
+    $feedback_data['percentage'] = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+}
+
+// Get recent feedback with user details
+$query = "SELECT f.*, 
+          CASE 
+            WHEN r.idno IS NOT NULL THEN r.idno
+            WHEN s.idno IS NOT NULL THEN s.idno
+            ELSE NULL
+          END as idno,
+          CASE 
+            WHEN r.fullname IS NOT NULL AND r.fullname != '' THEN r.fullname
+            WHEN s.fullname IS NOT NULL AND s.fullname != '' THEN s.fullname
+            ELSE NULL
+          END as fullname,
+          f.created_at,
+          u.firstname, u.lastname
+          FROM feedback f
+          LEFT JOIN reservations r ON f.reservation_id = r.id
+          LEFT JOIN sit_ins s ON f.sit_in_id = s.id
+          LEFT JOIN users u ON r.idno = u.idno OR s.idno = u.idno
+          ORDER BY f.created_at DESC
+          LIMIT 3";
+
+$result = $conn->query($query);
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        // If we have user details from users table, use them
+        if (!empty($row['firstname']) && !empty($row['lastname'])) {
+            $name = $row['firstname'] . ' ' . $row['lastname'];
+            $initials = strtoupper(substr($row['firstname'], 0, 1) . substr($row['lastname'], 0, 1));
+        } 
+        // Otherwise use the fullname from sit_ins or reservations
+        elseif (!empty($row['fullname'])) {
+            $name = $row['fullname'];
+            $name_parts = explode(' ', trim($row['fullname']));
+            if (count($name_parts) >= 2) {
+                $initials = strtoupper(substr($name_parts[0], 0, 1) . substr($name_parts[count($name_parts)-1], 0, 1));
+            } else {
+                $initials = strtoupper(substr($row['fullname'], 0, 2));
+            }
+        } 
+        // Fallback
+        else {
+            $name = "Anonymous User";
+            $initials = "AU";
+        }
+        
+        // Format date if available
+        $created_date = "N/A";
+        if (!empty($row['created_at']) && $row['created_at'] != '0000-00-00 00:00:00') {
+            $created_date = date('F j, Y', strtotime($row['created_at']));
+        }
+        
+        $feedback_data['recent_feedback'][] = [
+            'name' => $name,
+            'initials' => $initials,
+            'rating' => (int)$row['rating'],
+            'message' => $row['message'],
+            'date' => $created_date
+        ];
+    }
+}
+
+// If no recent feedback is found, provide sample data
+if (empty($feedback_data['recent_feedback'])) {
+    $feedback_data['recent_feedback'] = [
+        [
+            'name' => 'No feedback available',
+            'initials' => 'NF',
+            'rating' => 0,
+            'message' => 'No student feedback has been submitted yet. Feedback will appear here once students begin providing ratings.',
+            'date' => date('F j, Y')
+        ]
+    ];
 }
 ?>
 <!DOCTYPE html>
@@ -505,6 +623,94 @@ if ($result) {
                 </div>
             </div>
         </div>
+
+        <!-- Student Feedback and Ratings Section -->
+        <div class="feedback-section">
+            <div class="section-header">
+                <i class="ri-star-line"></i>
+                <span>Student Feedback and Ratings</span>
+            </div>
+            
+            <div class="feedback-grid">
+                <!-- Overall Rating Card -->
+                <div class="feedback-card overall-rating">
+                    <div class="card-header">
+                        <h3>Overall Satisfaction Rating</h3>
+                    </div>
+                    <div class="rating-display">
+                        <div class="rating-number"><?php echo $feedback_data['average_rating']; ?></div>
+                        <div class="rating-stars">
+                            <?php
+                            // Display stars based on average rating
+                            $avg = $feedback_data['average_rating'];
+                            for ($i = 1; $i <= 5; $i++) {
+                                if ($i <= floor($avg)) {
+                                    echo '<i class="ri-star-fill"></i>'; // Full star
+                                } elseif ($i == ceil($avg) && $avg != floor($avg)) {
+                                    echo '<i class="ri-star-half-line"></i>'; // Half star
+                                } else {
+                                    echo '<i class="ri-star-line"></i>'; // Empty star
+                                }
+                            }
+                            ?>
+                        </div>
+                        <div class="rating-count">Based on <?php echo $feedback_data['total_count']; ?> student rating<?php echo $feedback_data['total_count'] != 1 ? 's' : ''; ?></div>
+                    </div>
+                </div>
+                
+                <!-- Rating Distribution Card -->
+                <div class="feedback-card rating-distribution">
+                    <div class="card-header">
+                        <h3>Rating Distribution</h3>
+                    </div>
+                    <div class="distribution-bars">
+                        <?php for ($i = 5; $i >= 1; $i--): ?>
+                        <div class="dist-item">
+                            <div class="dist-label"><?php echo $i; ?> <i class="ri-star-fill"></i></div>
+                            <div class="dist-bar-container">
+                                <div class="dist-bar" style="width: <?php echo $feedback_data['percentage'][$i]; ?>%"></div>
+                            </div>
+                            <div class="dist-count"><?php echo $feedback_data['percentage'][$i]; ?>%</div>
+                        </div>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+                
+                <!-- Recent Feedback Card -->
+                <div class="feedback-card recent-feedback">
+                    <div class="card-header">
+                        <h3>Recent Feedback</h3>
+                    </div>
+                    <div class="feedback-list">
+                        <?php foreach ($feedback_data['recent_feedback'] as $feedback): ?>
+                        <div class="feedback-item">
+                            <div class="feedback-user">
+                                <div class="user-avatar"><?php echo $feedback['initials']; ?></div>
+                                <div class="user-info">
+                                    <div class="user-name"><?php echo htmlspecialchars($feedback['name']); ?></div>
+                                    <div class="user-stars">
+                                        <?php 
+                                        for ($i = 1; $i <= 5; $i++) {
+                                            if ($i <= $feedback['rating']) {
+                                                echo '<i class="ri-star-fill"></i>';
+                                            } else {
+                                                echo '<i class="ri-star-line"></i>';
+                                            }
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="feedback-text">
+                                "<?php echo htmlspecialchars($feedback['message']); ?>"
+                            </div>
+                            <div class="feedback-date"><?php echo $feedback['date']; ?></div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>    
         
         <!-- Overall Stats Chart -->
         <div class="chart-card" style="margin-bottom: 1.5rem;">
@@ -983,36 +1189,47 @@ if ($result) {
         // Year Level Distribution Chart - Changed to pie chart
         const yearLevelCtx = document.getElementById('yearLevelChart');
         if (yearLevelCtx) {
-            new Chart(yearLevelCtx.getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
-                    datasets: [{
-                        data: [
-                            <?php echo $year_level_stats['1st Year']; ?>,
-                            <?php echo $year_level_stats['2nd Year']; ?>,
-                            <?php echo $year_level_stats['3rd Year']; ?>,
-                            <?php echo $year_level_stats['4th Year']; ?>
-                        ],
-                        backgroundColor: [
-                            'rgba(117,86,204,0.8)',
-                            'rgba(213,105,167,0.8)',
-                            'rgba(155,95,185,0.8)',
-                            'rgba(94,114,228,0.8)'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                boxWidth: 12,
-                                font: {
+            // Check if we have any valid year level data
+            const yearLevelData = [
+                <?php echo $year_level_stats['1st Year']; ?>,
+                <?php echo $year_level_stats['2nd Year']; ?>,
+                <?php echo $year_level_stats['3rd Year']; ?>,
+                <?php echo $year_level_stats['4th Year']; ?>
+            ];
+            
+            const hasYearLevelData = yearLevelData.some(count => count > 0);
+            
+            if (!hasYearLevelData) {
+                // Display a message if no data is available
+                const container = yearLevelCtx.closest('.chart-container');
+                container.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#666; text-align:center;">No year level data available.<br>Please ensure student year levels are properly set.</div>';
+            } else {
+                // Initialize the chart only if we have data
+                new Chart(yearLevelCtx.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
+                        datasets: [{
+                            data: yearLevelData,
+                            backgroundColor: [
+                                'rgba(117,86,204,0.8)',
+                                'rgba(213,105,167,0.8)',
+                                'rgba(155,95,185,0.8)',
+                                'rgba(94,114,228,0.8)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    boxWidth: 12,
+                                    font: {
                                         size: 11
                                     }
                                 }
@@ -1032,6 +1249,7 @@ if ($result) {
                         }
                     }
                 });
+            }
         }
         
         // ...existing code...
@@ -1159,6 +1377,80 @@ if ($result) {
             closeDeleteModal();
         }
     }
+
+    // Feedback Over Time Chart
+        const feedbackTimeCtx = document.getElementById('feedbackTimeChart');
+        if (feedbackTimeCtx) {
+            // Create data for the last 7 days
+            const labels = [];
+            const data = [];
+            
+            // Generate dates for the last 7 days
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                
+                // Generate some random data for now (will be replaced with real data)
+                // In a real scenario, you would fetch this data from the server
+                data.push(<?php echo $feedback_data['total_count'] > 0 ? rand(1, 5) : 0; ?>);
+            }
+            
+            new Chart(feedbackTimeCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Average Rating',
+                        data: data,
+                        backgroundColor: 'rgba(117,86,204,0.2)',
+                        borderColor: 'rgba(117,86,204,1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: 'rgba(117,86,204,1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            grid: {
+                                display: true,
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Average Rating: ${context.raw}/5`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    
     </script>
 </body>
 </html>
