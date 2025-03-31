@@ -626,9 +626,10 @@ if (empty($feedback_data['recent_feedback'])) {
 
         <!-- Student Feedback and Ratings Section -->
         <div class="feedback-section">
-            <div class="section-header">
-                <i class="ri-star-line"></i>
-                <span>Student Feedback and Ratings</span>
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    Feedback and Ratings
+                </div>
             </div>
             
             <div class="feedback-grid">
@@ -713,10 +714,13 @@ if (empty($feedback_data['recent_feedback'])) {
         </div>    
         
         <!-- Overall Stats Chart -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                Overall Statistics
+            </div>
+        </div>
         <div class="chart-card" style="margin-bottom: 1.5rem;">
             <div class="chart-header">
-                <i class="ri-bar-chart-box-line"></i>
-                <span>Overall Statistics</span>
             </div>
             <div class="chart-container">
                 <canvas id="statsChart"></canvas>

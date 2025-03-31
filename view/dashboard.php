@@ -399,15 +399,15 @@ $conn->close();
             -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
-            padding: 1.5rem 1.5rem 0.75rem;
+            padding: 1rem 1.5rem 1.5rem;
             border-bottom: 1px solid #eee;
             flex-shrink: 0;
         }
         
         /* Modern announcement list styles */
         .announcement-list {
-            max-height: 300px; /* Reduced height */
-            height: 300px; /* Fixed height */
+            max-height: 400px !important; /* Increased from 300px */
+            height: 400px !important; /* Increased from 300px */
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
@@ -531,7 +531,7 @@ $conn->close();
         }
         
         .rules-container {
-            height: 300px; /* Reduced to match announcement-list */
+            height: 400px !important; /* Reduced to match announcement-list */
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
@@ -696,6 +696,17 @@ $conn->close();
         
         .selection-card:hover .selection-details h3 {
             color: #7556cc;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            text-align: center;  /* Added */
         }
         
         @media (max-width: 767px) {
@@ -972,6 +983,11 @@ $conn->close();
         </div>
 
         <!-- System Selection Section -->
+        <div class="dashboard-header">
+                <div class="dashboard-title">
+                    Quick Actions
+                </div>
+            </div>
         <div class="system-selection">
             <div class="selection-header">
             </div>
