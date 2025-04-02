@@ -155,6 +155,17 @@ $conn->close();
             justify-content: center;
             margin-right: 15px;
         }
+        .nav-container {
+            margin: 0 auto;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
         
         .notification-dropdown {
             position: absolute;
@@ -393,7 +404,7 @@ $conn->close();
         .announcements-header {
             font-size: 1.1rem;
             font-weight: 600;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -699,10 +710,6 @@ $conn->close();
         }
 
         .dashboard-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
             margin-top: 5rem;
             margin-bottom: 2rem;
             padding-bottom: 1rem;

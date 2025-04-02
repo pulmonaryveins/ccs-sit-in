@@ -234,7 +234,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 8px;  /* reduced from 10px */
-            background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+            background: #e9e9ff;
         }
 
         .input-group.id-input::before {

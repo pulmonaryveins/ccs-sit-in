@@ -50,7 +50,7 @@ body {
 
 .table-header h2 {
     font-size: 1.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -318,7 +318,7 @@ body {
 }
 
 .search-field button {
-    background: linear-gradient(135deg, rgba(117,86,204,0.95) 0%, rgba(213,105,167,0.95) 100%);
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     color: white;
     border: none;
     padding: 0 1.2rem;
@@ -402,10 +402,10 @@ body {
     height: 100px; /* Increased from 90px */
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid rgba(117,86,204,0.15);
+    border: 3px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     margin-bottom: 0.75rem;
-    box-shadow: 0 4px 10px rgba(117,86,204,0.15);
-    background: #f1f5f9;
     transition: all 0.3s ease;
 }
 
@@ -425,7 +425,7 @@ body {
     font-size: 1.1rem;
     text-align: center;
     margin-top: 0.25rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -468,7 +468,7 @@ body {
 
 .sessions-number {
     position: relative;
-    background: linear-gradient(135deg, rgba(117,86,204,0.08), rgba(213,105,167,0.08));
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     height: 50px;
     width: 50px;
     border-radius: 50%;
@@ -522,11 +522,12 @@ body {
     padding: 0.875rem;
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    box-shadow: none;
+    gap: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     transition: all 0.3s ease;
-    height: 100%;
+    height: 80%;
     margin-bottom: 0;
+    margin-top: 1rem;
     position: relative;
     overflow: hidden;
 }
@@ -542,7 +543,7 @@ body {
     justify-content: center;
     width: 36px;
     height: 36px;
-    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+    background: #e9e9ff;
     border-radius: 8px;
     color: var(--primary-color);
     font-size: 1.125rem;
@@ -608,33 +609,67 @@ body {
 .form-controls {
     grid-column: span 2;
     display: flex;
-    justify-content: center;
-    width: 100%;
+    height: 50%;
+    justify-content: right;
+    padding-right: 20px;
     margin-top: 1rem;
     padding: 0;
     opacity: 0;
     animation: fadeIn 0.5s ease-out 0.6s forwards;
+    gap: 1rem; /* Add gap between buttons */
 }
 
 .edit-btn, #submitSitinBtn {
-    min-width: 180px;
-    padding: 0.75rem 1.5rem;
-    border-radius: 10px;
-    font-size: 0.9rem;
+    min-width: 130px; /* Reduced from 150px */
+    padding: 0.5rem 0.6rem; /* Reduced padding */
+    border-radius: 8px; /* Reduced from 10px */
+    font-size: 0.8rem; /* Reduced from 0.85rem */
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    background: linear-gradient(135deg, rgba(117,86,204,0.95), rgba(213,105,167,0.95));
+    gap: 0.5rem; /* Reduced from 0.75rem */
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     color: white;
     border: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(117,86,204,0.15);
+    box-shadow: 0 3px 10px rgba(117,86,204,0.15); /* Reduced shadow */
     cursor: pointer;
     white-space: nowrap;
     position: relative;
     overflow: hidden;
+}
+
+#cancelSitinBtn {
+    min-width: 100px; /* Reduced from 120px */
+    padding: 0.5rem 0.6rem; /* Reduced padding */
+    border-radius: 8px; /* Reduced from 10px */
+    font-size: 0.8rem; /* Reduced from 0.85rem */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Reduced from 0.75rem */
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Reduced shadow */
+    cursor: pointer;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+#cancelSitinBtn:hover {
+    background: #e5e7eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#cancelSitinBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .edit-btn:hover, #submitSitinBtn.active:hover {
@@ -798,6 +833,18 @@ body {
     pointer-events: auto;
 }
 
+.nav-container {
+    margin: 0 auto;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+    z-index: 1000;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                0 8px 30px -5px rgba(0, 0, 0, 0.1);
+}
+
 .confirm-modal {
     background-color: white;
     border-radius: 0.5rem;
@@ -883,6 +930,12 @@ body {
     
     .student-info-right {
         grid-template-columns: 1fr;
+    }
+    
+    .form-controls {
+        flex-direction: row;
+        justify-content: center;
+        gap: 0.75rem;
     }
     
     .student-profile-container, 

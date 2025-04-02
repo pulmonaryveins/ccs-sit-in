@@ -28,11 +28,11 @@
 
 .table-header h2 {
     font-size: 1.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .search-box {
@@ -561,14 +561,14 @@
 
 .bulk-action-btn.warning {
     margin-right: 1rem;
-    background: #fff7ed;
-    color: #ea580c;
+    background: #fee2e2;
+    color: #dc2626;
 }
 
 .bulk-action-btn.primary {
     margin-right: 1rem;
-    background: #e0f2fe;
-    color: #0369a1;
+    background: #e9e9ff;
+    color: #6d28d9;
 }
 
 .bulk-action-btn:hover {

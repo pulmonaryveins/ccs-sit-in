@@ -9,6 +9,8 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    background-color: #ffffff;
+    
 }
 
 /* Add new class for login/register pages */
@@ -813,7 +815,7 @@ input[type="submit"]:active {
     align-items: center;
     justify-content: center;
     border-radius: 8px;  /* reduced from 10px */
-    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+    background: #e9e9ff;
     color: var(--primary-color);
 }
 
@@ -849,29 +851,29 @@ input[type="submit"]:active {
 
 .profile-header h2 {
     font-size: 1.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .profile-header h3 {
     font-size: 1.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .profile-header a {
     font-size: 1rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .profile-image-container {
@@ -893,7 +895,7 @@ input[type="submit"]:active {
     overflow: hidden;
     border: 3px solid transparent;
     background: linear-gradient(white, white) padding-box,
-                linear-gradient(135deg, var(--primary-color), var(--secondary-color)) border-box;
+                linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     padding: 3px;
 }
 
@@ -1015,17 +1017,6 @@ input[type="submit"]:active {
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.info-icon {
-    width: 32px;  /* reduced from 40px */
-    height: 32px;  /* reduced from 40px */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;  /* reduced from 10px */
-    background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
-    color: var(--primary-color);
-}
-
 .info-icon i {
     font-size: 0.9rem;  /* reduced icon size */
 }
@@ -1104,7 +1095,7 @@ input[type="submit"]:active {
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    background: linear-gradient(135deg, rgba(117,86,204,0.95) 0%, rgba(213,105,167,0.95) 100%);
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     color: white;
     text-decoration: none;
     border: none;
@@ -1135,7 +1126,7 @@ input[type="submit"]:active {
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    background: linear-gradient(135deg, rgba(117,86,204,0.95) 0%, rgba(213,105,167,0.95) 100%);
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     color: white;
     text-decoration: none;
     border: none;
@@ -1178,7 +1169,7 @@ input[type="submit"]:active {
 }
 
 .save-btn {
-    background: linear-gradient(135deg, rgba(117, 86, 204, 0.95) 0%, rgba(213, 105, 167, 0.95) 100%);
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     color: white;
     text-decoration: none;
     padding: 1.2rem;
@@ -1540,10 +1531,7 @@ input[type="submit"]:active {
 .stat-value {
     font-size: 2.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #7556cc !important;
 }
 
 /* Password Change Section Styles */

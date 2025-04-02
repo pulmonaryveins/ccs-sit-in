@@ -350,6 +350,17 @@ $conn->close();
             opacity: 1;
             transform: scale(1);
         }
+        .nav-container {
+            margin: 0 auto;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
         
         .notification-icon {
             position: relative;

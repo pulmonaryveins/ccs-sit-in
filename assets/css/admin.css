@@ -168,12 +168,12 @@
 
 /* Dashboard header */
 .dashboard-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    margin-top: 5rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-top: 5rem;
-    margin-bottom: 2rem;
     padding-bottom: 1rem;
     text-align: center;  /* Added */
 }
@@ -181,7 +181,7 @@
 .dashboard-title {
     font-size: 2rem;
     font-weight: 700;
-    color: #333;
+    color: #7556cc !important;
     margin-bottom: 0.5rem;
     display: inline-flex;  /* Changed from flex to inline-flex */
     align-items: center;
@@ -239,6 +239,7 @@
 }
 
 .stat-value {
+    color: #7556cc !important;
     font-size: 2.25rem;
     font-weight: 700;
 }
@@ -284,10 +285,7 @@
 .chart-header {
     font-size: 1.1rem;
     font-weight: 600;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color:#7556cc;
     margin-bottom: 1.25rem;
     display: flex;
     align-items: center;
@@ -331,10 +329,7 @@
 .announcements-header {
     font-size: 1.1rem;
     font-weight: 600;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #7556cc;
     margin-bottom: 1.25rem;
     display: flex;
     align-items: center;
@@ -603,10 +598,7 @@
 }
 
 .card-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color:#7556cc;
     margin-bottom: 1.25rem;
     display: flex;
     align-items: center;

@@ -123,6 +123,203 @@ if ($feedback_table_exists) {
         .report-container {
             animation: fadeIn 0.8s ease-out forwards;
         }
+        .nav-container {
+            margin: 0 auto;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Export buttons styling */
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-right: 15px;
+        }
+
+        .export-btn {
+            background: #e9e9ff;
+            color: #6d28d9;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .export-btn i {
+            font-size: 1rem;
+        }
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        /* Date filter styling */
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 15px;
+        }
+        
+        .date-picker-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .date-picker-wrapper i {
+            position: absolute;
+            left: 10px;
+            color: #7556cc;
+            pointer-events: none;
+        }
+        
+        .date-picker {
+            padding: 8px 10px 8px 35px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background-color: #f8f9fa;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .date-picker:focus {
+            border-color: #7556cc;
+            box-shadow: 0 0 0 3px rgba(117,86,204,0.1);
+            outline: none;
+        }
+        
+        .reset-date-btn {
+            background: #e9e9ff;
+            color: #7556cc;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reset-date-btn:hover {
+            background: #d9d9ff;
+            transform: rotate(180deg);
+        }
+        
+        /* Active date filter indicator */
+        .date-filter.active .date-picker {
+            background-color: #f0e6ff;
+            border-color: #7556cc;
+            font-weight: 500;
+        }
+        
+        .date-filter.active .date-picker-wrapper i {
+            color: #7556cc;
+        }
+
+        @media print {
+            @page {
+                size: landscape;
+                margin: 1cm;
+            }
+            
+            body {
+                font-family: Arial, sans-serif;
+            }
+            
+            .table-header h2 {
+                text-align: center;
+                margin-bottom: 20px;
+                font-size: 1.5rem;
+                background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-weight: 500;
+            }
+            
+            .modern-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            .modern-table th {
+                background-color: #7556CC !important;
+                color: white !important;
+                padding: 8px;
+                text-align: left;
+            }
+            
+            .modern-table td {
+                padding: 8px;
+                border-bottom: 1px solid #ddd;
+            }
+            
+            .modern-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            
+            .source-badge {
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+            }
+            
+            .source-badge.reservation {
+                background-color: #e0f2f1 !important;
+                color: #00796b !important;
+            }
+            
+            .source-badge.sit_in {
+                background-color: #e8eaf6 !important;
+                color: #3f51b5 !important;
+            }
+
+            @media print {
+                .nav-container, .filter-tabs, .pagination-controls, .table-actions, .export-buttons {
+                    display: none !important;
+                }
+                
+                .content-wrapper {
+                    margin: 0;
+                    padding: 0;
+                }
+                
+                .table-header h2 {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                
+                body {
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }
+            }
+        }
     </style>
 </head>
 <body>
@@ -178,12 +375,21 @@ if ($feedback_table_exists) {
             <div class="table-header">
                 <h2>Sit-in Reports</h2>
                 <div class="table-actions">
-                <div class="export-buttons">
-                    <button class="export-btn" id="exportCSV"><i class="ri-file-text-line"></i> CSV</button>
-                    <button class="export-btn" id="exportExcel"><i class="ri-file-excel-line"></i> Excel</button>
-                    <button class="export-btn" id="exportPDF"><i class="ri-file-pdf-line"></i> PDF</button>
-                    <button class="export-btn" id="printReport"><i class="ri-printer-line"></i> Print</button>
-                </div>
+                    <div class="export-buttons">
+                        <button class="export-btn" id="exportCSV"><i class="ri-file-text-line"></i> CSV</button>
+                        <button class="export-btn" id="exportExcel"><i class="ri-file-excel-line"></i> Excel</button>
+                        <button class="export-btn" id="exportPDF"><i class="ri-file-pdf-line"></i> PDF</button>
+                        <button class="export-btn" id="printReport"><i class="ri-printer-line"></i> Print</button>
+                    </div>
+                    <div class="date-filter">
+                        <div class="date-picker-wrapper">
+                            <i class="ri-calendar-line"></i>
+                            <input type="date" id="dateFilter" class="date-picker" placeholder="Filter by date">
+                        </div>
+                        <button id="resetDateFilter" class="reset-date-btn" title="Reset date filter">
+                            <i class="ri-refresh-line"></i>
+                        </button>
+                    </div>
                     <div class="search-box">
                         <i class="ri-search-line"></i>
                         <input type="text" id="searchInput" placeholder="Search records...">
@@ -373,154 +579,6 @@ if ($feedback_table_exists) {
         </div>
     </div>
 
-    <style>
-        /* Export buttons styling */
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            margin-right: 15px;
-        }
-
-        .export-btn {
-            background-color:rgba(118, 86, 204, 0.26);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: #7556CC;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background-color 0.2s;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .export-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .export-btn i {
-            font-size: 1rem;
-        }
-
-        .table-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        @media print {
-            @page {
-                size: landscape;
-                margin: 1cm;
-            }
-            
-            body {
-                font-family: Arial, sans-serif;
-            }
-            
-            .table-header h2 {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            
-            .modern-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            
-            .modern-table th {
-                background-color: #7556CC !important;
-                color: white !important;
-                padding: 8px;
-                text-align: left;
-            }
-            
-            .modern-table td {
-                padding: 8px;
-                border-bottom: 1px solid #ddd;
-            }
-            
-            .modern-table tr:nth-child(even) {
-                background-color: #f9f9f9;
-            }
-            
-            .source-badge {
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 12px;
-            }
-            
-            .source-badge.reservation {
-                background-color: #e0f2f1 !important;
-                color: #00796b !important;
-            }
-            
-            .source-badge.sit_in {
-                background-color: #e8eaf6 !important;
-                color: #3f51b5 !important;
-            }
-
-            .export-buttons {
-                display: flex;
-                gap: 10px;
-                margin-right: 15px;
-            }
-
-            .export-btn {
-                background-color: #7556CC;
-                color: white;
-                border: none;
-                padding: 8px 12px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.85rem;
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                transition: background-color 0.2s;
-            }
-
-            .export-btn:hover {
-                background-color:rgba(99, 74, 173, 0.53);
-            }
-
-            .export-btn i {
-                font-size: 1rem;
-            }
-
-            .table-actions {
-                display: flex;
-                align-items: center;
-            }
-
-            @media print {
-                .nav-container, .filter-tabs, .pagination-controls, .table-actions, .export-buttons {
-                    display: none !important;
-                }
-                
-                .content-wrapper {
-                    margin: 0;
-                    padding: 0;
-                }
-                
-                .table-header h2 {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                
-                body {
-                    print-color-adjust: exact;
-                    -webkit-print-color-adjust: exact;
-                }
-            }
-        }
-    </style>
-
     <script>
         // Add the missing updateClock function
         function updateClock() {
@@ -539,6 +597,7 @@ if ($feedback_table_exists) {
         let feedbackEntriesPerPage = 10;
         let currentFilter = 'all'; // Track the current filter
         let currentFeedbackFilter = 'all'; // Track the current feedback filter
+        let selectedDate = null; // Track the selected date
         
         // COMPLETELY REWRITTEN TAB NAVIGATION CODE
         document.addEventListener('DOMContentLoaded', function() {
@@ -620,6 +679,9 @@ if ($feedback_table_exists) {
                 });
             });
             
+            // Initialize date filter
+            initDateFilter();
+            
             // Initialize pagination controls
             initPaginationControls();
             
@@ -646,6 +708,56 @@ if ($feedback_table_exists) {
             document.getElementById('printReport').addEventListener('click', printReport);
         });
         
+        // Initialize date filter functionality
+        function initDateFilter() {
+            const dateFilter = document.getElementById('dateFilter');
+            const resetDateFilter = document.getElementById('resetDateFilter');
+            const dateFilterContainer = document.querySelector('.date-filter');
+            
+            if (dateFilter && resetDateFilter) {
+                // Date filter event handler
+                dateFilter.addEventListener('change', function() {
+                    selectedDate = this.value ? new Date(this.value) : null;
+                    
+                    // Add active class to the date filter container when a date is selected
+                    if (selectedDate) {
+                        dateFilterContainer.classList.add('active');
+                    } else {
+                        dateFilterContainer.classList.remove('active');
+                    }
+                    
+                    // Apply filters based on which tab is active
+                    const isActivityTabActive = document.getElementById('activity-reports').classList.contains('active');
+                    
+                    if (isActivityTabActive) {
+                        filterActivityRows(currentFilter);
+                        applyPagination();
+                    } else {
+                        filterFeedbackRows(currentFeedbackFilter);
+                        applyFeedbackPagination();
+                    }
+                });
+                
+                // Reset date filter button
+                resetDateFilter.addEventListener('click', function() {
+                    dateFilter.value = '';
+                    selectedDate = null;
+                    dateFilterContainer.classList.remove('active');
+                    
+                    // Apply filters based on which tab is active
+                    const isActivityTabActive = document.getElementById('activity-reports').classList.contains('active');
+                    
+                    if (isActivityTabActive) {
+                        filterActivityRows(currentFilter);
+                        applyPagination();
+                    } else {
+                        filterFeedbackRows(currentFeedbackFilter);
+                        applyFeedbackPagination();
+                    }
+                });
+            }
+        }
+        
         // FILTER FUNCTIONS
         function filterActivityRows(filterValue, resetPage = true) {
             // Update current filter
@@ -658,7 +770,19 @@ if ($feedback_table_exists) {
                 if (row.querySelector('.empty-state')) return; // Skip empty state row
                 
                 const rowType = row.getAttribute('data-type');
-                if (filterValue === 'all' || filterValue === rowType) {
+                const dateCell = row.querySelector('td:first-child');
+                let meetDateCriteria = true;
+                
+                // Apply date filter if selected
+                if (selectedDate && dateCell) {
+                    const cellDate = new Date(dateCell.textContent);
+                    // Compare year, month, and day only
+                    meetDateCriteria = cellDate.getFullYear() === selectedDate.getFullYear() &&
+                                      cellDate.getMonth() === selectedDate.getMonth() &&
+                                      cellDate.getDate() === selectedDate.getDate();
+                }
+                
+                if ((filterValue === 'all' || filterValue === rowType) && meetDateCriteria) {
                     row.classList.remove('filtered-out');
                 } else {
                     row.classList.add('filtered-out');
@@ -682,7 +806,19 @@ if ($feedback_table_exists) {
                 if (row.querySelector('.empty-state')) return; // Skip empty state row
                 
                 const rowRating = row.getAttribute('data-rating');
-                if (filterValue === 'all' || filterValue === rowRating) {
+                const dateCell = row.querySelector('td:first-child');
+                let meetDateCriteria = true;
+                
+                // Apply date filter if selected
+                if (selectedDate && dateCell) {
+                    const cellDate = new Date(dateCell.textContent);
+                    // Compare year, month, and day only
+                    meetDateCriteria = cellDate.getFullYear() === selectedDate.getFullYear() &&
+                                      cellDate.getMonth() === selectedDate.getMonth() &&
+                                      cellDate.getDate() === selectedDate.getDate();
+                }
+                
+                if ((filterValue === 'all' || filterValue === rowRating) && meetDateCriteria) {
                     row.classList.remove('filtered-out');
                 } else {
                     row.classList.add('filtered-out');
@@ -714,9 +850,21 @@ if ($feedback_table_exists) {
                             
                             const text = row.textContent.toLowerCase();
                             const rowType = row.getAttribute('data-type');
+                            const dateCell = row.querySelector('td:first-child');
+                            let meetDateCriteria = true;
                             
-                            // Apply both current filter and search
-                            if ((currentFilter === 'all' || currentFilter === rowType) && text.includes(searchText)) {
+                            // Apply date filter if selected
+                            if (selectedDate && dateCell) {
+                                const cellDate = new Date(dateCell.textContent);
+                                meetDateCriteria = cellDate.getFullYear() === selectedDate.getFullYear() &&
+                                                  cellDate.getMonth() === selectedDate.getMonth() &&
+                                                  cellDate.getDate() === selectedDate.getDate();
+                            }
+                            
+                            // Apply current filter, date filter, and search
+                            if ((currentFilter === 'all' || currentFilter === rowType) && 
+                                meetDateCriteria && 
+                                text.includes(searchText)) {
                                 row.classList.remove('filtered-out');
                             } else {
                                 row.classList.add('filtered-out');
@@ -735,9 +883,21 @@ if ($feedback_table_exists) {
                             
                             const text = row.textContent.toLowerCase();
                             const rowRating = row.getAttribute('data-rating');
+                            const dateCell = row.querySelector('td:first-child');
+                            let meetDateCriteria = true;
                             
-                            // Apply both current filter and search
-                            if ((currentFeedbackFilter === 'all' || currentFeedbackFilter === rowRating) && text.includes(searchText)) {
+                            // Apply date filter if selected
+                            if (selectedDate && dateCell) {
+                                const cellDate = new Date(dateCell.textContent);
+                                meetDateCriteria = cellDate.getFullYear() === selectedDate.getFullYear() &&
+                                                  cellDate.getMonth() === selectedDate.getMonth() &&
+                                                  cellDate.getDate() === selectedDate.getDate();
+                            }
+                            
+                            // Apply current filter, date filter, and search
+                            if ((currentFeedbackFilter === 'all' || currentFeedbackFilter === rowRating) && 
+                                meetDateCriteria && 
+                                text.includes(searchText)) {
                                 row.classList.remove('filtered-out');
                             } else {
                                 row.classList.add('filtered-out');
@@ -757,16 +917,6 @@ if ($feedback_table_exists) {
             // Get all rows first
             const allRows = Array.from(document.querySelectorAll('#reports-table-body tr'))
                 .filter(row => !row.querySelector('.empty-state'));
-            
-            // Apply current filter to determine visible rows
-            allRows.forEach(row => {
-                const rowType = row.getAttribute('data-type');
-                if (currentFilter === 'all' || currentFilter === rowType) {
-                    row.classList.remove('filtered-out');
-                } else {
-                    row.classList.add('filtered-out');
-                }
-            });
             
             // Get filtered rows
             const visibleRows = allRows.filter(row => !row.classList.contains('filtered-out'));

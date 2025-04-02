@@ -53,6 +53,18 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             align-items: center;
             gap: 10px;
         }
+
+        .nav-container {
+            margin: 0 auto;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
         
         .active-student-warning i {
             color: #e6a210;
@@ -328,9 +340,13 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                         
                                         <!-- Form Submit Button -->
                                         <div class="form-controls">
-                                            <button type="button" class="edit-btn" id="submitSitinBtn" onclick="submitAddSitIn()">
+                                            <button id="cancelSitinBtn" type="button">
+                                                <i class="ri-close-line"></i>
+                                                Cancel
+                                            </button>
+                                            <button id="submitSitinBtn" type="submit">
                                                 <i class="ri-check-line"></i>
-                                                <span>Add Student Sit-in</span>
+                                                Submit Sit-in
                                             </button>
                                         </div>
                                     </div>
@@ -808,6 +824,53 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         
         // Remove the automatic search on input to eliminate double panel issue
         // We'll only search when the button is clicked or Enter is pressed
+    });
+
+    // Add this to your JavaScript file or in a script tag
+    document.addEventListener('DOMContentLoaded', function() {
+        const cancelButton = document.getElementById('cancelSitinBtn');
+        
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function() {
+                // Hide the student info grid
+                const studentInfo = document.getElementById('studentInfo');
+                if (studentInfo) {
+                    studentInfo.style.display = 'none';
+                }
+                
+                // Clear form inputs
+                document.getElementById('addSitInForm').reset();
+                document.getElementById('student_idno').value = '';
+                
+                // Reset select dropdowns
+                const selectElements = document.querySelectorAll('select');
+                selectElements.forEach(select => {
+                    select.value = '';
+                });
+                
+                // Reset submit button state
+                const submitBtn = document.getElementById('submitSitinBtn');
+                if (submitBtn) {
+                    submitBtn.classList.remove('active');
+                    submitBtn.disabled = true;
+                }
+                
+                // Remove any active student warnings
+                const warnings = document.querySelectorAll('.active-student-warning');
+                warnings.forEach(warning => {
+                    warning.remove();
+                });
+            });
+        }
+        
+        // Add the missing form submission handler
+        const sitInForm = document.getElementById('addSitInForm');
+        if (sitInForm) {
+            sitInForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+                submitAddSitIn();
+            });
+        }
     });
     </script>
 </body>

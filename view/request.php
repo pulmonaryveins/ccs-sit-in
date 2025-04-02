@@ -205,6 +205,18 @@ if ($result) {
     </div>
 
     <style>
+
+        .nav-container {
+            margin: 0 auto;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
         .lab-select {
             padding: 0.5rem;
             border: 1px solid #e2e8f0;
@@ -236,7 +248,7 @@ if ($result) {
         
         .profile-header h3 {
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 500;
             color: #2d3748;
             margin: 0;
             display: flex;

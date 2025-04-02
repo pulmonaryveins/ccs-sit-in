@@ -261,7 +261,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             top: 50%;
             transform: translateY(-50%);
             color: var(--primary-color);
-            background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
             font-size: small;
             width: 25px;  /* reduced from 40px */
             height: 25px;  /* reduced from 40px */
@@ -269,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             justify-content: center;
             border-radius: 8px;  /* reduced from 10px */
-            background: linear-gradient(135deg, rgba(117,86,204,0.1), rgba(213,105,167,0.1));
+            background: #e9e9ff;
         }
 
         .input-group:nth-child(1)::before {

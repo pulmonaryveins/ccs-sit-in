@@ -171,6 +171,17 @@ function getYearLevelDisplay($yearLevel) {
         .records-container {
             animation: fadeIn 0.8s ease-out forwards;
         }
+        .nav-container {
+            margin: 0 auto;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -866,7 +877,7 @@ function getYearLevelDisplay($yearLevel) {
         window.resetSessions = function() {
             const idno = document.getElementById('resetStudentIdno').value;
             
-            fetch('../controller/reset_sessions.php', {
+            fetch('../controller/reset_student_sessions.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -881,7 +892,6 @@ function getYearLevelDisplay($yearLevel) {
             })
             .then(data => {
                 if (data.success) {
-                    // Close modal
                     closeResetModal();
                     
                     // Show success notification
