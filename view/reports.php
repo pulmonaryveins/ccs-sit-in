@@ -320,6 +320,150 @@ if ($feedback_table_exists) {
                 }
             }
         }
+
+        /* Print and PDF styles */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 1.5cm 1cm;
+            }
+            
+            body {
+                font-family: Arial, sans-serif;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .print-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #7556cc;
+                padding-bottom: 15px;
+            }
+            
+            .logo-container {
+                display: flex !important;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .logo-container img {
+                height: 60px;
+                width: auto;
+            }
+            
+            .institution-info {
+                text-align: center;
+                flex-grow: 1;
+            }
+            
+            .institution-info h1 {
+                font-size: 18px;
+                font-weight: bold;
+                margin: 0;
+                color: #333;
+            }
+            
+            .institution-info h2 {
+                font-size: 16px;
+                font-weight: normal;
+                margin: 5px 0 0;
+                color: #333;
+            }
+            
+            .print-date {
+                font-size: 12px;
+                color: #666;
+                margin-top: 5px;
+            }
+            
+            .report-title {
+                font-size: 16px;
+                font-weight: 600;
+                text-align: center;
+                margin: 10px 0;
+                color: #333;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 10px;
+            }
+            
+            .modern-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            .modern-table th {
+                background-color: #7556CC !important;
+                color: white !important;
+                padding: 8px;
+                text-align: left;
+                font-size: 12px;
+                border: 1px solid #5d44a5;
+            }
+            
+            .modern-table td {
+                padding: 8px;
+                border: 1px solid #ddd;
+                font-size: 11px;
+            }
+            
+            .modern-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            
+            .source-badge {
+                padding: 3px 6px;
+                border-radius: 3px;
+                font-size: 10px;
+                font-weight: normal;
+                text-transform: uppercase;
+            }
+            
+            .source-badge.reservation {
+                background-color: #e0f2f1 !important;
+                color: #00796b !important;
+            }
+            
+            .source-badge.sit_in {
+                background-color: #e8eaf6 !important;
+                color: #3f51b5 !important;
+            }
+
+            .star-rating {
+                font-size: 10px;
+                color: #fbbf24 !important;
+            }
+
+            .star-rating i {
+                color: #fbbf24 !important;
+            }
+
+            .nav-container, .filter-tabs, .pagination-controls, .table-actions, .export-buttons {
+                display: none !important;
+            }
+            
+            .content-wrapper {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .print-footer {
+                display: flex !important;
+                justify-content: space-between;
+                margin-top: 20px;
+                font-size: 10px;
+                color: #666;
+                border-top: 1px solid #ddd;
+                padding-top: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -370,8 +514,25 @@ if ($feedback_table_exists) {
         </div>
     </div>
 
+    <!-- Print header - only visible when printing or in PDF export -->
+    <div class="print-header" style="display: none;">
+        <div class="logo-container">
+            <img src="../assets/images/logo/uc.png" alt="UC Logo">
+            <img src="../assets/images/logo/ccs.png" alt="CCS Logo">
+        </div>
+        <div class="institution-info">
+            <h1>College of Computer Studies</h1>
+            <h2>University of Cebu - Main Campus</h2>
+            <div class="print-date">Generated on: <span id="print-date-value"></span></div>
+        </div>
+        <div style="width: 80px;"></div> <!-- Spacer for alignment -->
+    </div>
+
     <div class="content-wrapper">
         <div class="table-wrapper">
+            <!-- Report title - only visible when printing or in PDF export -->
+            <div id="report-title" class="report-title" style="display: none;">Sit-in Activity Report</div>
+            
             <div class="table-header">
                 <h2>Sit-in Reports</h2>
                 <div class="table-actions">
@@ -575,6 +736,12 @@ if ($feedback_table_exists) {
                         <button class="page-btn" disabled data-action="next">Next</button>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Print footer - only visible when printing or in PDF export -->
+            <div class="print-footer" style="display: none;">
+                <div>Date Generated: <span id="print-footer-date"></span></div>
+                <div>CCS Sit-In System © University of Cebu</div>
             </div>
         </div>
     </div>
@@ -1188,6 +1355,31 @@ if ($feedback_table_exists) {
             return { headers, data };
         }
 
+        function getFeedbackReportData() {
+            const table = document.querySelector('#feedback-reports table');
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            
+            // Get all visible rows (not filtered out)
+            const visibleRows = Array.from(table.querySelectorAll('tbody tr'))
+                .filter(row => row.style.display !== 'none' && !row.querySelector('.empty-state'));
+            
+            const data = visibleRows.map(row => {
+                return Array.from(row.querySelectorAll('td')).map(cell => {
+                    // Special handling for the star rating
+                    if (cell.querySelector('.star-rating')) {
+                        return cell.textContent.trim();
+                    }
+                    // Special handling for the badge in the last column
+                    if (cell.querySelector('.source-badge')) {
+                        return cell.textContent.trim();
+                    }
+                    return cell.textContent.trim();
+                });
+            });
+            
+            return { headers, data };
+        }
+
         function exportToCSV() {
             const { headers, data } = getActivityReportData();
             
@@ -1245,7 +1437,9 @@ if ($feedback_table_exists) {
         }
 
         function exportToPDF() {
-            const { headers, data } = getActivityReportData();
+            // Determine which report type is active
+            const isActivityReport = document.getElementById('activity-reports').classList.contains('active');
+            const { headers, data } = isActivityReport ? getActivityReportData() : getFeedbackReportData();
             
             if (data.length === 0) {
                 alert('No data to export');
@@ -1256,33 +1450,54 @@ if ($feedback_table_exists) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'pt', 'a4'); // landscape orientation
             
-            // Add title
-            doc.setFontSize(16);
-            doc.text('Activity Report', 40, 40);
+            // Add logos and header
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const currentDate = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             
-            // Add date
+            // Add UC logo
+            doc.addImage('../assets/images/logo/uc.png', 'PNG', 40, 20, 50, 50);
+            
+            // Add CCS logo
+            doc.addImage('../assets/images/logo/ccs.png', 'PNG', pageWidth - 90, 20, 50, 50);
+            
+            // Add institutional header
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('College of Computer Studies', pageWidth / 2, 40, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'normal');
+            doc.text('University of Cebu - Main Campus', pageWidth / 2, 60, { align: 'center' });
+            
+            // Add report title
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            const reportTitle = isActivityReport ? 'Sit-In Activity Report' : 'Feedback Report';
+            doc.text(reportTitle, pageWidth / 2, 90, { align: 'center' });
+            
+            // Add date generated
             doc.setFontSize(10);
-            doc.text('Generated on: ' + new Date().toLocaleString(), 40, 60);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Generated on: ' + currentDate, pageWidth / 2, 110, { align: 'center' });
+            
+            // Draw a line
+            doc.setLineWidth(1);
+            doc.setDrawColor(117, 86, 204);
+            doc.line(40, 120, pageWidth - 40, 120);
             
             // Create table
             doc.autoTable({
                 head: [headers],
                 body: data,
-                startY: 70,
+                startY: 140,
                 styles: {
                     fontSize: 9,
                     cellPadding: 3,
                     overflow: 'linebreak'
-                },
-                columnStyles: {
-                    0: { cellWidth: 70 }, // Date
-                    1: { cellWidth: 60 }, // ID Number
-                    2: { cellWidth: 90 }, // Name
-                    3: { cellWidth: 90 }, // Purpose
-                    4: { cellWidth: 80 }, // Laboratory
-                    5: { cellWidth: 60 }, // Time In
-                    6: { cellWidth: 60 }, // Time Out
-                    7: { cellWidth: 60 }  // Type
                 },
                 headStyles: {
                     fillColor: [117, 86, 204],
@@ -1294,12 +1509,103 @@ if ($feedback_table_exists) {
                 }
             });
             
+            // Add footer
+            const bottomY = doc.internal.pageSize.getHeight() - 20;
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('CCS Sit-In System © University of Cebu', 40, bottomY);
+            doc.text('Page ' + doc.internal.getNumberOfPages(), pageWidth - 40, bottomY, { align: 'right' });
+            
             // Save file
-            doc.save('activity_report_' + new Date().toISOString().slice(0,10) + '.pdf');
+            const filePrefix = isActivityReport ? 'activity_report_' : 'feedback_report_';
+            doc.save(filePrefix + new Date().toISOString().slice(0,10) + '.pdf');
         }
 
         function printReport() {
-            window.print();
+            // Set the current date for the print view
+            const currentDate = new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            document.getElementById('print-date-value').textContent = currentDate;
+            document.getElementById('print-footer-date').textContent = currentDate;
+            
+            // Update the logo container structure for better print layout
+            const logoContainer = document.querySelector('.logo-container');
+            
+            // Remove any spacer divs that might interfere with positioning
+            const spacer = document.querySelector('.print-header > div[style="width: 80px;"]');
+            if (spacer) {
+                spacer.remove();
+            }
+            
+            // Ensure the print elements are properly displayed
+            document.querySelector('.print-header').style.display = 'flex';
+            document.querySelector('.report-title').style.display = 'block';
+            document.querySelector('.print-footer').style.display = 'flex';
+            
+            // Hide the regular table header
+            document.querySelector('.table-header').style.display = 'none';
+            
+            // Determine which report is active and update title accordingly
+            const reportTitle = document.getElementById('report-title');
+            
+            if (document.getElementById('activity-reports').classList.contains('active')) {
+                reportTitle.textContent = 'Sit-In Activity Report';
+                // Further filter by current tab
+                if (currentFilter === 'reservation') {
+                    reportTitle.textContent = 'Sit-In Reservation Report';
+                } else if (currentFilter === 'sit_in') {
+                    reportTitle.textContent = 'Direct Sit-In Report';
+                }
+            } else {
+                reportTitle.textContent = 'Feedback Report';
+                // Further filter by current feedback tab
+                if (currentFeedbackFilter !== 'all') {
+                    reportTitle.textContent = `${currentFeedbackFilter}-Star Feedback Report`;
+                }
+            }
+            
+            // Show all filtered-in rows for printing by removing display:none
+            document.querySelectorAll('#reports-table-body tr:not(.filtered-out), #feedback-table-body tr:not(.filtered-out)').forEach(row => {
+                row.style.display = 'table-row';
+            });
+            
+            // Ensure all feedback messages are expanded for printing
+            document.querySelectorAll('.feedback-message').forEach(msg => {
+                msg.classList.add('expanded');
+            });
+            
+            // Wait a moment for styles to apply
+            setTimeout(() => {
+                // Print the document
+                window.print();
+                
+                // Restore the view after printing
+                setTimeout(() => {
+                    document.querySelector('.print-header').style.display = 'none';
+                    document.querySelector('.report-title').style.display = 'none';
+                    document.querySelector('.print-footer').style.display = 'none';
+                    document.querySelector('.table-header').style.display = 'flex';
+                    
+                    // Remove expanded class from feedback messages
+                    document.querySelectorAll('.feedback-message').forEach(msg => {
+                        msg.classList.remove('expanded');
+                    });
+                    
+                    // Restore pagination display
+                    if (document.getElementById('activity-reports').classList.contains('active')) {
+                        applyPagination();
+                    } else {
+                        applyFeedbackPagination();
+                    }
+                }, 500);
+            }, 300);
         }
     </script>
 </body>

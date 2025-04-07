@@ -18,7 +18,10 @@ require_once '../config/db_connect.php';
 $stats = [
     'total_students' => 0,
     'current_sitin' => 0,
-    'total_sitin' => 0
+    'total_sitin' => 0,
+    'avg_daily_usage' => 0,    // New stat
+    'peak_hour' => 'N/A',      // New stat
+    'most_active_lab' => 'N/A' // New stat
 ];
 
 // Get total registered students (modified query)
@@ -66,6 +69,69 @@ if ($result) {
     $stats['total_sitin'] += $result->fetch_assoc()['count'];
 }
 
+// NEW: Calculate average daily usage (past 30 days)
+$query = "SELECT AVG(daily_count) as avg_count FROM (
+    SELECT DATE(time_in) as check_date, COUNT(*) as daily_count
+    FROM reservations
+    WHERE time_in IS NOT NULL AND time_in >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    GROUP BY DATE(time_in)
+    UNION ALL
+    SELECT DATE(time_in) as check_date, COUNT(*) as daily_count
+    FROM sit_ins
+    WHERE time_in IS NOT NULL AND time_in >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    GROUP BY DATE(time_in)
+  ) as daily_stats";
+$result = $conn->query($query);
+if ($result && ($row = $result->fetch_assoc()) && !empty($row['avg_count'])) {
+    $stats['avg_daily_usage'] = round($row['avg_count'], 1);
+} else {
+    $stats['avg_daily_usage'] = 0;
+}
+
+// NEW: Find peak hour (time with most students)
+$query = "SELECT 
+            HOUR(time_in) as check_hour, 
+            COUNT(*) as hourly_count
+          FROM (
+            SELECT time_in FROM reservations 
+            WHERE time_in IS NOT NULL
+            UNION ALL
+            SELECT time_in FROM sit_ins 
+            WHERE time_in IS NOT NULL
+          ) as combined_times
+          GROUP BY HOUR(time_in)
+          ORDER BY hourly_count DESC
+          LIMIT 1";
+$result = $conn->query($query);
+if ($result && $row = $result->fetch_assoc()) {
+    $hour = $row['check_hour'];
+    $ampm = $hour >= 12 ? 'PM' : 'AM';
+    $hour12 = $hour % 12;
+    if ($hour12 == 0) $hour12 = 12;
+    $stats['peak_hour'] = $hour12 . ' ' . $ampm;
+}
+
+// Check column names for both tables - Update to check for "laboratory" first
+$reservations_lab_column = 'laboratory'; // Use the actual column name in database
+$sit_ins_lab_column = 'laboratory';      // Use the actual column name in database
+
+// NEW: Find most active laboratory (using the correct column names)
+$query = "SELECT lab, COUNT(*) as usage_count
+          FROM (
+            SELECT $reservations_lab_column as lab FROM reservations 
+            WHERE $reservations_lab_column IS NOT NULL AND $reservations_lab_column != ''
+            UNION ALL
+            SELECT $sit_ins_lab_column as lab FROM sit_ins 
+            WHERE $sit_ins_lab_column IS NOT NULL AND $sit_ins_lab_column != ''
+          ) as combined_labs
+          GROUP BY lab
+          ORDER BY usage_count DESC
+          LIMIT 1";
+$result = $conn->query($query);
+if ($result && $row = $result->fetch_assoc()) {
+    $stats['most_active_lab'] = $row['lab'];
+}
+
 // Add this after the existing stats queries
 // Get year level distribution
 $year_level_stats = [
@@ -97,6 +163,85 @@ if ($result && $result->num_rows > 0) {
                 $year_level_stats['4th Year'] = $row['count'];
                 break;
         }
+    }
+}
+
+// NEW: Get lab usage statistics
+$lab_usage_stats = [];
+
+// Construct the query using the correct column names for both tables
+$query = "SELECT lab, COUNT(*) as count 
+          FROM (
+            SELECT $reservations_lab_column as lab FROM reservations 
+            WHERE $reservations_lab_column IS NOT NULL AND $reservations_lab_column != ''
+            UNION ALL
+            SELECT $sit_ins_lab_column as lab FROM sit_ins 
+            WHERE $sit_ins_lab_column IS NOT NULL AND $sit_ins_lab_column != ''
+          ) as combined_labs
+          GROUP BY lab
+          ORDER BY count DESC";
+
+$result = $conn->query($query);
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $lab_usage_stats[] = [
+            'label' => $row['lab'],
+            'count' => $row['count']
+        ];
+    }
+}
+
+// NEW: Get daily usage for the past 14 days
+$daily_usage = [];
+$dates = [];
+for ($i = 13; $i >= 0; $i--) {
+    $date = date('Y-m-d', strtotime("-$i days"));
+    $dates[] = date('M d', strtotime($date));
+    $daily_usage[$date] = 0;
+}
+
+$query = "SELECT 
+            DATE(time_in) as check_date, 
+            COUNT(*) as daily_count
+          FROM (
+            SELECT time_in FROM reservations 
+            WHERE time_in IS NOT NULL AND time_in >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+            UNION ALL
+            SELECT time_in FROM sit_ins 
+            WHERE time_in IS NOT NULL AND time_in >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+          ) as combined_times
+          GROUP BY DATE(time_in)";
+$result = $conn->query($query);
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        if (isset($daily_usage[$row['check_date']])) {
+            $daily_usage[$row['check_date']] = $row['daily_count'];
+        }
+    }
+}
+$daily_usage_values = array_values($daily_usage);
+
+// NEW: Get hourly distribution for a heat map
+$hourly_distribution = [];
+for ($i = 0; $i < 24; $i++) {
+    $hourly_distribution[$i] = 0;
+}
+
+$query = "SELECT 
+            HOUR(time_in) as check_hour, 
+            COUNT(*) as hourly_count
+          FROM (
+            SELECT time_in FROM reservations 
+            WHERE time_in IS NOT NULL AND time_in >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            UNION ALL
+            SELECT time_in FROM sit_ins 
+            WHERE time_in IS NOT NULL AND time_in >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+          ) as combined_times
+          GROUP BY HOUR(time_in)";
+$result = $conn->query($query);
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $hourly_distribution[$row['check_hour']] = $row['hourly_count'];
     }
 }
 
@@ -557,7 +702,7 @@ if (empty($feedback_data['recent_feedback'])) {
             </div>
         </div>
         
-        <!-- Stats Grid - Modernized -->
+        <!-- Enhanced Stats Grid - Now with more metrics -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-title">Total Students</div>
@@ -570,6 +715,20 @@ if (empty($feedback_data['recent_feedback'])) {
             <div class="stat-card">
                 <div class="stat-title">Total Sit-In Records</div>
                 <div class="stat-value"><?php echo $stats['total_sitin']; ?></div>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Avg. Daily Usage</div>
+                <div class="stat-value"><?php echo $stats['avg_daily_usage']; ?></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Peak Usage Hour</div>
+                <div class="stat-value"><?php echo $stats['peak_hour']; ?></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Most Active Lab</div>
+                <div class="stat-value"><?php echo $stats['most_active_lab']; ?></div>
             </div>
         </div>
 
@@ -632,6 +791,68 @@ if (empty($feedback_data['recent_feedback'])) {
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Redesigned Overall Statistics Section -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                Overall Statistics
+            </div>
+        </div>
+        
+        <!-- Daily Usage Trend Chart -->
+        <div class="chart-card" style="margin-bottom: 1.5rem;">
+            <div class="chart-header">
+                <i class="ri-line-chart-line"></i>
+                <span>Daily Student Usage (Past 14 Days)</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="dailyUsageChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Advanced Statistics Grid -->
+        <div class="charts-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2rem;">
+            <div class="chart-card" style="min-height: 400px;">
+                <div class="chart-header">
+                    <i class="ri-building-line"></i>
+                    <span>Laboratory Usage Distribution</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="labUsageChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card" style="min-height: 400px;">
+                <div class="chart-header">
+                    <i class="ri-time-line"></i>
+                    <span>Hourly Traffic Distribution</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="hourlyTrafficChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Grid - Two columns for pie charts -->
+        <div class="charts-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2rem;">
+            <div class="chart-card" style="min-height: 400px;">
+                <div class="chart-header">
+                    <i class="ri-bar-chart-box-line"></i>
+                    <span>Year Level Distribution</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="yearLevelChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card" style="min-height: 400px;">
+                <div class="chart-header">
+                    <i class="ri-questionnaire-line"></i>
+                    <span>Student Sit-in Purposes</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="purposeChart"></canvas>
                 </div>
             </div>
         </div>
@@ -724,42 +945,7 @@ if (empty($feedback_data['recent_feedback'])) {
                 </div>
             </div>
         </div>    
-        
-        <!-- Overall Stats Chart -->
-        <div class="dashboard-header">
-            <div class="dashboard-title">
-                Overall Statistics
-            </div>
-        </div>
-        <div class="chart-card" style="margin-bottom: 1.5rem;">
-            <div class="chart-header">
-            </div>
-            <div class="chart-container">
-                <canvas id="statsChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Charts Grid - Two columns for pie charts -->
-        <div class="charts-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2rem;">
-            <div class="chart-card" style="min-height: 400px;">
-                <div class="chart-header">
-                    <i class="ri-bar-chart-box-line"></i>
-                    <span>Year Level Distribution</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="yearLevelChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card" style="min-height: 400px;">
-                <div class="chart-header">
-                    <i class="ri-questionnaire-line"></i>
-                    <span>Student Sit-in Purposes</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="purposeChart"></canvas>
-                </div>
-            </div>
-        </div>
+    
         
         <!-- Enhanced Edit Announcement Modal -->
         <div id="editModal" class="modal">
@@ -1088,23 +1274,219 @@ if (empty($feedback_data['recent_feedback'])) {
         </style>
         `);
         
+        // Daily Usage Chart - New
+        const dailyUsageCtx = document.getElementById('dailyUsageChart');
+        if (dailyUsageCtx) {
+            new Chart(dailyUsageCtx, {
+                type: 'line',
+                data: {
+                    labels: <?php echo json_encode($dates); ?>,
+                    datasets: [{
+                        label: 'Daily Student Count',
+                        data: <?php echo json_encode($daily_usage_values); ?>,
+                        backgroundColor: 'rgba(117, 86, 204, 0.2)',
+                        borderColor: 'rgba(117, 86, 204, 1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: 'white',
+                        pointBorderColor: 'rgba(117, 86, 204, 1)',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.raw} student${context.raw !== 1 ? 's' : ''}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Laboratory Usage Chart - New
+        const labUsageCtx = document.getElementById('labUsageChart');
+        if (labUsageCtx) {
+            const labData = <?php echo json_encode(array_column($lab_usage_stats, 'count')); ?>;
+            const hasLabData = labData && labData.length > 0 && labData.some(count => count > 0);
+            
+            if (!hasLabData) {
+                const container = labUsageCtx.closest('.chart-container');
+                container.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#666; text-align:center;">No laboratory usage data available.<br>Data will appear once students start using laboratories.</div>';
+            } else {
+                new Chart(labUsageCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: <?php echo json_encode(array_column($lab_usage_stats, 'label')); ?>,
+                        datasets: [{
+                            data: labData,
+                            backgroundColor: [
+                                'rgba(117, 86, 204, 0.8)',
+                                'rgba(213, 105, 167, 0.8)',
+                                'rgba(155, 95, 185, 0.8)',
+                                'rgba(94, 114, 228, 0.8)',
+                                'rgba(45, 206, 137, 0.8)',
+                                'rgba(255, 184, 0, 0.8)',
+                                'rgba(255, 97, 132, 0.8)'
+                            ],
+                            borderWidth: 2,
+                            borderColor: 'white'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    boxWidth: 12,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${context.label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Hourly Traffic Chart - New
+        const hourlyTrafficCtx = document.getElementById('hourlyTrafficChart');
+        if (hourlyTrafficCtx) {
+            const hourlyData = <?php echo json_encode(array_values($hourly_distribution)); ?>;
+            const hasHourlyData = hourlyData && hourlyData.some(count => count > 0);
+            
+            if (!hasHourlyData) {
+                const container = hourlyTrafficCtx.closest('.chart-container');
+                container.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#666; text-align:center;">No hourly traffic data available yet.<br>Data will appear as students use the facilities.</div>';
+            } else {
+                // Generate labels for 24-hour format
+                const hourLabels = Array.from({length: 24}, (_, i) => {
+                    const hour = i % 12 || 12;
+                    const ampm = i < 12 ? 'AM' : 'PM';
+                    return `${hour} ${ampm}`;
+                });
+                
+                new Chart(hourlyTrafficCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: hourLabels,
+                        datasets: [{
+                            data: hourlyData,
+                            backgroundColor: (context) => {
+                                const value = context.dataset.data[context.dataIndex];
+                                const max = Math.max(...context.dataset.data);
+                                const alpha = 0.3 + (value / max) * 0.7; // Scale between 0.3 and 1.0
+                                return `rgba(117, 86, 204, ${alpha})`;
+                            },
+                            borderRadius: 4,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        return `${value} student${value !== 1 ? 's' : ''}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    precision: 0
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Your existing charts
         // Overall Statistics Chart
         const statsCtx = document.getElementById('statsChart');
         if (statsCtx) {
             new Chart(statsCtx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: ['Total Students', 'Current Students', 'Total Sit-Ins'],
+                    labels: ['Total Students', 'Current Students', 'Total Sit-Ins', 'Avg. Daily Usage'],
                     datasets: [{
                         data: [
                             <?php echo $stats['total_students']; ?>,
                             <?php echo $stats['current_sitin']; ?>,
-                            <?php echo $stats['total_sitin']; ?>
+                            <?php echo $stats['total_sitin']; ?>,
+                            <?php echo $stats['avg_daily_usage']; ?>
                         ],
                         backgroundColor: [
                             'rgba(117,86,204,0.8)',
                             'rgba(213,105,167,0.8)',
-                            'rgba(155,95,185,0.8)'
+                            'rgba(155,95,185,0.8)',
+                            'rgba(94,114,228,0.8)'
                         ],
                         borderRadius: 6,
                         borderWidth: 0
@@ -1139,19 +1521,13 @@ if (empty($feedback_data['recent_feedback'])) {
         // Purpose Distribution Chart - Enhanced with better tooltips and formatting
         const purposeCtx = document.getElementById('purposeChart');
         if (purposeCtx) {
-            // Debug output to verify data
-            console.log('Purpose Stats:', <?php echo json_encode($purpose_stats); ?>);
-            
-            // Check if we have any data
             const purposeData = <?php echo json_encode(array_column($purpose_stats, 'count')); ?>;
             const hasPurposeData = purposeData && purposeData.length > 0 && purposeData.some(count => count > 0);
             
             if (!hasPurposeData) {
-                // If no data, show a message
                 const container = purposeCtx.closest('.chart-container');
                 container.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#666; text-align:center;">No sit-in purpose data available.<br>Students need to specify purposes when sitting in.</div>';
             } else {
-                // Create the chart with existing data
                 new Chart(purposeCtx, {
                     type: 'pie',
                     data: {
@@ -1200,12 +1576,9 @@ if (empty($feedback_data['recent_feedback'])) {
             }
         }
 
-        // Add this after the existing charts initialization
-        
         // Year Level Distribution Chart - Changed to pie chart
         const yearLevelCtx = document.getElementById('yearLevelChart');
         if (yearLevelCtx) {
-            // Check if we have any valid year level data
             const yearLevelData = [
                 <?php echo $year_level_stats['1st Year']; ?>,
                 <?php echo $year_level_stats['2nd Year']; ?>,
@@ -1216,11 +1589,9 @@ if (empty($feedback_data['recent_feedback'])) {
             const hasYearLevelData = yearLevelData.some(count => count > 0);
             
             if (!hasYearLevelData) {
-                // Display a message if no data is available
                 const container = yearLevelCtx.closest('.chart-container');
                 container.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#666; text-align:center;">No year level data available.<br>Please ensure student year levels are properly set.</div>';
             } else {
-                // Initialize the chart only if we have data
                 new Chart(yearLevelCtx.getContext('2d'), {
                     type: 'pie',
                     data: {
@@ -1264,12 +1635,9 @@ if (empty($feedback_data['recent_feedback'])) {
                             }
                         }
                     }
-                });
+                    });
             }
         }
-        
-        // ...existing code...
-    });
 
     // Announcement Form Handler
     document.getElementById('announcementForm').addEventListener('submit', async (e) => {
@@ -1381,92 +1749,19 @@ if (empty($feedback_data['recent_feedback'])) {
     });
 
     // Close modal when clicking outside
-    window.onclick = function(event) {
-        const editModal = document.getElementById('editModal');
-        const deleteModal = document.getElementById('deleteModal');
-        
-        if (event.target == editModal) {
-            closeModal();
-        }
-        
-        if (event.target == deleteModal) {
-            closeDeleteModal();
-        }
-    }
-
-    // Feedback Over Time Chart
-        const feedbackTimeCtx = document.getElementById('feedbackTimeChart');
-        if (feedbackTimeCtx) {
-            // Create data for the last 7 days
-            const labels = [];
-            const data = [];
+        window.onclick = function(event) {
+            const editModal = document.getElementById('editModal');
+            const deleteModal = document.getElementById('deleteModal');
             
-            // Generate dates for the last 7 days
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                
-                // Generate some random data for now (will be replaced with real data)
-                // In a real scenario, you would fetch this data from the server
-                data.push(<?php echo $feedback_data['total_count'] > 0 ? rand(1, 5) : 0; ?>);
+            if (event.target == editModal) {
+                closeModal();
             }
             
-            new Chart(feedbackTimeCtx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Average Rating',
-                        data: data,
-                        backgroundColor: 'rgba(117,86,204,0.2)',
-                        borderColor: 'rgba(117,86,204,1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: 'rgba(117,86,204,1)',
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 5,
-                            ticks: {
-                                stepSize: 1
-                            },
-                            grid: {
-                                display: true,
-                                color: 'rgba(0,0,0,0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Average Rating: ${context.raw}/5`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+            if (event.target == deleteModal) {
+                closeDeleteModal();
+            }
         }
-
-    
+    });
     </script>
 </body>
 </html>

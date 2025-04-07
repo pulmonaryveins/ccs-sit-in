@@ -877,6 +877,30 @@ function getYearLevelDisplay($yearLevel) {
         window.resetSessions = function() {
             const idno = document.getElementById('resetStudentIdno').value;
             
+            // Get the current remaining sessions from the table row
+            const studentRow = Array.from(document.querySelectorAll('#students-table-body tr')).find(
+                row => row.querySelector('td') && row.querySelector('td').textContent.trim() === idno
+            );
+            
+            // Check if sessions are already at maximum
+            if (studentRow) {
+                const sessionsElement = studentRow.querySelector('.sessions-badge');
+                if (sessionsElement) {
+                    const sessionsText = sessionsElement.textContent;
+                    const currentSessions = parseInt(sessionsText);
+                    
+                    if (currentSessions >= 30) {
+                        closeResetModal();
+                        showNotification(
+                            "Information", 
+                            "This student already has the maximum of 30 sessions. No need to reset.",
+                            "info"
+                        );
+                        return;
+                    }
+                }
+            }
+            
             fetch('../controller/reset_student_sessions.php', {
                 method: 'POST',
                 headers: {
@@ -915,6 +939,41 @@ function getYearLevelDisplay($yearLevel) {
         
         // Override resetAllSessions function
         window.resetAllSessions = function() {
+            // First check if all students already have 30 sessions
+            const sessionsBadges = document.querySelectorAll('#students-table-body .sessions-badge');
+            let allMaxed = true;
+            let anyMaxed = false;
+            
+            sessionsBadges.forEach(badge => {
+                const sessionsText = badge.textContent;
+                const currentSessions = parseInt(sessionsText);
+                
+                if (currentSessions < 30) {
+                    allMaxed = false;
+                } else {
+                    anyMaxed = true;
+                }
+            });
+            
+            if (allMaxed) {
+                closeResetAllSessionsModal();
+                showNotification(
+                    "Information", 
+                    "All students already have the maximum of 30 sessions. No need to reset.",
+                    "info"
+                );
+                return;
+            }
+            
+            if (anyMaxed) {
+                // Some students already at max, show warning but allow to continue
+                document.querySelector('#resetAllSessionsModal .modal-body').innerHTML = `
+                    <p>Are you sure you want to reset <strong>ALL students'</strong> sessions back to 30?</p>
+                    <p class="text-yellow-500 font-semibold">Note: Some students already have 30 sessions and won't be affected.</p>
+                    <p class="text-red-500 font-semibold">This action cannot be undone!</p>
+                `;
+            }
+            
             fetch('../controller/reset_all_sessions.php', {
                 method: 'POST'
             })
