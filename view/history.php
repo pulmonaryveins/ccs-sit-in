@@ -1,4 +1,7 @@
 <?php
+// Set timezone to Philippines (GMT+8)
+date_default_timezone_set('Asia/Manila');
+
 session_start();
 
 // Check if user is not logged in
@@ -1727,7 +1730,7 @@ $conn->close();
                 if (searchText) {
                     // Search in all text fields
                     const date = new Date(record.date).toLocaleDateString('en-US', 
-                        {month: 'short', day: 'numeric', year: 'numeric'});
+                        {month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Manila'});
                     const laboratory = `Laboratory ${record.laboratory}`;
                     const purpose = record.purpose || '';
                     
@@ -1772,19 +1775,26 @@ $conn->close();
                     
                     // Format date
                     const date = new Date(record.date).toLocaleDateString('en-US', 
-                        {month: 'short', day: 'numeric', year: 'numeric'});
+                        {month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Manila'});
                     
-                    // Format time in
-                    const timeIn = new Date('1970-01-01T' + record.time_in + 'Z')
-                        .toLocaleTimeString('en-US', 
-                            {hour: '2-digit', minute: '2-digit', hour12: true});
+                    // Format time in with GMT+8 timezone
+                    let timeIn = '';
+                    if (record.time_in) {
+                        const [hours, minutes] = record.time_in.split(':');
+                        const hour = parseInt(hours);
+                        const ampm = hour >= 12 ? 'PM' : 'AM';
+                        const hour12 = hour % 12 || 12;
+                        timeIn = `${hour12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+                    }
                     
-                    // Format time out
+                    // Format time out with GMT+8 timezone
                     let timeOut = 'Not yet';
                     if (record.time_out) {
-                        timeOut = new Date('1970-01-01T' + record.time_out + 'Z')
-                            .toLocaleTimeString('en-US', 
-                                {hour: '2-digit', minute: '2-digit', hour12: true});
+                        const [hours, minutes] = record.time_out.split(':');
+                        const hour = parseInt(hours);
+                        const ampm = hour >= 12 ? 'PM' : 'AM';
+                        const hour12 = hour % 12 || 12;
+                        timeOut = `${hour12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
                     }
                     
                     // Determine status badge
