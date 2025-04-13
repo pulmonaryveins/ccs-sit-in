@@ -189,8 +189,16 @@ function formatYearLevel($year) {
             </div>
         </div>
 
+        <!-- Tabs Section -->
+        <div class="filter-tabs">
+            <div class="filter-tab active" data-target="all-students">All Students</div>
+            <?php if (isset($_SESSION['admin_logged_in'])): ?>
+            <div class="filter-tab" data-target="students-points">Student's Points</div>
+            <?php endif; ?>
+        </div>
+
         <!-- Top 3 Students Section -->
-        <div class="top-students-section">
+        <div class="top-students-section view-section active">
             <h2>Top Active Students</h2>
             <div class="top-students-grid">
                 <?php 
@@ -249,16 +257,12 @@ function formatYearLevel($year) {
             </div>
         </div>
 
-        <!-- Tabs Section -->
-        <div class="filter-tabs">
-            <div class="filter-tab active" data-target="all-students">All Students</div>
-            <?php if (isset($_SESSION['admin_logged_in'])): ?>
-            <div class="filter-tab" data-target="students-points">Student's Points</div>
-            <?php endif; ?>
-        </div>
-
         <!-- All Students Container -->
         <div id="all-students" class="view-container active">
+            <div class="container-header">
+                <h2><i class="ri-user-search-line"></i> All Students Leaderboard</h2>
+                <p>Ranking of all students based on total sit-in sessions and points</p>
+            </div>
             <div class="table-container">
                 <table class="modern-table">
                     <thead>
@@ -291,13 +295,15 @@ function formatYearLevel($year) {
                                     <td><?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?></td>
                                     <td><?php echo htmlspecialchars($student['course']); ?></td>
                                     <td><?php echo formatYearLevel($student['year']); ?></td>
-                                    <td class="text-center"><?php echo $student['total_sitins']; ?></td>
                                     <td class="text-center">
-                                        <span class="points-badge"><?php echo $student['points']; ?></span>
+                                        <span class="sitin-badge"><?php echo $student['total_sitins']; ?> sit-ins</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="points-badge"><?php echo $student['points']; ?> points</span>
                                     </td>
                                     <td class="text-center">
                                         <span class="sessions-badge <?php echo $student['remaining_sessions'] <= 5 ? 'sessions-low' : ($student['remaining_sessions'] <= 10 ? 'sessions-medium' : ''); ?>">
-                                            <?php echo $student['remaining_sessions']; ?>
+                                            <?php echo $student['remaining_sessions']; ?> sessions
                                         </span>
                                     </td>
                                 </tr>
@@ -311,6 +317,10 @@ function formatYearLevel($year) {
         <?php if (isset($_SESSION['admin_logged_in'])): ?>
         <!-- Student's Points Container (Admin Only) -->
         <div id="students-points" class="view-container">
+            <div class="container-header">
+                <h2><i class="ri-star-line"></i> Student Points Management</h2>
+                <p>Add or manage points for students in the CCS Sit-In system</p>
+            </div>
             <div class="table-container">
                 <table class="modern-table">
                     <thead>
@@ -342,11 +352,11 @@ function formatYearLevel($year) {
                                     <td><?php echo htmlspecialchars($student['course']); ?></td>
                                     <td><?php echo formatYearLevel($student['year']); ?></td>
                                     <td class="text-center">
-                                        <span class="points-badge"><?php echo $student['points']; ?></span>
+                                        <span class="points-badge"><?php echo $student['points']; ?> points</span>
                                     </td>
                                     <td class="text-center">
                                         <span class="sessions-badge <?php echo $student['remaining_sessions'] <= 5 ? 'sessions-low' : ($student['remaining_sessions'] <= 10 ? 'sessions-medium' : ''); ?>">
-                                            <?php echo $student['remaining_sessions']; ?>
+                                            <?php echo $student['remaining_sessions']; ?> sessions
                                         </span>
                                     </td>
                                     <td class="text-center">
@@ -404,6 +414,14 @@ function formatYearLevel($year) {
                     // Show the target container
                     const targetId = this.getAttribute('data-target');
                     document.getElementById(targetId).classList.add('active');
+                    
+                    // Show/hide the top students section based on the selected tab
+                    const topStudentsSection = document.querySelector('.top-students-section');
+                    if (targetId === 'students-points') {
+                        topStudentsSection.classList.remove('active');
+                    } else {
+                        topStudentsSection.classList.add('active');
+                    }
                 });
             });
 
@@ -532,6 +550,66 @@ function formatYearLevel($year) {
                     
                     .notification.info .notification-icon {
                         color: #3b82f6;
+                    }
+                    
+                    .view-section {
+                        display: none;
+                    }
+                    
+                    .view-section.active {
+                        display: block;
+                    }
+                    
+                    /* Container headers */
+                    .container-header {
+                        margin-bottom: 1.5rem;
+                        padding: 1.25rem;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+                        border: 1px solid #e2e8f0;
+                    }
+                    
+                    .container-header h2 {
+                        color: #1e293b;
+                        font-size: 1.3rem;
+                        font-weight: 600;
+                        margin-bottom: 0.5rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                    }
+                    
+                    .container-header h2 i {
+                        color: #7556cc;
+                    }
+                    
+                    .container-header p {
+                        color: #64748b;
+                        font-size: 0.9rem;
+                        margin: 0;
+                    }
+                    
+                    /* Sit-ins badge */
+                    .sitin-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-width: 50px;
+                        height: 24px;
+                        background: rgba(59, 130, 246, 0.1);
+                        color: #3b82f6;
+                        border-radius: 12px;
+                        font-weight: 500;
+                        font-size: 0.8rem;
+                        border: 1px solid rgba(59, 130, 246, 0.2);
+                        padding: 0 8px;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    .sitin-badge:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
                     }
                 </style>
             `);
