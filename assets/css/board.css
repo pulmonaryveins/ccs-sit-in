@@ -34,6 +34,7 @@
     justify-content: center;
 }
 
+
 .top-students-section h2::before {
     content: "\ea1a"; /* Trophy icon from Remix Icon */
     font-family: 'remixicon';
@@ -433,8 +434,11 @@
 
 /* Utility classes */
 .text-center {
-    text-align: center;
+    text-align: left;
 }
+
+
+
 
 .font-mono {
     font-family: monospace;

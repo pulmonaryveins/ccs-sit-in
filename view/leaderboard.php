@@ -184,9 +184,7 @@ function formatYearLevel($year) {
     <div class="content-wrapper">
         <!-- Leaderboard Header -->
         <div class="dashboard-header">
-            <div class="dashboard-title">
-                CCS Leaderboard
-            </div>
+
         </div>
 
         <!-- Tabs Section -->
@@ -323,6 +321,32 @@ function formatYearLevel($year) {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                
+                <!-- Pagination for All Students -->
+                <div class="pagination-container">
+                <div class="entries-selector">
+                            <label for="students-per-page">Show</label>
+                            <select id="all-students-entries" class="entries-select">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <label for="students-per-page">entries</label>
+                        </div>
+                    <div class="pagination-info">
+                        Showing <span id="all-students-start">1</span>-<span id="all-students-end">10</span> of <span id="all-students-total"><?php echo count($all_students); ?></span> students
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" id="all-students-prev" disabled>
+                            <i class="ri-arrow-left-s-line"></i> Previous
+                        </button>
+                        <div class="pagination-pages" id="all-students-pages"></div>
+                        <button class="pagination-btn" id="all-students-next">
+                            Next <i class="ri-arrow-right-s-line"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -393,6 +417,32 @@ function formatYearLevel($year) {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                
+                <!-- Pagination for Student Points -->
+                <div class="pagination-container">
+                <div class="entries-selector">
+                            <label for="points-students-entries">Show</label>
+                            <select id="points-students-entries" class="entries-select">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <label for="points-students-entries">entries</label>
+                        </div>
+                    <div class="pagination-info">
+                        Showing <span id="points-students-start">1</span>-<span id="points-students-end">10</span> of <span id="points-students-total"><?php echo count($all_students); ?></span> students
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" id="points-students-prev" disabled>
+                            <i class="ri-arrow-left-s-line"></i> Previous
+                        </button>
+                        <div class="pagination-pages" id="points-students-pages"></div>
+                        <button class="pagination-btn" id="points-students-next">
+                            Next <i class="ri-arrow-right-s-line"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         <?php endif; ?>
@@ -770,6 +820,104 @@ function formatYearLevel($year) {
                         pointer-events: none;
                     }
                     
+                    /* Pagination styles */
+                    .pagination-container {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-top: 1.5rem;
+                        padding: 1rem;
+                        background: white;
+                        border-radius: 8px;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                    }
+                    
+                    .pagination-info {
+                        color: #64748b;
+                        font-size: 0.9rem;
+                    }
+                    
+                    .pagination-controls {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                    }
+                    
+                    .pagination-btn {
+                        display: flex;
+                        align-items: center;
+                        padding: 0.5rem 1rem;
+                        background: white;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 6px;
+                        color: #4b5563;
+                        font-size: 0.9rem;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    .pagination-btn:hover:not(:disabled) {
+                        background: #f8fafc;
+                        border-color: #cbd5e1;
+                    }
+                    
+                    .pagination-btn:disabled {
+                        opacity: 0.5;
+                        cursor: not-allowed;
+                    }
+                    
+                    .pagination-btn i {
+                        font-size: 1.1rem;
+                    }
+                    
+                    .pagination-pages {
+                        display: flex;
+                        gap: 0.25rem;
+                    }
+                    
+                    .page-number {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 6px;
+                        font-size: 0.9rem;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        color: #4b5563;
+                        border: 1px solid transparent;
+                    }
+                    
+                    .page-number:hover:not(.active) {
+                        background: #f1f5f9;
+                    }
+                    
+                    .page-number.active {
+                        background: #7556cc;
+                        color: white;
+                        font-weight: 600;
+                    }
+
+                    label {
+                        font-size: 0.9rem;
+                        color: #4b5563;
+                    }
+                    
+                    /* Responsive pagination */
+                    @media (max-width: 640px) {
+                        .pagination-container {
+                            flex-direction: column;
+                            gap: 1rem;
+                            align-items: flex-start;
+                        }
+                        
+                        .pagination-controls {
+                            width: 100%;
+                            justify-content: space-between;
+                        }
+                    }
+                    
                     /* Responsive adjustments */
                     @media (max-width: 768px) {
                         .header-content {
@@ -783,80 +931,386 @@ function formatYearLevel($year) {
                     }
                 </style>
             `);
+            
+            // Pagination functionality
+            function setupPagination(tableSelector, paginationIds, itemsPerPage = 10) {
+                const tableBody = document.querySelector(`${tableSelector} tbody`);
+                const rows = Array.from(tableBody.querySelectorAll('tr')).filter(row => !row.classList.contains('empty-state') && !row.classList.contains('empty-search'));
+                
+                // Get pagination elements
+                const prevButton = document.getElementById(paginationIds.prev);
+                const nextButton = document.getElementById(paginationIds.next);
+                const pagesContainer = document.getElementById(paginationIds.pages);
+                const startElement = document.getElementById(paginationIds.start);
+                const endElement = document.getElementById(paginationIds.end);
+                const totalElement = document.getElementById(paginationIds.total);
+                
+                if (!tableBody || !prevButton || !nextButton || !pagesContainer) return;
+                
+                let currentPage = 1;
+                const totalPages = Math.ceil(rows.length / itemsPerPage);
+                
+                // Set total count
+                if (totalElement) totalElement.textContent = rows.length;
+                
+                // Function to render page numbers
+                function renderPageNumbers() {
+                    pagesContainer.innerHTML = '';
+                    
+                    // Calculate visible page numbers
+                    let startPage = Math.max(1, currentPage - 2);
+                    let endPage = Math.min(totalPages, startPage + 4);
+                    
+                    if (endPage - startPage < 4) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+                    
+                    // Add first page if not visible
+                    if (startPage > 1) {
+                        const firstPage = document.createElement('div');
+                        firstPage.className = 'page-number';
+                        firstPage.textContent = '1';
+                        firstPage.addEventListener('click', () => goToPage(1));
+                        pagesContainer.appendChild(firstPage);
+                        
+                        if (startPage > 2) {
+                            const dots = document.createElement('div');
+                            dots.className = 'page-number dots';
+                            dots.textContent = '...';
+                            dots.style.cursor = 'default';
+                            pagesContainer.appendChild(dots);
+                        }
+                    }
+                    
+                    // Add page numbers
+                    for (let i = startPage; i <= endPage; i++) {
+                        const pageNumber = document.createElement('div');
+                        pageNumber.className = `page-number ${i === currentPage ? 'active' : ''}`;
+                        pageNumber.textContent = i;
+                        pageNumber.addEventListener('click', () => goToPage(i));
+                        pagesContainer.appendChild(pageNumber);
+                    }
+                    
+                    // Add last page if not visible
+                    if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                            const dots = document.createElement('div');
+                            dots.className = 'page-number dots';
+                            dots.textContent = '...';
+                            dots.style.cursor = 'default';
+                            pagesContainer.appendChild(dots);
+                        }
+                        
+                        const lastPage = document.createElement('div');
+                        lastPage.className = 'page-number';
+                        lastPage.textContent = totalPages;
+                        lastPage.addEventListener('click', () => goToPage(totalPages));
+                        pagesContainer.appendChild(lastPage);
+                    }
+                }
+                
+                // Function to go to a specific page
+                function goToPage(page) {
+                    if (page < 1 || page > totalPages) return;
+                    
+                    currentPage = page;
+                    showCurrentPage();
+                    
+                    // Update pagination UI
+                    prevButton.disabled = currentPage === 1;
+                    nextButton.disabled = currentPage === totalPages;
+                    renderPageNumbers();
+                    
+                    // Update info text
+                    if (startElement && endElement) {
+                        const start = (currentPage - 1) * itemsPerPage + 1;
+                        const end = Math.min(start + itemsPerPage - 1, rows.length);
+                        startElement.textContent = start;
+                        endElement.textContent = end;
+                    }
+                }
+                
+                // Function to show current page rows
+                function showCurrentPage() {
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    
+                    rows.forEach((row, index) => {
+                        row.style.display = (index >= start && index < end) ? '' : 'none';
+                    });
+                }
+                
+                // Setup pagination event listeners
+                prevButton.addEventListener('click', () => goToPage(currentPage - 1));
+                nextButton.addEventListener('click', () => goToPage(currentPage + 1));
+                
+                // Initial setup
+                renderPageNumbers();
+                showCurrentPage();
+                
+                // Return the reset function
+                return function resetPagination() {
+                    goToPage(1);
+                };
+            }
+            
+            // Initialize pagination
+            const resetAllStudentsPagination = setupPagination(
+                '#all-students .modern-table', 
+                {
+                    prev: 'all-students-prev',
+                    next: 'all-students-next',
+                    pages: 'all-students-pages',
+                    start: 'all-students-start',
+                    end: 'all-students-end',
+                    total: 'all-students-total'
+                }
+            );
+            
+            const resetPointsPagination = setupPagination(
+                '#students-points .modern-table', 
+                {
+                    prev: 'points-students-prev',
+                    next: 'points-students-next',
+                    pages: 'points-students-pages',
+                    start: 'points-students-start',
+                    end: 'points-students-end',
+                    total: 'points-students-total'
+                }
+            );
+            
+            // Update search functions to work with pagination
+            function setupSearchForTable(searchInput, tableSelector, colIndexes, resetPaginationFn) {
+                if (!searchInput) return;
+                
+                searchInput.addEventListener('keyup', function() {
+                    const searchValue = this.value.toLowerCase().trim();
+                    const tableBody = document.querySelector(tableSelector);
+                    
+                    if (!tableBody) return;
+                    
+                    const rows = tableBody.querySelectorAll('tr');
+                    let hasVisibleRows = false;
+                    
+                    // Remove existing empty search row if any
+                    const emptySearch = tableBody.querySelector('.empty-search');
+                    if (emptySearch) tableBody.removeChild(emptySearch);
+                    
+                    // Show all rows first
+                    rows.forEach(row => {
+                        if (!row.querySelector('.empty-state') && !row.classList.contains('empty-search')) {
+                            // Remove any display: none style from previous pagination
+                            row.style.display = '';
+                            
+                            let match = false;
+                            
+                            // Check each column we want to search in
+                            colIndexes.forEach(idx => {
+                                const cell = row.querySelector(`td:nth-child(${idx})`);
+                                if (cell && cell.textContent.toLowerCase().includes(searchValue)) {
+                                    match = true;
+                                }
+                            });
+                            
+                            // Mark rows that don't match for later filtering
+                            if (match || searchValue === '') {
+                                row.dataset.searchMatch = 'true';
+                                hasVisibleRows = true;
+                            } else {
+                                row.dataset.searchMatch = 'false';
+                                row.style.display = 'none';
+                            }
+                        }
+                    });
+                    
+                    // Show empty state if no results
+                    if (!hasVisibleRows && searchValue !== '') {
+                        const colspan = tableSelector.includes('all-students') ? 8 : 7;
+                        const emptyRow = document.createElement('tr');
+                        emptyRow.classList.add('empty-search');
+                        emptyRow.innerHTML = `
+                            <td colspan="${colspan}" class="empty-state">
+                                <div class="empty-state-content">
+                                    <i class="ri-search-line"></i>
+                                    <p>No students match your search</p>
+                                </div>
+                            </td>
+                        `;
+                        tableBody.appendChild(emptyRow);
+                    } else if (searchValue === '' && resetPaginationFn) {
+                        // If search is cleared, reset pagination
+                        resetPaginationFn();
+                    }
+                });
+            }
+            
+            // Setup improved search for each table
+            setupSearchForTable(studentSearchAll, '#all-students .modern-table tbody', [2, 3, 4], resetAllStudentsPagination);
+            setupSearchForTable(studentSearchPoints, '#students-points .modern-table tbody', [1, 2, 3], resetPointsPagination);
+            
+            // Clear search and reset pagination when switching tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    
+                    if (targetId === 'all-students') {
+                        if (studentSearchAll) {
+                            studentSearchAll.value = '';
+                            studentSearchAll.dispatchEvent(new Event('keyup'));
+                        }
+                        if (resetAllStudentsPagination) resetAllStudentsPagination();
+                    } else if (targetId === 'students-points') {
+                        if (studentSearchPoints) {
+                            studentSearchPoints.value = '';
+                            studentSearchPoints.dispatchEvent(new Event('keyup'));
+                        }
+                        if (resetPointsPagination) resetPointsPagination();
+                    }
+                });
+            });
+
+            // Function to show notifications
+            function showNotification(title, message, type = 'info', duration = 5000) {
+                const notificationContainer = document.getElementById('notification-container');
+                
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                
+                // Set icon based on type
+                let iconClass = 'ri-information-line';
+                if (type === 'success') iconClass = 'ri-check-line';
+                if (type === 'error') iconClass = 'ri-error-warning-line';
+                if (type === 'warning') iconClass = 'ri-alert-line';
+                
+                notification.innerHTML = `
+                    <div class="notification-icon">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${title}</div>
+                        <div class="notification-message">${message}</div>
+                    </div>
+                    <button class="notification-close" onclick="closeNotification(this)">×</button>
+                `;
+                
+                // Add to container
+                notificationContainer.appendChild(notification);
+                
+                // Auto-remove after duration
+                if (duration > 0) {
+                    setTimeout(() => closeNotification(notification), duration);
+                }
+                
+                return notification;
+            }
+            
+            function closeNotification(notification) {
+                if (!notification) return;
+                
+                // If notification is a button, find its parent notification
+                if (notification.tagName === 'BUTTON') {
+                    notification = notification.closest('.notification');
+                }
+                
+                notification.classList.add('removing');
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 400);
+            }
+
+            // Confirm modal functions
+            function showConfirmModal(message, title, callback) {
+                document.getElementById('confirm-message').textContent = message;
+                document.getElementById('confirm-title').textContent = title;
+                
+                const confirmButton = document.getElementById('confirm-button');
+                confirmButton.onclick = function() {
+                    hideConfirmModal();
+                    callback(true);
+                };
+                
+                document.getElementById('confirmModal').style.display = 'flex';
+            }
+            
+            function hideConfirmModal() {
+                document.getElementById('confirmModal').style.display = 'none';
+            }
+            
+            // Function to add a point to a student
+            function addPoint(idno, studentName) {
+                showConfirmModal(
+                    `Are you sure you want to add 1 point to ${studentName}?`,
+                    "Confirm Point Addition",
+                    (confirmed) => {
+                        if (confirmed) {
+                            // Show pending notification
+                            const pendingNotification = showNotification(
+                                "Processing", 
+                                "Adding point to student...",
+                                "info",
+                                0
+                            );
+                            
+                            // Send request to add point
+                            fetch('../controller/add_student_point.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: `idno=${encodeURIComponent(idno)}`
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                // Remove pending notification
+                                closeNotification(pendingNotification);
+                                
+                                if (data.success) {
+                                    let message = data.message;
+                                    
+                                    // Show success notification
+                                    showNotification(
+                                        "Success", 
+                                        message,
+                                        "success"
+                                    );
+                                    
+                                    // Reload the page after a short delay
+                                    setTimeout(() => window.location.reload(), 1500);
+                                } else {
+                                    showNotification(
+                                        "Error", 
+                                        data.message || "Failed to add point",
+                                        "error"
+                                    );
+                                }
+                            })
+                            .catch(error => {
+                                // Remove pending notification
+                                closeNotification(pendingNotification);
+                                
+                                console.error('Error:', error);
+                                showNotification(
+                                    "Error", 
+                                    "An error occurred while processing your request.",
+                                    "error"
+                                );
+                            });
+                        }
+                    }
+                );
+            }
         });
 
-        // Function to show notifications
-        function showNotification(title, message, type = 'info', duration = 5000) {
-            const notificationContainer = document.getElementById('notification-container');
-            
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            
-            // Set icon based on type
-            let iconClass = 'ri-information-line';
-            if (type === 'success') iconClass = 'ri-check-line';
-            if (type === 'error') iconClass = 'ri-error-warning-line';
-            if (type === 'warning') iconClass = 'ri-alert-line';
-            
-            notification.innerHTML = `
-                <div class="notification-icon">
-                    <i class="${iconClass}"></i>
-                </div>
-                <div class="notification-content">
-                    <div class="notification-title">${title}</div>
-                    <div class="notification-message">${message}</div>
-                </div>
-                <button class="notification-close" onclick="closeNotification(this)">×</button>
-            `;
-            
-            // Add to container
-            notificationContainer.appendChild(notification);
-            
-            // Auto-remove after duration
-            if (duration > 0) {
-                setTimeout(() => closeNotification(notification), duration);
-            }
-            
-            return notification;
-        }
-        
-        function closeNotification(notification) {
-            if (!notification) return;
-            
-            // If notification is a button, find its parent notification
-            if (notification.tagName === 'BUTTON') {
-                notification = notification.closest('.notification');
-            }
-            
-            notification.classList.add('removing');
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 400);
-        }
-
-        // Confirm modal functions
-        function showConfirmModal(message, title, callback) {
-            document.getElementById('confirm-message').textContent = message;
-            document.getElementById('confirm-title').textContent = title;
-            
-            const confirmButton = document.getElementById('confirm-button');
-            confirmButton.onclick = function() {
-                hideConfirmModal();
-                callback(true);
-            };
-            
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-        
-        function hideConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'none';
-        }
-        
-        // Function to add a point to a student
+        // Make sure addPoint function is available globally for onclick handlers
         function addPoint(idno, studentName) {
             showConfirmModal(
                 `Are you sure you want to add 1 point to ${studentName}?`,
@@ -924,6 +1378,310 @@ function formatYearLevel($year) {
                 }
             );
         }
+
+        // Helper function to show notifications - must be global
+        function showNotification(title, message, type = 'info', duration = 5000) {
+            const notificationContainer = document.getElementById('notification-container');
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            // Set icon based on type
+            let iconClass = 'ri-information-line';
+            if (type === 'success') iconClass = 'ri-check-line';
+            if (type === 'error') iconClass = 'ri-error-warning-line';
+            if (type === 'warning') iconClass = 'ri-alert-line';
+            
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="${iconClass}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close" onclick="closeNotification(this)">×</button>
+            `;
+            
+            // Add to container
+            notificationContainer.appendChild(notification);
+            
+            // Auto-remove after duration
+            if (duration > 0) {
+                setTimeout(() => closeNotification(notification), duration);
+            }
+            
+            return notification;
+        }
+        
+        // Helper function to close notifications - must be global
+        function closeNotification(notification) {
+            if (!notification) return;
+            
+            // If notification is a button, find its parent notification
+            if (notification.tagName === 'BUTTON') {
+                notification = notification.closest('.notification');
+            }
+            
+            notification.classList.add('removing');
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 400);
+        }
+        
+        // Confirm modal functions - must be global
+        function showConfirmModal(message, title, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirm-title').textContent = title;
+            
+            const confirmButton = document.getElementById('confirm-button');
+            confirmButton.onclick = function() {
+                hideConfirmModal();
+                callback(true);
+            };
+            
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+        
+        function hideConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ...existing code...
+
+            // Add CSS for the entries selector
+            document.head.insertAdjacentHTML('beforeend', `
+                <style>
+                    /* ...existing styles... */
+                    
+                    .entries-selector {
+                        margin-left: 1rem;
+                    }
+                    
+                    .entries-select {
+                        padding: 0.5rem;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 6px;
+                        background-color: white;
+                        color: #4b5563;
+                        font-size: 0.9rem;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    .entries-select:focus {
+                        outline: none;
+                        border-color: #7556cc;
+                        box-shadow: 0 0 0 2px rgba(117, 86, 204, 0.1);
+                    }
+                    
+                    /* Responsive pagination for entries selector */
+                    @media (max-width: 768px) {
+                        .pagination-controls {
+                            flex-wrap: wrap;
+                            gap: 0.75rem;
+                        }
+                        
+                        .entries-selector {
+                            margin-left: 0;
+                            margin-top: 0.5rem;
+                            width: 100%;
+                        }
+                        
+                        .entries-select {
+                            width: 100%;
+                        }
+                    }
+                </style>
+            `);
+            
+            // Pagination functionality with entries per page option
+            function setupPagination(tableSelector, paginationIds, defaultItemsPerPage = 10) {
+                const tableBody = document.querySelector(`${tableSelector} tbody`);
+                const rows = Array.from(tableBody.querySelectorAll('tr')).filter(row => !row.classList.contains('empty-state') && !row.classList.contains('empty-search'));
+                
+                // Get pagination elements
+                const prevButton = document.getElementById(paginationIds.prev);
+                const nextButton = document.getElementById(paginationIds.next);
+                const pagesContainer = document.getElementById(paginationIds.pages);
+                const startElement = document.getElementById(paginationIds.start);
+                const endElement = document.getElementById(paginationIds.end);
+                const totalElement = document.getElementById(paginationIds.total);
+                const entriesSelect = document.getElementById(paginationIds.entries);
+                
+                if (!tableBody || !prevButton || !nextButton || !pagesContainer) return;
+                
+                let currentPage = 1;
+                let itemsPerPage = defaultItemsPerPage;
+                let totalPages = Math.ceil(rows.length / itemsPerPage);
+                
+                // Set total count
+                if (totalElement) totalElement.textContent = rows.length;
+                
+                // Function to render page numbers
+                function renderPageNumbers() {
+                    pagesContainer.innerHTML = '';
+                    
+                    // Recalculate total pages
+                    totalPages = Math.ceil(rows.length / itemsPerPage);
+                    
+                    // If there are no pages, exit
+                    if (totalPages === 0) return;
+                    
+                    // Ensure current page is not out of bounds
+                    if (currentPage > totalPages) {
+                        currentPage = totalPages;
+                    }
+                    
+                    // Calculate visible page numbers
+                    let startPage = Math.max(1, currentPage - 2);
+                    let endPage = Math.min(totalPages, startPage + 4);
+                    
+                    if (endPage - startPage < 4) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+                    
+                    // Add first page if not visible
+                    if (startPage > 1) {
+                        const firstPage = document.createElement('div');
+                        firstPage.className = 'page-number';
+                        firstPage.textContent = '1';
+                        firstPage.addEventListener('click', () => goToPage(1));
+                        pagesContainer.appendChild(firstPage);
+                        
+                        if (startPage > 2) {
+                            const dots = document.createElement('div');
+                            dots.className = 'page-number dots';
+                            dots.textContent = '...';
+                            dots.style.cursor = 'default';
+                            pagesContainer.appendChild(dots);
+                        }
+                    }
+                    
+                    // Add page numbers
+                    for (let i = startPage; i <= endPage; i++) {
+                        const pageNumber = document.createElement('div');
+                        pageNumber.className = `page-number ${i === currentPage ? 'active' : ''}`;
+                        pageNumber.textContent = i;
+                        pageNumber.addEventListener('click', () => goToPage(i));
+                        pagesContainer.appendChild(pageNumber);
+                    }
+                    
+                    // Add last page if not visible
+                    if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                            const dots = document.createElement('div');
+                            dots.className = 'page-number dots';
+                            dots.textContent = '...';
+                            dots.style.cursor = 'default';
+                            pagesContainer.appendChild(dots);
+                        }
+                        
+                        const lastPage = document.createElement('div');
+                        lastPage.className = 'page-number';
+                        lastPage.textContent = totalPages;
+                        lastPage.addEventListener('click', () => goToPage(totalPages));
+                        pagesContainer.appendChild(lastPage);
+                    }
+                }
+                
+                // Function to go to a specific page
+                function goToPage(page) {
+                    if (page < 1 || page > totalPages) return;
+                    
+                    currentPage = page;
+                    showCurrentPage();
+                    
+                    // Update pagination UI
+                    prevButton.disabled = currentPage === 1;
+                    nextButton.disabled = currentPage === totalPages || totalPages === 0;
+                    renderPageNumbers();
+                    
+                    // Update info text
+                    if (startElement && endElement) {
+                        if (rows.length === 0) {
+                            startElement.textContent = '0';
+                            endElement.textContent = '0';
+                        } else {
+                            const start = (currentPage - 1) * itemsPerPage + 1;
+                            const end = Math.min(start + itemsPerPage - 1, rows.length);
+                            startElement.textContent = start;
+                            endElement.textContent = end;
+                        }
+                    }
+                }
+                
+                // Function to show current page rows
+                function showCurrentPage() {
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    
+                    rows.forEach((row, index) => {
+                        row.style.display = (index >= start && index < end) ? '' : 'none';
+                    });
+                }
+                
+                // Function to change items per page
+                function changeItemsPerPage(newItemsPerPage) {
+                    itemsPerPage = parseInt(newItemsPerPage);
+                    goToPage(1); // Reset to first page when changing items per page
+                }
+                
+                // Setup pagination event listeners
+                prevButton.addEventListener('click', () => goToPage(currentPage - 1));
+                nextButton.addEventListener('click', () => goToPage(currentPage + 1));
+                
+                // Setup entries select
+                if (entriesSelect) {
+                    entriesSelect.addEventListener('change', function() {
+                        changeItemsPerPage(this.value);
+                    });
+                }
+                
+                // Initial setup
+                renderPageNumbers();
+                showCurrentPage();
+                
+                // Return the reset function
+                return function resetPagination() {
+                    goToPage(1);
+                };
+            }
+            
+            // Initialize pagination with entries per page
+            const resetAllStudentsPagination = setupPagination(
+                '#all-students .modern-table', 
+                {
+                    prev: 'all-students-prev',
+                    next: 'all-students-next',
+                    pages: 'all-students-pages',
+                    start: 'all-students-start',
+                    end: 'all-students-end',
+                    total: 'all-students-total',
+                    entries: 'all-students-entries'
+                }
+            );
+            
+            const resetPointsPagination = setupPagination(
+                '#students-points .modern-table', 
+                {
+                    prev: 'points-students-prev',
+                    next: 'points-students-next',
+                    pages: 'points-students-pages',
+                    start: 'points-students-start',
+                    end: 'points-students-end',
+                    total: 'points-students-total',
+                    entries: 'points-students-entries'
+                }
+            );
+            
+            // ...existing code...
+        });
     </script>
 </body>
 </html>
