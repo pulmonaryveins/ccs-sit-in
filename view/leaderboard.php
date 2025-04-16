@@ -258,12 +258,24 @@ function formatYearLevel($year) {
         </div>
 
         <!-- All Students Container -->
-        <div id="all-students" class="view-container active">
-            <div class="container-header">
-                <h2><i class="ri-user-search-line"></i> All Students Leaderboard</h2>
-                <p>Ranking of all students based on total sit-in sessions and points</p>
-            </div>
+        <div id="all-students" class="view-container active">   
             <div class="table-container">
+                <div class="container-header">
+                    <div class="header-content">
+                        <div class="header-left">
+                            <h2><i class="ri-user-search-line"></i> All Students Leaderboard</h2>
+                            <p>Ranking of all students based on total sit-in sessions and points</p>
+                        </div>
+                        <div class="header-right">
+                            <div class="search-container">
+                                <input type="text" id="studentSearchAll" class="search-input" placeholder="Search students...">
+                                <span class="search-icon">
+                                    <i class="ri-search-line"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <table class="modern-table">
                     <thead>
                         <tr>
@@ -317,11 +329,23 @@ function formatYearLevel($year) {
         <?php if (isset($_SESSION['admin_logged_in'])): ?>
         <!-- Student's Points Container (Admin Only) -->
         <div id="students-points" class="view-container">
-            <div class="container-header">
-                <h2><i class="ri-star-line"></i> Student Points Management</h2>
-                <p>Add or manage points for students in the CCS Sit-In system</p>
-            </div>
             <div class="table-container">
+            <div class="container-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <h2><i class="ri-star-line"></i> Student Points Management</h2>
+                        <p>Add or manage points for students in the CCS Sit-In system</p>
+                    </div>
+                    <div class="header-right">
+                        <div class="search-container">
+                            <input type="text" id="studentSearchPoints" class="search-input" placeholder="Search students...">
+                            <span class="search-icon">
+                                <i class="ri-search-line"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
                 <table class="modern-table">
                     <thead>
                         <tr>
@@ -566,8 +590,6 @@ function formatYearLevel($year) {
                         padding: 1.25rem;
                         background: white;
                         border-radius: 12px;
-                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-                        border: 1px solid #e2e8f0;
                     }
                     
                     .container-header h2 {
@@ -610,6 +632,154 @@ function formatYearLevel($year) {
                     .sitin-badge:hover {
                         transform: translateY(-2px);
                         box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+                    }
+                </style>
+            `);
+
+            // Add search functionality for the leaderboard
+            const studentSearchAll = document.getElementById('studentSearchAll');
+            const studentSearchPoints = document.getElementById('studentSearchPoints');
+            
+            // Search function for re-use
+            function setupSearchForTable(searchInput, tableSelector, colIndexes) {
+                if (!searchInput) return;
+                
+                searchInput.addEventListener('keyup', function() {
+                    const searchValue = this.value.toLowerCase().trim();
+                    const tableBody = document.querySelector(tableSelector);
+                    
+                    if (!tableBody) return;
+                    
+                    const rows = tableBody.querySelectorAll('tr');
+                    let hasVisibleRows = false;
+                    
+                    rows.forEach(row => {
+                        if (!row.querySelector('.empty-state') && !row.classList.contains('empty-search')) {
+                            let match = false;
+                            
+                            // Check each column we want to search in
+                            colIndexes.forEach(idx => {
+                                const cell = row.querySelector(`td:nth-child(${idx})`);
+                                if (cell && cell.textContent.toLowerCase().includes(searchValue)) {
+                                    match = true;
+                                }
+                            });
+                            
+                            if (match || searchValue === '') {
+                                row.style.display = '';
+                                hasVisibleRows = true;
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        }
+                    });
+                    
+                    // Handle empty search results
+                    const emptySearch = tableBody.querySelector('.empty-search');
+                    
+                    if (!hasVisibleRows && searchValue !== '') {
+                        if (!emptySearch) {
+                            const colspan = tableSelector.includes('all-students') ? 8 : 7;
+                            const emptyRow = document.createElement('tr');
+                            emptyRow.classList.add('empty-search');
+                            emptyRow.innerHTML = `
+                                <td colspan="${colspan}" class="empty-state">
+                                    <div class="empty-state-content">
+                                        <i class="ri-search-line"></i>
+                                        <p>No students match your search</p>
+                                    </div>
+                                </td>
+                            `;
+                            tableBody.appendChild(emptyRow);
+                        }
+                    } else if (emptySearch) {
+                        tableBody.removeChild(emptySearch);
+                    }
+                });
+            }
+            
+            // Setup search for each table
+            setupSearchForTable(studentSearchAll, '#all-students .modern-table tbody', [2, 3, 4]);
+            setupSearchForTable(studentSearchPoints, '#students-points .modern-table tbody', [1, 2, 3]);
+            
+            // Clear search when switching tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    if (studentSearchAll) studentSearchAll.value = '';
+                    if (studentSearchPoints) studentSearchPoints.value = '';
+                    
+                    // Trigger keyup to reset table view
+                    if (studentSearchAll) studentSearchAll.dispatchEvent(new Event('keyup'));
+                    if (studentSearchPoints) studentSearchPoints.dispatchEvent(new Event('keyup'));
+                });
+            });
+
+            // Add CSS for the search container with improved styling
+            document.head.insertAdjacentHTML('beforeend', `
+                <style>
+                    .header-content {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 1rem;
+                    }
+                    
+                    .header-left {
+                        flex: 1;
+                        min-width: 250px;
+                    }
+                    
+                    .header-right {
+                        display: flex;
+                        align-items: center;
+                    }
+                    
+                    .search-container {
+                        position: relative;
+                        width: 280px;
+                        margin-top: 0.5rem;
+                    }
+                    
+                    .search-input {
+                        width: 80%;
+                        padding: 10px 15px 10px 40px;
+                        border-radius: 8px;
+                        border: 1px solid #e2e8f0;
+                        background-color: white;
+                        font-size: 0.9rem;
+                        transition: all 0.2s ease;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                    }
+                    
+                    .search-input:focus {
+                        outline: none;
+                        border-color: #7556cc;
+                        box-shadow: 0 0 0 3px rgba(117, 86, 204, 0.15);
+                    }
+                    
+                    .search-icon {
+                        position: absolute;
+                        top: 50%;
+                        left: 12px;
+                        transform: translateY(-50%);
+                        color: #a0aec0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        pointer-events: none;
+                    }
+                    
+                    /* Responsive adjustments */
+                    @media (max-width: 768px) {
+                        .header-content {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+                        
+                        .search-container {
+                            width: 100%;
+                        }
                     }
                 </style>
             `);
