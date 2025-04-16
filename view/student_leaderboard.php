@@ -371,6 +371,236 @@ foreach ($all_students as $student) {
             margin-bottom: 0.75rem;
             line-height: 1.5;
         }
+
+        /* Updated My Points view styling */
+        .points-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .points-summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            animation: fadeUp 0.7s ease-out 0.3s forwards;
+            opacity: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .points-summary-card h2 {
+            font-size: 1.3rem;
+            color: #7556cc;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .points-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(117, 86, 204, 0.1) 0%, rgba(149, 86, 204, 0.2) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem auto 1.5rem;
+            position: relative;
+            border: 4px solid rgba(117, 86, 204, 0.2);
+        }
+        
+        .points-circle::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border-radius: 50%;
+            border: 2px solid rgba(117, 86, 204, 0.1);
+            animation: pulseCircle 2s infinite;
+        }
+        
+        @keyframes pulseCircle {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+        
+        .points-count {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #7556cc;
+            line-height: 1;
+            text-shadow: 0 2px 10px rgba(117, 86, 204, 0.2);
+        }
+        
+        .points-label {
+            font-size: 1rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .earn-points-section,
+        .use-points-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            animation: fadeUp 0.7s ease-out 0.4s forwards;
+            opacity: 0;
+            height: 100%;
+        }
+        
+        .earn-points-section h3,
+        .use-points-section h3 {
+            font-size: 1.2rem;
+            color: #7556cc;
+            margin-bottom: 1.25rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .earn-points-section h3::after,
+        .use-points-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            border-radius: 3px;
+        }
+        
+        .earn-points-section ul,
+        .use-points-section ul {
+            margin: 0;
+            padding-left: 1.5rem;
+            color: #4b5563;
+        }
+        
+        .earn-points-section li,
+        .use-points-section li {
+            margin-bottom: 0.85rem;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        .earn-points-section li::marker,
+        .use-points-section li::marker {
+            color: #7556cc;
+        }
+        
+        .sessions-overview {
+            background: white;
+            border-radius: 12px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            margin-top: 1.5rem;
+            animation: fadeUp 0.7s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+        
+        .sessions-overview h3 {
+            font-size: 1.2rem;
+            color: #2dce89;
+            margin-bottom: 1.25rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .sessions-overview h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(135deg, #2dce89 0%, #2dceac 100%);
+            border-radius: 3px;
+        }
+        
+        .sessions-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .session-stat-card {
+            background: rgba(45, 206, 137, 0.05);
+            border: 1px solid rgba(45, 206, 137, 0.15);
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .session-stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(45, 206, 137, 0.1);
+        }
+        
+        .session-stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2dce89;
+            line-height: 1;
+            margin-bottom: 0.75rem;
+        }
+        
+        .session-stat-label {
+            color: #4b5563;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .low-sessions-alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background-color: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            color: #ef4444;
+            animation: fadeIn 1s ease-out forwards;
+        }
+        
+        .low-sessions-alert i {
+            font-size: 1.5rem;
+            color: #ef4444;
+        }
     </style>
 </head>
 <body>
@@ -393,7 +623,7 @@ foreach ($all_students as $student) {
             <!-- Center - Navigation -->
             <nav class="nav-links">
                 <!-- Student Navigation -->
-                <a href="student_dashboard.php" class="nav-link">
+                <a href="dashboard.php" class="nav-link">
                     <i class="ri-dashboard-line"></i>
                     <span>Dashboard</span>
                 </a>
@@ -401,13 +631,17 @@ foreach ($all_students as $student) {
                     <i class="ri-trophy-line"></i>
                     <span>Leaderboard</span>
                 </a>
-                <a href="reserve.php" class="nav-link">
+                <a href="reservation.php" class="nav-link">
                     <i class="ri-calendar-check-line"></i>
                     <span>Reserve</span>
                 </a>
                 <a href="history.php" class="nav-link">
                     <i class="ri-history-line"></i>
                     <span>History</span>
+                </a>
+                <a href="profile.php" class="nav-link">
+                    <i class="ri-user-3-line"></i>
+                    <span>Profile</span>
                 </a>
             </nav>
             <!-- Right side - Actions -->
@@ -603,10 +837,10 @@ foreach ($all_students as $student) {
                 </div>
             </div>
             
-            <!-- My Points View Section (New) -->
+            <!-- My Points View Section - Redesigned -->
             <div id="my-points" class="view-container">
                 <?php if ($current_student_rank > 0): ?>
-                <!-- My Ranking Section (moved here) -->
+                <!-- My Ranking Section -->
                 <div class="my-ranking">
                     <h2><i class="ri-award-fill"></i> Your Current Ranking</h2>
                     <div class="my-ranking-value">
@@ -637,8 +871,24 @@ foreach ($all_students as $student) {
                 <?php endif; ?>
 
                 <?php if ($current_student): ?>
-                <div class="points-info-grid">
-                    <div class="points-info-card">
+                <!-- Points & Sessions Dashboard -->
+                <div class="points-dashboard">
+                    <!-- Points Summary -->
+                    <div class="points-summary-card">
+                        <h2><i class="ri-coin-line"></i> Your Points</h2>
+                        <div class="points-circle">
+                            <div>
+                                <div class="points-count"><?php echo $current_student['points']; ?></div>
+                                <div class="points-label">Total Points</div>
+                            </div>
+                        </div>
+                        <p class="points-description">
+                            Points are rewards for active participation in the CCS Sit-In system.
+                        </p>
+                    </div>
+                    
+                    <!-- How to Earn Points -->
+                    <div class="earn-points-section">
                         <h3><i class="ri-award-line"></i> How to Earn Points</h3>
                         <ul>
                             <li>Completing sit-in sessions (1 point per session)</li>
@@ -648,42 +898,14 @@ foreach ($all_students as $student) {
                         </ul>
                     </div>
                     
-                    <div class="points-info-card">
+                    <!-- Using Your Points -->
+                    <div class="use-points-section">
                         <h3><i class="ri-exchange-line"></i> Using Your Points</h3>
                         <ul>
                             <li>Exchange points for additional sit-in sessions when you've used your standard allocation</li>
                             <li>Gain special privileges within the CCS Sit-In System</li>
                             <li>Earn recognition on the student leaderboard</li>
                         </ul>
-                    </div>
-                </div>
-
-                <div class="points-info-card">
-                    <h2><i class="ri-information-line"></i> Your Sessions</h2>
-                    <div class="sessions-info">
-                        <div class="sessions-stat">
-                            <div class="sessions-value"><?php echo $current_student['remaining_sessions']; ?></div>
-                            <div class="sessions-label">Remaining Sessions</div>
-                        </div>
-                        
-                        <div class="sessions-stat">
-                            <div class="sessions-value"><?php echo $current_student['total_sitins']; ?></div>
-                            <div class="sessions-label">Total Sit-ins</div>
-                        </div>
-                    </div>
-                    
-                    <?php if ($current_student['remaining_sessions'] <= 5): ?>
-                    <div class="sessions-warning">
-                        <i class="ri-alert-line"></i> You're running low on sessions. Consider using your points for more sessions!
-                    </div>
-                    <?php endif; ?>
-                </div>
-                <?php else: ?>
-                <div class="empty-state-container">
-                    <div class="empty-state-content">
-                        <i class="ri-user-search-line"></i>
-                        <p>No student data found</p>
-                        <small>Your points and sessions information will appear here</small>
                     </div>
                 </div>
                 <?php endif; ?>

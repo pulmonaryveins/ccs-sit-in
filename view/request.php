@@ -88,6 +88,10 @@ if ($result) {
                     <i class="ri-dashboard-line"></i>
                     <span>Dashboard</span>
                 </a>
+                <a href="leaderboard.php" class="nav-link">
+                    <i class="ri-trophy-line"></i>
+                    <span>Leaderboard</span>
+                </a>
                 <a href="request.php" class="nav-link active">
                     <i class="ri-mail-check-line"></i>
                     <span>Request</span>

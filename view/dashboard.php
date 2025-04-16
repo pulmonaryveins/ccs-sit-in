@@ -746,6 +746,10 @@ $conn->close();
                     <i class="ri-dashboard-line"></i>
                     <span>Dashboard</span>
                 </a>
+                <a href="student_leaderboard.php" class="nav-link">
+                    <i class="ri-trophy-line"></i>
+                    <span>Leaderboard</span>
+                </a>
                 <a href="reservation.php" class="nav-link">
                     <i class="ri-calendar-line"></i>
                     <span>Reservation</span>
