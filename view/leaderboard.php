@@ -184,7 +184,10 @@ function formatYearLevel($year) {
     <div class="content-wrapper">
         <!-- Leaderboard Header -->
         <div class="dashboard-header">
-
+            <div class="dashboard-title">
+                <i class="ri-trophy-line"></i>
+                <span>Student Leaderboard</span>
+            </div>  
         </div>
 
         <!-- Tabs Section -->
@@ -201,7 +204,7 @@ function formatYearLevel($year) {
             <div class="top-students-grid">
                 <?php 
                 $positions = ['second', 'first', 'third'];
-                $icons = ['🥈', '🥇', '🥉'];
+                $ranks = ['2', '1', '3']; // Change emoji icons to rank numbers
                 
                 // Ensure we have exactly 3 positions
                 while (count($top_students) < 3) {
@@ -223,7 +226,7 @@ function formatYearLevel($year) {
                 
                 foreach ($display_order as $index => $student): ?>
                     <div class="top-student <?php echo $positions[$index]; ?>">
-                        <div class="position-icon"><?php echo $icons[$index]; ?></div>
+                        <div class="position-icon"><?php echo $ranks[$index]; ?></div>
                         <div class="student-avatar">
                             <img src="<?php echo isset($student['profile_image']) && $student['profile_image'] 
                                 ? htmlspecialchars($student['profile_image']) 
@@ -929,11 +932,61 @@ function formatYearLevel($year) {
                             width: 100%;
                         }
                     }
+                    
+                    /* Table row animations */
+                    .modern-table tbody tr {
+                        opacity: 0;
+                        transform: translateY(10px);
+                        animation: fadeInRow 0.5s ease forwards;
+                    }
+                    
+                    @keyframes fadeInRow {
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    
+                    /* Apply staggered delay to rows */
+                    .modern-table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+                    .modern-table tbody tr:nth-child(2) { animation-delay: 0.1s; }
+                    .modern-table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+                    .modern-table tbody tr:nth-child(4) { animation-delay: 0.2s; }
+                    .modern-table tbody tr:nth-child(5) { animation-delay: 0.25s; }
+                    .modern-table tbody tr:nth-child(6) { animation-delay: 0.3s; }
+                    .modern-table tbody tr:nth-child(7) { animation-delay: 0.35s; }
+                    .modern-table tbody tr:nth-child(8) { animation-delay: 0.4s; }
+                    .modern-table tbody tr:nth-child(9) { animation-delay: 0.45s; }
+                    .modern-table tbody tr:nth-child(10) { animation-delay: 0.5s; }
+                    
+                    /* Special styling for empty state rows */
+                    .modern-table tbody tr.empty-state,
+                    .modern-table tbody tr.empty-search {
+                        animation-delay: 0.1s;
+                    }
+                    
+                    /* Animate rows when changing pages */
+                    .modern-table tbody tr.animate-new {
+                        opacity: 0;
+                        animation: fadeInRow 0.4s ease forwards;
+                    }
+                    
+                    /* Responsive adjustments */
+                    @media (max-width: 768px) {
+                        .header-content {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+                        
+                        .search-container {
+                            width: 100%;
+                        }
+                    }
                 </style>
             `);
             
-            // Pagination functionality
-            function setupPagination(tableSelector, paginationIds, itemsPerPage = 10) {
+            // Pagination functionality with entries per page option
+            function setupPagination(tableSelector, paginationIds, defaultItemsPerPage = 10) {
                 const tableBody = document.querySelector(`${tableSelector} tbody`);
                 const rows = Array.from(tableBody.querySelectorAll('tr')).filter(row => !row.classList.contains('empty-state') && !row.classList.contains('empty-search'));
                 
@@ -944,11 +997,13 @@ function formatYearLevel($year) {
                 const startElement = document.getElementById(paginationIds.start);
                 const endElement = document.getElementById(paginationIds.end);
                 const totalElement = document.getElementById(paginationIds.total);
+                const entriesSelect = document.getElementById(paginationIds.entries);
                 
                 if (!tableBody || !prevButton || !nextButton || !pagesContainer) return;
                 
                 let currentPage = 1;
-                const totalPages = Math.ceil(rows.length / itemsPerPage);
+                let itemsPerPage = defaultItemsPerPage;
+                let totalPages = Math.ceil(rows.length / itemsPerPage);
                 
                 // Set total count
                 if (totalElement) totalElement.textContent = rows.length;
@@ -956,6 +1011,17 @@ function formatYearLevel($year) {
                 // Function to render page numbers
                 function renderPageNumbers() {
                     pagesContainer.innerHTML = '';
+                    
+                    // Recalculate total pages
+                    totalPages = Math.ceil(rows.length / itemsPerPage);
+                    
+                    // If there are no pages, exit
+                    if (totalPages === 0) return;
+                    
+                    // Ensure current page is not out of bounds
+                    if (currentPage > totalPages) {
+                        currentPage = totalPages;
+                    }
                     
                     // Calculate visible page numbers
                     let startPage = Math.max(1, currentPage - 2);
@@ -1018,31 +1084,67 @@ function formatYearLevel($year) {
                     
                     // Update pagination UI
                     prevButton.disabled = currentPage === 1;
-                    nextButton.disabled = currentPage === totalPages;
+                    nextButton.disabled = currentPage === totalPages || totalPages === 0;
                     renderPageNumbers();
                     
                     // Update info text
                     if (startElement && endElement) {
-                        const start = (currentPage - 1) * itemsPerPage + 1;
-                        const end = Math.min(start + itemsPerPage - 1, rows.length);
-                        startElement.textContent = start;
-                        endElement.textContent = end;
+                        if (rows.length === 0) {
+                            startElement.textContent = '0';
+                            endElement.textContent = '0';
+                        } else {
+                            const start = (currentPage - 1) * itemsPerPage + 1;
+                            const end = Math.min(start + itemsPerPage - 1, rows.length);
+                            startElement.textContent = start;
+                            endElement.textContent = end;
+                        }
                     }
                 }
                 
-                // Function to show current page rows
+                // Function to show current page rows with animation
                 function showCurrentPage() {
                     const start = (currentPage - 1) * itemsPerPage;
                     const end = start + itemsPerPage;
                     
-                    rows.forEach((row, index) => {
-                        row.style.display = (index >= start && index < end) ? '' : 'none';
+                    // First hide all rows
+                    rows.forEach(row => {
+                        row.style.display = 'none';
+                        row.classList.remove('animate-new');
                     });
+                    
+                    // Then show and animate the current page rows
+                    rows.forEach((row, index) => {
+                        if (index >= start && index < end) {
+                            // Remove any existing animation classes
+                            row.style.removeProperty('animation-delay');
+                            
+                            // Set display to empty string (show the row)
+                            row.style.display = '';
+                            
+                            // Add animation class with a small delay based on position
+                            const delay = 0.05 * (index - start);
+                            row.style.animationDelay = delay + 's';
+                            row.classList.add('animate-new');
+                        }
+                    });
+                }
+                
+                // Function to change items per page
+                function changeItemsPerPage(newItemsPerPage) {
+                    itemsPerPage = parseInt(newItemsPerPage);
+                    goToPage(1); // Reset to first page when changing items per page
                 }
                 
                 // Setup pagination event listeners
                 prevButton.addEventListener('click', () => goToPage(currentPage - 1));
                 nextButton.addEventListener('click', () => goToPage(currentPage + 1));
+                
+                // Setup entries select
+                if (entriesSelect) {
+                    entriesSelect.addEventListener('change', function() {
+                        changeItemsPerPage(this.value);
+                    });
+                }
                 
                 // Initial setup
                 renderPageNumbers();
@@ -1054,7 +1156,7 @@ function formatYearLevel($year) {
                 };
             }
             
-            // Initialize pagination
+            // Initialize pagination with entries per page
             const resetAllStudentsPagination = setupPagination(
                 '#all-students .modern-table', 
                 {
@@ -1063,7 +1165,8 @@ function formatYearLevel($year) {
                     pages: 'all-students-pages',
                     start: 'all-students-start',
                     end: 'all-students-end',
-                    total: 'all-students-total'
+                    total: 'all-students-total',
+                    entries: 'all-students-entries'
                 }
             );
             
@@ -1075,7 +1178,8 @@ function formatYearLevel($year) {
                     pages: 'points-students-pages',
                     start: 'points-students-start',
                     end: 'points-students-end',
-                    total: 'points-students-total'
+                    total: 'points-students-total',
+                    entries: 'points-students-entries'
                 }
             );
             
@@ -1616,13 +1720,31 @@ function formatYearLevel($year) {
                     }
                 }
                 
-                // Function to show current page rows
+                // Function to show current page rows with animation
                 function showCurrentPage() {
                     const start = (currentPage - 1) * itemsPerPage;
                     const end = start + itemsPerPage;
                     
+                    // First hide all rows
+                    rows.forEach(row => {
+                        row.style.display = 'none';
+                        row.classList.remove('animate-new');
+                    });
+                    
+                    // Then show and animate the current page rows
                     rows.forEach((row, index) => {
-                        row.style.display = (index >= start && index < end) ? '' : 'none';
+                        if (index >= start && index < end) {
+                            // Remove any existing animation classes
+                            row.style.removeProperty('animation-delay');
+                            
+                            // Set display to empty string (show the row)
+                            row.style.display = '';
+                            
+                            // Add animation class with a small delay based on position
+                            const delay = 0.05 * (index - start);
+                            row.style.animationDelay = delay + 's';
+                            row.classList.add('animate-new');
+                        }
                     });
                 }
                 
