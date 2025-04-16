@@ -76,6 +76,15 @@ function ordinalSuffix($number) {
         return $ends[$number % 10];
     }
 }
+
+// Get current student's data
+$current_student = null;
+foreach ($all_students as $student) {
+    if ($student['idno'] == $current_student_idno) {
+        $current_student = $student;
+        break;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -197,6 +206,171 @@ function ordinalSuffix($number) {
             font-weight: 600;
             color: #1e293b;
         }
+        
+        /* My Points view styling */
+        .my-points-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            animation: fadeUp 0.7s ease-out 0.3s forwards;
+            opacity: 0;
+        }
+        
+        .points-value {
+            font-size: 5rem;
+            font-weight: 700;
+            color: #7556cc;
+            margin: 1.5rem 0;
+            text-shadow: 0 2px 10px rgba(117, 86, 204, 0.2);
+        }
+        
+        .points-info {
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+            color: #475569;
+            line-height: 1.6;
+        }
+        
+        .points-card {
+            background: rgba(117, 86, 204, 0.03);
+            border: 1px solid rgba(117, 86, 204, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .points-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .points-card h3 {
+            color: #7556cc;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .points-card ul {
+            text-align: left;
+            color: #4b5563;
+            padding-left: 1.5rem;
+        }
+        
+        .points-card li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .sessions-info {
+            background: rgba(45, 206, 137, 0.05);
+            border: 1px solid rgba(45, 206, 137, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .sessions-stat {
+            text-align: center;
+        }
+        
+        .sessions-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2dce89;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sessions-label {
+            font-size: 0.9rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+        
+        .sessions-warning {
+            text-align: center;
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* My Points cards styling improvements */
+        .points-info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            animation: fadeUp 0.7s ease-out 0.3s forwards;
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .points-info-card h2 {
+            font-size: 1.3rem;
+            color: #7556cc;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .points-info-card .points-value {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #7556cc;
+            margin: 1rem 0;
+            text-shadow: 0 2px 10px rgba(117, 86, 204, 0.2);
+        }
+
+        .points-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .points-info-card h3 {
+            color: #7556cc;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .points-info-card ul {
+            text-align: left;
+            color: #4b5563;
+            padding-left: 1.5rem;
+        }
+
+        .points-info-card li {
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -256,207 +430,263 @@ function ordinalSuffix($number) {
                 <span>Student Leaderboard</span>
             </div>  
         </div>
+
+        <!-- Tabs Section (New) -->
+        <div class="filter-tabs">
+            <div class="filter-tab active" data-target="all-students">All Students</div>
+            <div class="filter-tab" data-target="my-points">My Points</div>
+        </div>
         
-        <!-- My Ranking Section - Student Only -->
-        <?php if ($current_student_rank > 0): ?>
-        <?php 
-            $current_student = null;
-            foreach ($all_students as $student) {
-                if ($student['idno'] == $current_student_idno) {
-                    $current_student = $student;
-                    break;
-                }
-            }
-        ?>
-        <div class="my-ranking">
-            <h2><i class="ri-award-fill"></i> Your Current Ranking</h2>
-            <div class="my-ranking-value">
-                <div class="rank-number">
-                    <?php echo $current_student_rank; ?><sup><?php echo ordinalSuffix($current_student_rank); ?></sup>
-                </div>
-            </div>
-            <?php if ($current_student): ?>
-            <div class="my-stats">
-                <div class="my-stat">
-                    <div class="my-stat-icon"><i class="ri-computer-line"></i></div>
-                    <div class="my-stat-value"><?php echo $current_student['total_sitins']; ?></div>
-                    <div class="my-stat-label">Total Sit-ins</div>
-                </div>
-                <div class="my-stat">
-                    <div class="my-stat-icon"><i class="ri-star-line"></i></div>
-                    <div class="my-stat-value"><?php echo $current_student['points']; ?></div>
-                    <div class="my-stat-label">Points</div>
-                </div>
-                <div class="my-stat">
-                    <div class="my-stat-icon"><i class="ri-time-line"></i></div>
-                    <div class="my-stat-value"><?php echo $current_student['remaining_sessions']; ?></div>
-                    <div class="my-stat-label">Sessions</div>
-                </div>
-            </div>
-            <?php endif; ?>
-        </div>
-        <?php endif; ?>
-
-        <!-- Top 3 Students Section -->
-        <div class="top-students-section view-section active">
-            <h2>Top Active Students</h2>
-            <div class="top-students-grid">
-                <?php 
-                $positions = ['second', 'first', 'third'];
-                $ranks = ['2', '1', '3'];
-                
-                // Ensure we have exactly 3 positions
-                while (count($top_students) < 3) {
-                    $top_students[] = [
-                        'idno' => 'N/A',
-                        'firstname' => 'No',
-                        'lastname' => 'Student',
-                        'profile_image' => '../assets/images/logo/AVATAR.png',
-                        'course' => 'N/A',
-                        'year' => '1',
-                        'total_sitins' => '0',
-                        'points' => '0',
-                        'remaining_sessions' => '0'
-                    ];
-                }
-                
-                // Reorder for display (1st in middle, 2nd on left, 3rd on right)
-                $display_order = [$top_students[1], $top_students[0], $top_students[2]];
-                
-                foreach ($display_order as $index => $student): ?>
-                    <div class="top-student <?php echo $positions[$index]; ?> <?php echo ($student['idno'] === $current_student_idno) ? 'current-user' : ''; ?>">
-                        <div class="position-icon"><?php echo $ranks[$index]; ?></div>
-                        <div class="student-avatar">
-                            <img src="<?php echo isset($student['profile_image']) && $student['profile_image'] 
-                                ? htmlspecialchars($student['profile_image']) 
-                                : '../assets/images/logo/AVATAR.png'; ?>" 
-                                alt="Student Profile" onerror="this.src='../assets/images/logo/AVATAR.png'">
-                        </div>
-                        <div class="student-name">
-                            <?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>
-                            <?php if ($student['idno'] === $current_student_idno): ?>
-                            <small>(You)</small>
-                            <?php endif; ?>
-                        </div>
-                        <div class="student-id">
-                            <?php echo htmlspecialchars($student['idno']); ?>
-                        </div>
-                        <div class="student-course">
-                            <?php echo htmlspecialchars($student['course']); ?> | 
-                            <?php echo formatYearLevel($student['year']); ?>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat">
-                                <i class="ri-computer-line"></i>
-                                <span><?php echo $student['total_sitins']; ?> Sit-ins</span>
-                            </div>
-                            <div class="stat">
-                                <i class="ri-star-line"></i>
-                                <span><?php echo $student['points']; ?> Points</span>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <!-- All Students Container -->
-        <div id="all-students" class="view-container active">   
-            <div class="table-container">
-                <div class="container-header">
-                    <div class="header-content">
-                        <div class="header-left">
-                            <h2><i class="ri-user-search-line"></i> All Students Leaderboard</h2>
-                            <p>Ranking of all students based on total sit-in sessions and points</p>
-                        </div>
-                        <div class="header-right">
-                            <div class="search-container">
-                                <input type="text" id="studentSearchAll" class="search-input" placeholder="Search students...">
-                                <span class="search-icon">
-                                    <i class="ri-search-line"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th class="text-center">Rank</th>
-                            <th>ID Number</th>
-                            <th>Student Name</th>
-                            <th>Course</th>
-                            <th>Year</th>
-                            <th class="text-center">Total Sit-ins</th>
-                            <th class="text-center">Points</th>
-                            <th class="text-center">Sessions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($all_students)): ?>
-                            <tr>
-                                <td colspan="8" class="empty-state">
-                                    <div class="empty-state-content">
-                                        <i class="ri-user-search-line"></i>
-                                        <p>No student records found</p>
+        <!-- View Sections Container -->
+        <div id="view-sections-container">
+            <!-- All Students View Section -->
+            <div id="all-students" class="view-container active">
+                <!-- Top 3 Students Section -->
+                <div class="top-students-section view-section active">
+                    <h2>Top Active Students</h2>
+                    <div class="top-students-grid">
+                        <?php 
+                        $positions = ['second', 'first', 'third'];
+                        $ranks = ['2', '1', '3'];
+                        
+                        // Ensure we have exactly 3 positions
+                        while (count($top_students) < 3) {
+                            $top_students[] = [
+                                'idno' => 'N/A',
+                                'firstname' => 'No',
+                                'lastname' => 'Student',
+                                'profile_image' => '../assets/images/logo/AVATAR.png',
+                                'course' => 'N/A',
+                                'year' => '1',
+                                'total_sitins' => '0',
+                                'points' => '0',
+                                'remaining_sessions' => '0'
+                            ];
+                        }
+                        
+                        // Reorder for display (1st in middle, 2nd on left, 3rd on right)
+                        $display_order = [$top_students[1], $top_students[0], $top_students[2]];
+                        
+                        foreach ($display_order as $index => $student): ?>
+                            <div class="top-student <?php echo $positions[$index]; ?> <?php echo ($student['idno'] === $current_student_idno) ? 'current-user' : ''; ?>">
+                                <div class="position-icon"><?php echo $ranks[$index]; ?></div>
+                                <div class="student-avatar">
+                                    <img src="<?php echo isset($student['profile_image']) && $student['profile_image'] 
+                                        ? htmlspecialchars($student['profile_image']) 
+                                        : '../assets/images/logo/AVATAR.png'; ?>" 
+                                        alt="Student Profile" onerror="this.src='../assets/images/logo/AVATAR.png'">
+                                </div>
+                                <div class="student-name">
+                                    <?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>
+                                    <?php if ($student['idno'] === $current_student_idno): ?>
+                                    <small>(You)</small>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="student-id">
+                                    <?php echo htmlspecialchars($student['idno']); ?>
+                                </div>
+                                <div class="student-course">
+                                    <?php echo htmlspecialchars($student['course']); ?> | 
+                                    <?php echo formatYearLevel($student['year']); ?>
+                                </div>
+                                <div class="student-stats">
+                                    <div class="stat">
+                                        <i class="ri-computer-line"></i>
+                                        <span><?php echo $student['total_sitins']; ?> Sit-ins</span>
                                     </div>
-                                </td>
+                                    <div class="stat">
+                                        <i class="ri-star-line"></i>
+                                        <span><?php echo $student['points']; ?> Points</span>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- All Students Container -->   
+                <div class="table-container">
+                    <div class="container-header">
+                        <div class="header-content">
+                            <div class="header-left">
+                                <h2><i class="ri-user-search-line"></i> All Students Leaderboard</h2>
+                                <p>Ranking of all students based on total sit-in sessions and points</p>
+                            </div>
+                            <div class="header-right">
+                                <div class="search-container">
+                                    <input type="text" id="studentSearchAll" class="search-input" placeholder="Search students...">
+                                    <span class="search-icon">
+                                        <i class="ri-search-line"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Rank</th>
+                                <th>ID Number</th>
+                                <th>Student Name</th>
+                                <th>Course</th>
+                                <th>Year</th>
+                                <th class="text-center">Total Sit-ins</th>
+                                <th class="text-center">Points</th>
+                                <th class="text-center">Sessions</th>
                             </tr>
-                        <?php else: ?>
-                            <?php foreach ($all_students as $rank => $student): ?>
-                                <tr <?php echo ($student['idno'] === $current_student_idno) ? 'class="highlight-row"' : ''; ?>>
-                                    <td class="text-center"><?php echo $rank + 1; ?></td>
-                                    <td class="font-mono"><?php echo htmlspecialchars($student['idno']); ?></td>
-                                    <td>
-                                        <?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>
-                                        <?php if ($student['idno'] === $current_student_idno): ?>
-                                        <span class="current-user-badge">You</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($student['course']); ?></td>
-                                    <td><?php echo formatYearLevel($student['year']); ?></td>
-                                    <td class="text-center">
-                                        <span class="sitin-badge"><?php echo $student['total_sitins']; ?> sit-ins</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="points-badge"><?php echo $student['points']; ?> points</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="sessions-badge <?php echo $student['remaining_sessions'] <= 5 ? 'sessions-low' : ($student['remaining_sessions'] <= 10 ? 'sessions-medium' : ''); ?>">
-                                            <?php echo $student['remaining_sessions']; ?> sessions
-                                        </span>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($all_students)): ?>
+                                <tr>
+                                    <td colspan="8" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="ri-user-search-line"></i>
+                                            <p>No student records found</p>
+                                        </div>
                                     </td>
                                 </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-                
-                <!-- Pagination for All Students -->
-                <div class="pagination-container">
-                    <div class="entries-selector">
-                        <label for="students-per-page">Show</label>
-                        <select id="all-students-entries" class="entries-select">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                        <label for="students-per-page">entries</label>
-                    </div>
-                    <div class="pagination-info">
-                        Showing <span id="all-students-start">1</span>-<span id="all-students-end">10</span> of <span id="all-students-total"><?php echo count($all_students); ?></span> students
-                    </div>
-                    <div class="pagination-controls">
-                        <button class="pagination-btn" id="all-students-prev" disabled>
-                            <i class="ri-arrow-left-s-line"></i> Previous
-                        </button>
-                        <div class="pagination-pages" id="all-students-pages"></div>
-                        <button class="pagination-btn" id="all-students-next">
-                            Next <i class="ri-arrow-right-s-line"></i>
-                        </button>
+                            <?php else: ?>
+                                <?php foreach ($all_students as $rank => $student): ?>
+                                    <tr <?php echo ($student['idno'] === $current_student_idno) ? 'class="highlight-row"' : ''; ?>>
+                                        <td class="text-center"><?php echo $rank + 1; ?></td>
+                                        <td class="font-mono"><?php echo htmlspecialchars($student['idno']); ?></td>
+                                        <td>
+                                            <?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>
+                                            <?php if ($student['idno'] === $current_student_idno): ?>
+                                            <span class="current-user-badge">You</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($student['course']); ?></td>
+                                        <td><?php echo formatYearLevel($student['year']); ?></td>
+                                        <td class="text-center">
+                                            <span class="sitin-badge"><?php echo $student['total_sitins']; ?> sit-ins</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="points-badge"><?php echo $student['points']; ?> points</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="sessions-badge <?php echo $student['remaining_sessions'] <= 5 ? 'sessions-low' : ($student['remaining_sessions'] <= 10 ? 'sessions-medium' : ''); ?>">
+                                                <?php echo $student['remaining_sessions']; ?> sessions
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Pagination for All Students -->
+                    <div class="pagination-container">
+                        <div class="entries-selector">
+                            <label for="students-per-page">Show</label>
+                            <select id="all-students-entries" class="entries-select">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <label for="students-per-page">entries</label>
+                        </div>
+                        <div class="pagination-info">
+                            Showing <span id="all-students-start">1</span>-<span id="all-students-end">10</span> of <span id="all-students-total"><?php echo count($all_students); ?></span> students
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" id="all-students-prev" disabled>
+                                <i class="ri-arrow-left-s-line"></i> Previous
+                            </button>
+                            <div class="pagination-pages" id="all-students-pages"></div>
+                            <button class="pagination-btn" id="all-students-next">
+                                Next <i class="ri-arrow-right-s-line"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- My Points View Section (New) -->
+            <div id="my-points" class="view-container">
+                <?php if ($current_student_rank > 0): ?>
+                <!-- My Ranking Section (moved here) -->
+                <div class="my-ranking">
+                    <h2><i class="ri-award-fill"></i> Your Current Ranking</h2>
+                    <div class="my-ranking-value">
+                        <div class="rank-number">
+                            <?php echo $current_student_rank; ?><sup><?php echo ordinalSuffix($current_student_rank); ?></sup>
+                        </div>
+                    </div>
+                    <?php if ($current_student): ?>
+                    <div class="my-stats">
+                        <div class="my-stat">
+                            <div class="my-stat-icon"><i class="ri-computer-line"></i></div>
+                            <div class="my-stat-value"><?php echo $current_student['total_sitins']; ?></div>
+                            <div class="my-stat-label">Total Sit-ins</div>
+                        </div>
+                        <div class="my-stat">
+                            <div class="my-stat-icon"><i class="ri-star-line"></i></div>
+                            <div class="my-stat-value"><?php echo $current_student['points']; ?></div>
+                            <div class="my-stat-label">Points</div>
+                        </div>
+                        <div class="my-stat">
+                            <div class="my-stat-icon"><i class="ri-time-line"></i></div>
+                            <div class="my-stat-value"><?php echo $current_student['remaining_sessions']; ?></div>
+                            <div class="my-stat-label">Sessions</div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($current_student): ?>
+                <div class="points-info-grid">
+                    <div class="points-info-card">
+                        <h3><i class="ri-award-line"></i> How to Earn Points</h3>
+                        <ul>
+                            <li>Completing sit-in sessions (1 point per session)</li>
+                            <li>Being recognized by administrators for exemplary behavior</li>
+                            <li>Participating in special CCS events and activities</li>
+                            <li>Helping other students with their coursework during sit-in sessions</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="points-info-card">
+                        <h3><i class="ri-exchange-line"></i> Using Your Points</h3>
+                        <ul>
+                            <li>Exchange points for additional sit-in sessions when you've used your standard allocation</li>
+                            <li>Gain special privileges within the CCS Sit-In System</li>
+                            <li>Earn recognition on the student leaderboard</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="points-info-card">
+                    <h2><i class="ri-information-line"></i> Your Sessions</h2>
+                    <div class="sessions-info">
+                        <div class="sessions-stat">
+                            <div class="sessions-value"><?php echo $current_student['remaining_sessions']; ?></div>
+                            <div class="sessions-label">Remaining Sessions</div>
+                        </div>
+                        
+                        <div class="sessions-stat">
+                            <div class="sessions-value"><?php echo $current_student['total_sitins']; ?></div>
+                            <div class="sessions-label">Total Sit-ins</div>
+                        </div>
+                    </div>
+                    
+                    <?php if ($current_student['remaining_sessions'] <= 5): ?>
+                    <div class="sessions-warning">
+                        <i class="ri-alert-line"></i> You're running low on sessions. Consider using your points for more sessions!
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php else: ?>
+                <div class="empty-state-container">
+                    <div class="empty-state-content">
+                        <i class="ri-user-search-line"></i>
+                        <p>No student data found</p>
+                        <small>Your points and sessions information will appear here</small>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -626,6 +856,28 @@ function ordinalSuffix($number) {
                 </style>
             `);
             
+            // Tab switching functionality
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.filter-tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Hide all view containers
+                    document.querySelectorAll('.view-container').forEach(container => {
+                        container.classList.remove('active');
+                    });
+                    
+                    // Show the target container
+                    const targetId = this.getAttribute('data-target');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+            
             // Add search functionality
             const studentSearchAll = document.getElementById('studentSearchAll');
             
@@ -689,8 +941,8 @@ function ordinalSuffix($number) {
             // Setup search
             setupSearchForTable(studentSearchAll, '#all-students .modern-table tbody', [2, 3, 4]);
             
-             // Add CSS for the search container with improved styling
-             document.head.insertAdjacentHTML('beforeend', `
+            // Add CSS for the search container with improved styling
+            document.head.insertAdjacentHTML('beforeend', `
                 <style>
                     .header-content {
                         display: flex;
@@ -892,18 +1144,6 @@ function ordinalSuffix($number) {
                         opacity: 0;
                         animation: fadeInRow 0.4s ease forwards;
                     }
-                    
-                    /* Responsive adjustments */
-                    @media (max-width: 768px) {
-                        .header-content {
-                            flex-direction: column;
-                            align-items: flex-start;
-                        }
-                        
-                        .search-container {
-                            width: 100%;
-                        }
-                    }
                 </style>
             `);
 
@@ -1075,7 +1315,7 @@ function ordinalSuffix($number) {
                 };
             }
             
-            // Initialize pagination for all students table
+            // Initialize pagination for tables
             setupPagination(
                 '#all-students .modern-table', 
                 {

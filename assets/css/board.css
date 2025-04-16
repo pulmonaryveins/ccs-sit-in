@@ -367,6 +367,7 @@
     display: none;
     animation: containerFade 0.4s ease-out forwards;
     opacity: 0;
+    animation-delay: 0.2s;
 }
 
 @keyframes containerFade {
@@ -454,9 +455,6 @@
 .text-center {
     text-align: left;
 }
-
-
-
 
 .font-mono {
     font-family: monospace;
@@ -791,5 +789,131 @@
     
     .my-stat-icon {
         margin-bottom: 0;
+    }
+}
+
+/* Improved Sessions Info Section */
+.sessions-info {
+    background: rgba(45, 206, 137, 0.05);
+    border: 1px solid rgba(45, 206, 137, 0.1);
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.sessions-stat {
+    text-align: center;
+    position: relative;
+}
+
+.sessions-stat:first-child::after {
+    content: '';
+    position: absolute;
+    right: -1.5rem;
+    top: 50%;
+    height: 40px;
+    width: 1px;
+    background: rgba(45, 206, 137, 0.2);
+    transform: translateY(-50%);
+}
+
+.sessions-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2dce89;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+
+.sessions-label {
+    font-size: 0.9rem;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.sessions-warning {
+    text-align: center;
+    color: #ef4444;
+    font-size: 0.95rem;
+    margin-top: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.1);
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sessions-warning i {
+    font-size: 1.1rem;
+}
+
+/* Points Info Card improvements */
+.points-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.points-info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.points-info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.points-info-card h3 {
+    color: #7556cc;
+    font-size: 1.2rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.points-info-card ul {
+    color: #4b5563;
+    padding-left: 1.5rem;
+    margin: 0;
+}
+
+.points-info-card li {
+    margin-bottom: 0.85rem;
+    line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sessions-info {
+        gap: 2rem;
+        padding: 1.5rem 1rem;
+    }
+    
+    .sessions-stat:first-child::after {
+        display: none;
+    }
+    
+    .sessions-value {
+        font-size: 2.5rem;
+    }
+    
+    .points-info-grid {
+        grid-template-columns: 1fr;
     }
 }
