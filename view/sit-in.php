@@ -314,6 +314,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                                 <div class="detail-value">
                                                     <select id="laboratory" name="laboratory" required>
                                                         <option value="">Select Laboratory</option>
+                                                        <option value="517">517</option>
                                                         <option value="524">524</option>
                                                         <option value="526">526</option>
                                                         <option value="528">528</option>
@@ -337,6 +338,15 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                                         <option value="C#">C#</option>
                                                         <option value="PHP">PHP</option>
                                                         <option value="ASP.Net">ASP.Net</option>
+                                                        <option value="MySQL Database">MySQL Database</option>
+                                                        <option value="PHP">PHP</option>
+                                                        <option value="Web Development">Web Development</option>
+                                                        <option value="System Architecture">System Architecture</option>
+                                                        <option value="System Analysis and Design">System Analysis and Design</option>
+                                                        <option value="Information Security">Information Security</option>
+                                                        <option value="Research">Research</option>
+
+
                                                     </select>
                                                 </div>
                                             </div>

@@ -376,7 +376,7 @@ foreach ($all_students as $student) {
         .points-dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
+            gap: 1.75rem;
             margin-bottom: 2rem;
         }
         
@@ -385,7 +385,6 @@ foreach ($all_students as $student) {
             border-radius: 12px;
             padding: 2rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
             text-align: center;
             animation: fadeUp 0.7s ease-out 0.3s forwards;
             opacity: 0;
@@ -601,7 +600,276 @@ foreach ($all_students as $student) {
             font-size: 1.5rem;
             color: #ef4444;
         }
-    </style>
+
+        /* Improved Points Dashboard styling */
+        .points-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .points-summary-card, 
+        .earn-points-section,
+        .use-points-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2.25rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .points-summary-card::before,
+        .earn-points-section::before,
+        .use-points-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #7556cc, #9556cc);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .points-summary-card:hover,
+        .earn-points-section:hover,
+        .use-points-section:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(117, 86, 204, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-color: rgba(117, 86, 204, 0.15);
+        }
+        
+        .points-summary-card:hover::before,
+        .earn-points-section:hover::before,
+        .use-points-section:hover::before {
+            opacity: 1;
+        }
+        
+        .points-summary-card {
+            text-align: center;
+            animation: fadeUp 0.7s ease-out 0.3s forwards;
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .points-summary-card h2 {
+            font-size: 1.5rem;
+            color: #7556cc;
+            margin-bottom: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        
+        .points-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(117, 86, 204, 0.06) 0%, rgba(149, 86, 204, 0.12) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem auto 2rem;
+            position: relative;
+            border: 5px solid rgba(117, 86, 204, 0.12);
+            box-shadow: 0 10px 25px rgba(117, 86, 204, 0.12);
+            transition: all 0.5s ease;
+        }
+        
+        .points-circle::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(117, 86, 204, 0.3) 0%, rgba(149, 86, 204, 0.3) 50%, rgba(117, 86, 204, 0.3) 100%);
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
+        .points-summary-card:hover .points-circle {
+            transform: scale(1.05);
+            border-color: rgba(117, 86, 204, 0.25);
+            box-shadow: 0 15px 35px rgba(117, 86, 204, 0.2);
+        }
+        
+        .points-circle::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+            border-radius: 50%;
+            border: 2px solid rgba(117, 86, 204, 0.15);
+            animation: pulseCircle 3s infinite;
+        }
+        
+        @keyframes pulseCircle {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 0.2;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+        }
+        
+        .points-count {
+            font-size: 4.25rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .points-label {
+            font-size: 1.15rem;
+            color: #64748b;
+            margin-top: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+        
+        .points-description {
+            color: #64748b;
+            font-size: 1.05rem;
+            margin-top: 1.75rem;
+            line-height: 1.6;
+            max-width: 80%;
+        }
+        
+        /* Points earning and usage sections */
+        .earn-points-section {
+            animation: fadeUp 0.7s ease-out 0.4s forwards;
+            opacity: 0;
+        }
+        
+        .use-points-section {
+            animation: fadeUp 0.7s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+        
+        .earn-points-section h3,
+        .use-points-section h3 {
+            font-size: 1.35rem;
+            color: #7556cc;
+            margin-bottom: 1.75rem;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .earn-points-section h3::after,
+        .use-points-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .earn-points-section:hover h3::after,
+        .use-points-section:hover h3::after {
+            width: 100px;
+        }
+        
+        .earn-points-section ul,
+        .use-points-section ul {
+            margin: 0;
+            padding-left: 1.5rem;
+            color: #4b5563;
+        }
+        
+        .earn-points-section li,
+        .use-points-section li {
+            margin-bottom: 1.15rem;
+            line-height: 1.7;
+            position: relative;
+            padding-left: 0.5rem;
+            font-size: 1.05rem;
+        }
+        
+        .earn-points-section li::marker,
+        .use-points-section li::marker {
+            color: #7556cc;
+            font-weight: bold;
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 1024px) {
+            .points-dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .points-summary-card {
+                margin-bottom: 1rem;
+            }
+            
+            .points-circle {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .points-count {
+                font-size: 3.75rem;
+            }
+            
+            .points-description {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .points-summary-card,
+            .earn-points-section,
+            .use-points-section {
+                padding: 1.75rem;
+            }
+            
+            .points-circle {
+                width: 140px;
+                height: 140px;
+                margin: 0.5rem auto 1.5rem;
+            }
+            
+            .points-count {
+                font-size: 3.25rem;
+            }
+            
+            .points-description {
+                font-size: 1rem;
+                margin-top: 1.25rem;
+            }
+        }
+</style>
 </head>
 <body>
 
@@ -845,7 +1113,7 @@ foreach ($all_students as $student) {
                     <h2><i class="ri-award-fill"></i> Your Current Ranking</h2>
                     <div class="my-ranking-value">
                         <div class="rank-number">
-                            <?php echo $current_student_rank; ?><sup><?php echo ordinalSuffix($current_student_rank); ?></sup>
+                            #<?php echo $current_student_rank; ?><sup><?php echo ordinalSuffix($current_student_rank); ?></sup>
                         </div>
                     </div>
                     <?php if ($current_student): ?>
@@ -1550,7 +1818,464 @@ foreach ($all_students as $student) {
                     entries: 'all-students-entries'
                 }
             );
+
+            // Add improved styles for the My Points section
+            document.head.insertAdjacentHTML('beforeend', `
+                <style>
+                    /* Enhanced My Points styling */
+                    #my-points {
+                        padding: 0.5rem;
+                    }
+                    
+                    .my-ranking {
+                        background: white;
+                        border-radius: 12px;
+                        padding: 2rem;
+                        margin-bottom: 2rem;
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+                        border: 1px solid #e2e8f0;
+                        text-align: center;
+                        animation: fadeUp 0.7s ease-out 0.3s forwards;
+                        opacity: 0;
+                        transition: transform 0.3s ease;
+                    }
+                    
+                    .my-ranking:hover {
+                        transform: translateY(-5px);
+                    }
+                    
+                    .my-ranking h2 {
+                        font-size: 1.4rem;
+                        color: #7556cc;
+                        margin-bottom: 1.5rem;
+                        font-weight: 600;
+                        text-align: center;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 0.5rem;
+                    }
+                    
+                    .my-ranking-value {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        margin-bottom: 2rem;
+                    }
+                    
+                    .rank-number {
+                        font-size: 4rem;
+                        font-weight: 700;
+                        color: #7556cc;
+                        text-shadow: 0 2px 10px rgba(117, 86, 204, 0.2);
+                        background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+                        -webkit-background-clip: text;
+                        background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                    }
+                    
+                    .rank-number sup {
+                        font-size: 1.6rem;
+                        font-weight: 600;
+                        position: relative;
+                        top: -2rem;
+                        margin-left: 0.1rem;
+                    }
+                    
+                    .my-stats {
+                        display: flex;
+                        justify-content: center;
+                        gap: 3rem;
+                        margin-top: 2rem;
+                    }
+                    
+                    .my-stat {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 0.75rem;
+                        transition: all 0.3s ease;
+                        position: relative;
+                        padding: 1.25rem;
+                        border-radius: 12px;
+                    }
+                    
+                    .my-stat:hover {
+                        transform: translateY(-5px);
+                        background: rgba(117, 86, 204, 0.03);
+                    }
+                    
+                    .my-stat:not(:last-child)::after {
+                        content: '';
+                        position: absolute;
+                        right: -1.5rem;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        height: 50px;
+                        width: 1px;
+                        background: linear-gradient(to bottom, transparent, rgba(117, 86, 204, 0.2), transparent);
+                    }
+                    
+                    .my-stat-icon {
+                        width: 52px;
+                        height: 52px;
+                        background: rgba(117, 86, 204, 0.1);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #7556cc;
+                        font-size: 1.4rem;
+                        margin-bottom: 0.75rem;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 12px rgba(117, 86, 204, 0.15);
+                    }
+                    
+                    .my-stat:hover .my-stat-icon {
+                        transform: scale(1.1);
+                        background: rgba(117, 86, 204, 0.15);
+                    }
+                    
+                    .my-stat-value {
+                        font-size: 2rem;
+                        font-weight: 700;
+                        color: #1e293b;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .my-stat:hover .my-stat-value {
+                        color: #7556cc;
+                    }
+                    
+                    .my-stat-label {
+                        font-size: 0.95rem;
+                        color: #64748b;
+                        font-weight: 500;
+                    }
+                    
+                    /* Points Dashboard Styling */
+                    .points-dashboard {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 1.75rem;
+                        margin-bottom: 2rem;
+                    }
+                    
+                    .points-summary-card,
+                    .earn-points-section, 
+                    .use-points-section {
+                        background: white;
+                        border-radius: 12px;
+                        padding: 2rem;
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+                        border: 1px solid #e2e8f0;
+                        transition: transform 0.3s ease, box-shadow 0.3s ease;
+                        animation: fadeUp 0.7s ease-out forwards;
+                        opacity: 0;
+                        height: 100%;
+                    }
+                    
+                    .points-summary-card:hover,
+                    .earn-points-section:hover, 
+                    .use-points-section:hover {
+                        transform: translateY(-7px);
+                        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+                    }
+                    
+                    .points-summary-card {
+                        text-align: center;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        animation-delay: 0.3s;
+                    }
+                    
+                    .earn-points-section {
+                        animation-delay: 0.4s;
+                    }
+                    
+                    .use-points-section {
+                        animation-delay: 0.5s;
+                    }
+                    
+                    .points-summary-card h2,
+                    .earn-points-section h3, 
+                    .use-points-section h3 {
+                        font-size: 1.4rem;
+                        color: #7556cc;
+                        margin-bottom: 1.5rem;
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                    }
+                    
+                    .points-summary-card h2 {
+                        justify-content: center;
+                        margin-bottom: 2rem;
+                    }
+                    
+                    .points-circle {
+                        width: 180px;
+                        height: 180px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, rgba(117, 86, 204, 0.08) 0%, rgba(149, 86, 204, 0.15) 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 1rem auto 2rem;
+                        position: relative;
+                        border: 4px solid rgba(117, 86, 204, 0.15);
+                        box-shadow: 0 5px 15px rgba(117, 86, 204, 0.15);
+                        transition: all 0.5s ease;
+                    }
+                    
+                    .points-summary-card:hover .points-circle {
+                        transform: scale(1.05);
+                        border-color: rgba(117, 86, 204, 0.25);
+                    }
+                    
+                    .points-circle::before {
+                        content: '';
+                        position: absolute;
+                        top: -8px;
+                        left: -8px;
+                        right: -8px;
+                        bottom: -8px;
+                        border-radius: 50%;
+                        border: 2px solid rgba(117, 86, 204, 0.1);
+                        animation: pulseCircle 3s infinite;
+                    }
+                    
+                    .points-count {
+                        font-size: 4rem;
+                        font-weight: 700;
+                        color: #7556cc;
+                        line-height: 1;
+                        text-shadow: 0 2px 10px rgba(117, 86, 204, 0.2);
+                        background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+                        -webkit-background-clip: text;
+                        background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                    }
+                    
+                    .points-label {
+                        font-size: 1.1rem;
+                        color: #64748b;
+                        margin-top: 0.75rem;
+                        font-weight: 500;
+                    }
+                    
+                    .points-description {
+                        color: #64748b;
+                        font-size: 1rem;
+                        margin-top: 1.5rem;
+                        line-height: 1.6;
+                    }
+                    
+                    .earn-points-section h3,
+                    .use-points-section h3 {
+                        position: relative;
+                        padding-bottom: 1rem;
+                    }
+                    
+                    .earn-points-section h3::after,
+                    .use-points-section h3::after {
+                        content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        width: 60px;
+                        height: 3px;
+                        background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                    }
+                    
+                    .earn-points-section:hover h3::after,
+                    .use-points-section:hover h3::after {
+                        width: 80px;
+                    }
+                    
+                    .earn-points-section ul,
+                    .use-points-section ul {
+                        margin: 0;
+                        padding-left: 1.5rem;
+                        color: #4b5563;
+                    }
+                    
+                    .earn-points-section li,
+                    .use-points-section li {
+                        margin-bottom: 1rem;
+                        line-height: 1.7;
+                        position: relative;
+                        padding-left: 0.5rem;
+                    }
+                    
+                    .earn-points-section li::marker,
+                    .use-points-section li::marker {
+                        color: #7556cc;
+                    }
+                    
+                    @keyframes fadeUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    
+                    @keyframes pulseCircle {
+                        0% {
+                            transform: scale(1);
+                            opacity: 0.7;
+                        }
+                        50% {
+                            transform: scale(1.05);
+                            opacity: 0.3;
+                        }
+                        100% {
+                            transform: scale(1);
+                            opacity: 0.7;
+                        }
+                    }
+                    
+                    /* Responsive adjustments */
+                    @media (max-width: 768px) {
+                        .my-stats {
+                            flex-direction: column;
+                            gap: 2rem;
+                        }
+                        
+                        .my-stat {
+                            width: 100%;
+                            padding: 1.5rem;
+                            border-radius: 12px;
+                            background: rgba(117, 86, 204, 0.03);
+                        }
+                        
+                        .my-stat:not(:last-child)::after {
+                            display: none;
+                        }
+                        
+                        .points-dashboard {
+                            grid-template-columns: 1fr;
+                        }
+                        
+                        .points-circle {
+                            width: 150px;
+                            height: 150px;
+                        }
+                        
+                        .points-count {
+                            font-size: 3rem;
+                        }
+                    }
+                </style>
+            `);
         });
     </script>
+</body>
+</html>
+         
+        <style>
+            .header-content {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 1rem;
+                    }
+                    
+                    .header-left {
+                        flex: 1;
+                        min-width: 250px;
+                    }
+                    
+                    .header-left h2 {
+                        color: #1e293b;
+                        font-size: 1.3rem;
+                        font-weight: 600;
+                        margin-bottom: 0.5rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                    }
+                    
+                    .header-left h2 i {
+                        color: #7556cc;
+                    }
+                    
+                    .header-left p {
+                        color: #64748b;
+                        font-size: 0.9rem;
+                        margin: 0;
+                    }
+                    
+                    .header-right {
+                        display: flex;
+                        align-items: center;
+                    }
+                    
+                    .entries-selector {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        margin-left: 0;
+                    }
+                    
+                    .entries-select {
+                        padding: 0.5rem;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 6px;
+                        background-color: white;
+                        color: #4b5563;
+                        font-size: 0.9rem;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    .entries-select:focus {
+                        outline: none;
+                        border-color: #7556cc;
+                        box-shadow: 0 0 0 2px rgba(117, 86, 204, 0.1);
+                    }
+                    
+                    /* Container headers consistent styling */
+                    .container-header {
+                        margin-bottom: 1.5rem;
+                        padding: 1.25rem;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                    }
+                    
+                    /* Responsive pagination for entries selector */
+                    @media (max-width: 768px) {
+                        .pagination-controls {
+                            flex-wrap: wrap;
+                            gap: 0.75rem;
+                        }
+                        
+                        .entries-selector {
+                            margin-left: 0;
+                            margin-top: 0.5rem;
+                            width: 100%;
+                        }
+                        
+                        .entries-select {
+                            width: 100%;
+                        }
+                        
+                        .header-content {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+                    }
+
+        </style>
 </body>
 </html>

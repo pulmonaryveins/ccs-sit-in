@@ -18,7 +18,7 @@ if (!isset($_SESSION['username'])) {
 require_once '../config/db_connect.php';
 $username = $_SESSION['username'];
 // Update the SQL query to include remaining_sessions
-$sql = "SELECT idno, firstname, lastname, middlename, course, year, profile_image, email, address, remaining_sessions FROM users WHERE username = ?";
+$sql = "SELECT idno, firstname, lastname, middlename, course, year, profile_image, email, address, remaining_sessions, points FROM users WHERE username = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $username);
 $stmt->execute();
@@ -51,6 +51,9 @@ if ($row = $result->fetch_assoc()) {
     
     // Store remaining sessions in session
     $_SESSION['remaining_sessions'] = $row['remaining_sessions'] ?? 30;
+    
+    // Store points in session
+    $_SESSION['points'] = $row['points'] ?? 0;
 }
 
 // Get student statistics for dashboard
@@ -721,6 +724,12 @@ $conn->close();
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Points value styling */
+        .points-value {
+            font-weight: 600;
+            color: #7556cc;
+        }
     </style>
 </head>
 <body>
@@ -861,6 +870,13 @@ $conn->close();
                         </div>
                     </div>
                     <div class="info-card">
+                        <div class="info-icon"><i class="ri-star-fill"></i></div>
+                        <div class="info-content">
+                            <div class="detail-label">Points</div>
+                            <div class="detail-value points-value"><?php echo htmlspecialchars($_SESSION['points'] ?? 0); ?></div>
+                        </div>
+                    </div>
+                    <div class="info-card">
                         <div class="info-icon"><i class="ri-timer-fill"></i></div>
                         <div class="info-content">
                             <div class="detail-label">Session</div>
@@ -905,10 +921,44 @@ $conn->close();
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">Pending Reservations</div>
-                <div class="stat-value"><?php echo $stats['pending_reservations']; ?></div>
+                <div class="stat-title">Points</div>
+                <div class="stat-value points-display"><?php echo $_SESSION['points'] ?? 0; ?></div>
             </div>
         </div>
+
+        
+        <div class="analytics-summary">
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="ri-time-line"></i>
+                </div>
+                <div class="summary-content">
+                    <div class="summary-title">Average Session Duration</div>
+                    <div class="summary-value">1.5 hours</div>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="ri-calendar-check-line"></i>
+                </div>
+                <div class="summary-content">
+                    <div class="summary-title">Most Active Day</div>
+                    <div class="summary-value">Wednesday</div>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="ri-award-line"></i>
+                </div>
+                <div class="summary-content">
+                    <div class="summary-title">Sit-in Streak</div>
+                    <div class="summary-value">3 days</div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Announcements and Rules Grid -->
         <div class="announcements-grid">
@@ -1042,7 +1092,16 @@ $conn->close();
             </div>
         </div>
     </div>
-    
+
+    <!-- Add Data Visualization Section after Quick Actions -->
+    <div class="admin-dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+
+            </div>
+        </div>
+    </div> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     // Add notification system functions at the start of scripts
     function showNotification(title, message, type = 'info', duration = 5000) {
@@ -1423,6 +1482,14 @@ $conn->close();
             detailValues[1].textContent = data.fullname;
             detailValues[2].textContent = data.course;
             detailValues[3].textContent = data.year_level;
+            
+            // Update points if available
+            if (data.points !== undefined) {
+                const pointsElement = document.querySelector('.points-value');
+                if (pointsElement) {
+                    pointsElement.textContent = data.points;
+                }
+            }
         } catch (error) {
             console.error('Error updating profile:', error);
         }
@@ -1430,6 +1497,262 @@ $conn->close();
 
     // Update profile when panel is opened
     profileTrigger.addEventListener('click', updateProfilePanel);
+
+    // Chart initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize charts if they exist
+        initializeCharts();
+    });
+    
+    function initializeCharts() {
+        // Sit-in History Chart
+        const sitInCtx = document.getElementById('sitInChart');
+        if (sitInCtx) {
+            new Chart(sitInCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Sit-ins Completed',
+                        data: [4, 7, 5, 8, 6, <?php echo $stats['total_sitins']; ?>],
+                        borderColor: '#7556cc',
+                        backgroundColor: 'rgba(117, 86, 204, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Monthly Sit-in Activity'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Session Usage Chart
+        const sessionCtx = document.getElementById('sessionUsageChart');
+        if (sessionCtx) {
+            new Chart(sessionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Used', 'Remaining'],
+                    datasets: [{
+                        data: [30 - <?php echo $_SESSION['remaining_sessions']; ?>, <?php echo $_SESSION['remaining_sessions']; ?>],
+                        backgroundColor: [
+                            'rgba(117, 86, 204, 0.8)',
+                            'rgba(117, 86, 204, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(117, 86, 204, 1)',
+                            'rgba(117, 86, 204, 0.3)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Session Allocation'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Points Chart
+        const pointsCtx = document.getElementById('pointsChart');
+        if (pointsCtx) {
+            new Chart(pointsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sit-ins', 'Bonuses', 'Other'],
+                    datasets: [{
+                        label: 'Points Source',
+                        data: [<?php echo min($stats['total_sitins'], $_SESSION['points']); ?>, 
+                               <?php echo max(0, $_SESSION['points'] - $stats['total_sitins'] - 2); ?>, 
+                               2],
+                        backgroundColor: [
+                            'rgba(117, 86, 204, 0.7)',
+                            'rgba(45, 206, 137, 0.7)',
+                            'rgba(66, 153, 225, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(117, 86, 204, 1)',
+                            'rgba(45, 206, 137, 1)',
+                            'rgba(66, 153, 225, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Points Distribution'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
     </script>
+    
+    <style>
+        /* Points display styling */
+        .points-display {
+            font-weight: 700;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Analytics section styling */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .wide-card {
+            grid-column: span 2;
+        }
+        
+        .analytics-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .analytics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        .analytics-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #7556cc;
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            gap: 0.5rem;
+        }
+        
+        .analytics-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            position: relative;
+            height: 300px;
+        }
+        
+        .analytics-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        .summary-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 12px;
+            background: rgba(117, 86, 204, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7556cc;
+            font-size: 1.5rem;
+        }
+        
+        .summary-content {
+            flex-grow: 1;
+        }
+        
+        .summary-title {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+        
+        .summary-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        @media (max-width: 992px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .wide-card {
+                grid-column: span 1;
+            }
+            
+            .analytics-body {
+                height: 250px;
+            }
+        }
+    </style>
 </body>
 </html>
