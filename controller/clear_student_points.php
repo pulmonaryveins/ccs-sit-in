@@ -43,42 +43,34 @@ if ($result->num_rows === 0) {
 $conn->begin_transaction();
 
 try {
-    // Get current points and sessions
-    $get_points_sql = "SELECT points, remaining_sessions, firstname, lastname FROM users WHERE idno = ?";
+    // Get current points before clearing
+    $get_points_sql = "SELECT points, firstname, lastname FROM users WHERE idno = ?";
     $get_points_stmt = $conn->prepare($get_points_sql);
     $get_points_stmt->bind_param("s", $idno);
     $get_points_stmt->execute();
     $points_result = $get_points_stmt->get_result();
     $student_data = $points_result->fetch_assoc();
     $current_points = $student_data['points'];
-    $remaining_sessions = $student_data['remaining_sessions'];
     $student_name = $student_data['firstname'] . ' ' . $student_data['lastname'];
     
-    // Add 1 point
-    $new_points = $current_points + 1;
-    
-    // Check if we need to add a new session (every 3 points)
-    $add_session = false;
-    $new_sessions = $remaining_sessions;
-    
-    if ($new_points % 3 == 0) {
-        $new_sessions = $remaining_sessions + 1;
-        $add_session = true;
+    // If student already has 0 points, no need to update
+    if ($current_points == 0) {
+        $conn->commit();
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'message' => 'Student already has 0 points']);
+        exit();
     }
     
-    // Update student points and potentially sessions
-    $update_sql = "UPDATE users SET points = ?, remaining_sessions = ? WHERE idno = ?";
+    // Update student points to 0
+    $update_sql = "UPDATE users SET points = 0 WHERE idno = ?";
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("iis", $new_points, $new_sessions, $idno);
+    $update_stmt->bind_param("s", $idno);
     $update_stmt->execute();
     
     if ($update_stmt->affected_rows > 0) {
         // Log the action
         $admin_username = $_SESSION['username'];
-        $action = "Added 1 point to $student_name (ID: $idno)";
-        if ($add_session) {
-            $action .= " - Earned a new session";
-        }
+        $action = "Cleared points for $student_name (ID: $idno, Points cleared: $current_points)";
         
         // Check if admin_logs table exists
         $tables_result = $conn->query("SHOW TABLES LIKE 'admin_logs'");
@@ -94,22 +86,14 @@ try {
         // Commit transaction
         $conn->commit();
         
-        $message = "Point added successfully. New total: $new_points points";
-        if ($add_session) {
-            $message .= ". Student earned a new session (3 points = 1 session)!";
-        } else {
-            $points_left = 3 - ($new_points % 3);
-            $message .= ". $points_left more points needed for next session.";
-        }
-        
         header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'message' => $message]);
+        echo json_encode(['success' => true, 'message' => "All points ($current_points) for this student have been cleared successfully"]);
     } else {
         // Rollback if no rows affected
         $conn->rollback();
         
         header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'Failed to add point']);
+        echo json_encode(['success' => false, 'message' => 'Failed to clear points']);
     }
 } catch (Exception $e) {
     // Rollback on error

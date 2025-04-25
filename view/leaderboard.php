@@ -9,7 +9,7 @@ if (!isset($_SESSION['admin_logged_in']) && !isset($_SESSION['username'])) {
 
 require_once '../config/db_connect.php';
 
-// Get top 3 most active students based on sit-in count
+// Get top 3 most active students based on sit-in count AND points
 $top_students = [];
 $query = "SELECT u.idno, u.firstname, u.lastname, u.profile_image, u.course, u.year,
           u.points, u.remaining_sessions,
@@ -33,7 +33,8 @@ if ($result) {
 $all_students = [];
 $query = "SELECT u.idno, u.firstname, u.lastname, u.course, u.year, u.points, u.remaining_sessions,
           COUNT(DISTINCT CASE WHEN s.id IS NOT NULL THEN s.id END) +
-          COUNT(DISTINCT CASE WHEN r.id IS NOT NULL THEN r.id END) as total_sitins
+          COUNT(DISTINCT CASE WHEN r.id IS NOT NULL THEN r.id END) as total_sitins,
+          (3 - (u.points % 3)) as points_until_next_session
           FROM users u
           LEFT JOIN sit_ins s ON u.idno = s.idno
           LEFT JOIN reservations r ON u.idno = r.idno
@@ -43,6 +44,10 @@ $result = $conn->query($query);
 
 if ($result) {
     while ($row = $result->fetch_assoc()) {
+        // If points is divisible by 3, set points_until_next_session to 3
+        if ($row['points'] % 3 == 0 && $row['points'] > 0) {
+            $row['points_until_next_session'] = 3;
+        }
         $all_students[] = $row;
     }
 }
@@ -122,6 +127,76 @@ function formatYearLevel($year) {
             color: white;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
                         0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Points progress styles */
+        .points-progress {
+            margin-top: 4px;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .points-progress-text {
+            font-style: italic;
+        }
+        
+        /* Action buttons styles */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+        
+        .action-btn.primary {
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(117, 86, 204, 0.3);
+        }
+        
+        .action-btn.danger {
+            background: #fff;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .action-btn.danger:hover {
+            background: #fef2f2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.15);
+        }
+        
+        .action-btn i {
+            margin-right: 6px;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -287,6 +362,7 @@ function formatYearLevel($year) {
                             <th>Year</th>
                             <th class="text-center">Total Sit-ins</th>
                             <th class="text-center">Points</th>
+                            <th class="text-center">Progession</th>
                             <th class="text-center">Sessions</th>
                         </tr>
                     </thead>
@@ -313,6 +389,10 @@ function formatYearLevel($year) {
                                     </td>
                                     <td class="text-center">
                                         <span class="points-badge"><?php echo $student['points']; ?> points</span>
+                                    </td>
+                                    <td class="text-center">                                        <div class="points-progress">
+                                            <span class="points-progress-text">(<?php echo $student['points_until_next_session']; ?> points until next session)</span>
+                                        </div>
                                     </td>
                                     <td class="text-center">
                                         <span class="sessions-badge <?php echo $student['remaining_sessions'] <= 5 ? 'sessions-low' : ($student['remaining_sessions'] <= 10 ? 'sessions-medium' : ''); ?>">
@@ -381,6 +461,7 @@ function formatYearLevel($year) {
                             <th>Course</th>
                             <th>Year</th>
                             <th class="text-center">Points</th>
+                            <th class="text-center">Progression</th>
                             <th class="text-center">Sessions</th>
                             <th class="text-center">Actions</th>
                         </tr>
@@ -405,14 +486,20 @@ function formatYearLevel($year) {
                                     <td class="text-center">
                                         <span class="points-badge"><?php echo $student['points']; ?> points</span>
                                     </td>
+                                    <td class="text-center">                                        <div class="points-progress">
+                                            <span class="points-progress-text">(<?php echo $student['points_until_next_session']; ?> points until next session)</span>
+                                    </td>
                                     <td class="text-center">
                                         <span class="sessions-badge <?php echo $student['remaining_sessions'] <= 5 ? 'sessions-low' : ($student['remaining_sessions'] <= 10 ? 'sessions-medium' : ''); ?>">
                                             <?php echo $student['remaining_sessions']; ?> sessions
                                         </span>
                                     </td>
-                                    <td class="text-center">
-                                        <button class="add-point-btn" onclick="addPoint('<?php echo $student['idno']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
+                                    <td class="text-center action-buttons">
+                                        <button class="action-btn primary" onclick="addPoint('<?php echo $student['idno']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
                                             <i class="ri-add-circle-line"></i> Add Point
+                                        </button>
+                                        <button class="action-btn danger" onclick="clearPoints('<?php echo $student['idno']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
+                                            <i class="ri-delete-bin-line"></i> Clear Points
                                         </button>
                                     </td>
                                 </tr>
@@ -471,6 +558,212 @@ function formatYearLevel($year) {
     </div>
 
     <script>
+        // Make notification functions globally available (not inside DOMContentLoaded)
+        function showNotification(title, message, type = 'info', duration = 5000) {
+            const notificationContainer = document.getElementById('notification-container');
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            // Set icon based on type
+            let iconClass = 'ri-information-line';
+            if (type === 'success') iconClass = 'ri-check-line';
+            if (type === 'error') iconClass = 'ri-error-warning-line';
+            if (type === 'warning') iconClass = 'ri-alert-line';
+            
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="${iconClass}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close" onclick="closeNotification(this)">×</button>
+            `;
+            
+            // Add to container
+            notificationContainer.appendChild(notification);
+            
+            // Auto-remove after duration
+            if (duration > 0) {
+                setTimeout(() => closeNotification(notification), duration);
+            }
+            
+            return notification;
+        }
+        
+        function closeNotification(notification) {
+            if (!notification) return;
+            
+            // If notification is a button, find its parent notification
+            if (notification.tagName === 'BUTTON') {
+                notification = notification.closest('.notification');
+            }
+            
+            notification.classList.add('removing');
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 400);
+        }
+        
+        // Make confirm modal functions globally available
+        function showConfirmModal(message, title, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirm-title').textContent = title;
+            
+            const confirmButton = document.getElementById('confirm-button');
+            confirmButton.onclick = function() {
+                hideConfirmModal();
+                callback(true);
+            };
+            
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+        
+        function hideConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+        
+        // Make point functions globally available
+        function addPoint(idno, studentName) {
+            showConfirmModal(
+                `Are you sure you want to add 1 point to ${studentName}?`,
+                "Confirm Point Addition",
+                (confirmed) => {
+                    if (confirmed) {
+                        // Show pending notification
+                        const pendingNotification = showNotification(
+                            "Processing", 
+                            "Adding point to student...",
+                            "info",
+                            0
+                        );
+                        
+                        // Send request to add point
+                        fetch('../controller/add_student_point.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `idno=${encodeURIComponent(idno)}`
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Remove pending notification
+                            closeNotification(pendingNotification);
+                            
+                            if (data.success) {
+                                let message = data.message;
+                                
+                                // Show success notification
+                                showNotification(
+                                    "Success", 
+                                    message,
+                                    "success"
+                                );
+                                
+                                // Reload the page after a short delay
+                                setTimeout(() => window.location.reload(), 1500);
+                            } else {
+                                showNotification(
+                                    "Error", 
+                                    data.message || "Failed to add point",
+                                    "error"
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            // Remove pending notification
+                            closeNotification(pendingNotification);
+                            
+                            console.error('Error:', error);
+                            showNotification(
+                                "Error", 
+                                "An error occurred while processing your request.",
+                                "error"
+                            );
+                        });
+                    }
+                }
+            );
+        }
+        
+        function clearPoints(idno, studentName) {
+            showConfirmModal(
+                `Are you sure you want to clear all points for ${studentName}? This action cannot be undone.`,
+                "Confirm Clear Points",
+                (confirmed) => {
+                    if (confirmed) {
+                        // Show pending notification
+                        const pendingNotification = showNotification(
+                            "Processing", 
+                            "Clearing student points...",
+                            "info",
+                            0
+                        );
+                        
+                        // Send request to clear points
+                        fetch('../controller/clear_student_points.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `idno=${encodeURIComponent(idno)}`
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Remove pending notification
+                            closeNotification(pendingNotification);
+                            
+                            if (data.success) {
+                                // Show success notification
+                                showNotification(
+                                    "Success", 
+                                    data.message || "Student points have been cleared successfully",
+                                    "success"
+                                );
+                                
+                                // Reload the page after a short delay
+                                setTimeout(() => window.location.reload(), 1500);
+                            } else {
+                                showNotification(
+                                    "Error", 
+                                    data.message || "Failed to clear points",
+                                    "error"
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            // Remove pending notification
+                            closeNotification(pendingNotification);
+                            
+                            console.error('Error:', error);
+                            showNotification(
+                                "Error", 
+                                "An error occurred while processing your request.",
+                                "error"
+                            );
+                        });
+                    }
+                }
+            );
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Tab switching functionality
             document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -706,6 +999,9 @@ function formatYearLevel($year) {
                     const rows = tableBody.querySelectorAll('tr');
                     let hasVisibleRows = false;
                     
+                    // Check if there's an empty search row already
+                    const emptySearch = tableBody.querySelector('.empty-search');
+                    
                     rows.forEach(row => {
                         if (!row.querySelector('.empty-state') && !row.classList.contains('empty-search')) {
                             let match = false;
@@ -728,8 +1024,6 @@ function formatYearLevel($year) {
                     });
                     
                     // Handle empty search results
-                    const emptySearch = tableBody.querySelector('.empty-search');
-                    
                     if (!hasVisibleRows && searchValue !== '') {
                         if (!emptySearch) {
                             const colspan = tableSelector.includes('all-students') ? 8 : 7;
@@ -767,9 +1061,11 @@ function formatYearLevel($year) {
                 });
             });
 
-            // Add CSS for the search container with improved styling
+            // Add CSS for the entries selector
             document.head.insertAdjacentHTML('beforeend', `
                 <style>
+                    /* ...existing styles... */
+                    
                     .header-content {
                         display: flex;
                         justify-content: space-between;
@@ -1272,537 +1568,6 @@ function formatYearLevel($year) {
                     }
                 });
             });
-
-            // Function to show notifications
-            function showNotification(title, message, type = 'info', duration = 5000) {
-                const notificationContainer = document.getElementById('notification-container');
-                
-                // Create notification element
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                
-                // Set icon based on type
-                let iconClass = 'ri-information-line';
-                if (type === 'success') iconClass = 'ri-check-line';
-                if (type === 'error') iconClass = 'ri-error-warning-line';
-                if (type === 'warning') iconClass = 'ri-alert-line';
-                
-                notification.innerHTML = `
-                    <div class="notification-icon">
-                        <i class="${iconClass}"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-title">${title}</div>
-                        <div class="notification-message">${message}</div>
-                    </div>
-                    <button class="notification-close" onclick="closeNotification(this)">×</button>
-                `;
-                
-                // Add to container
-                notificationContainer.appendChild(notification);
-                
-                // Auto-remove after duration
-                if (duration > 0) {
-                    setTimeout(() => closeNotification(notification), duration);
-                }
-                
-                return notification;
-            }
-            
-            function closeNotification(notification) {
-                if (!notification) return;
-                
-                // If notification is a button, find its parent notification
-                if (notification.tagName === 'BUTTON') {
-                    notification = notification.closest('.notification');
-                }
-                
-                notification.classList.add('removing');
-                
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 400);
-            }
-
-            // Confirm modal functions
-            function showConfirmModal(message, title, callback) {
-                document.getElementById('confirm-message').textContent = message;
-                document.getElementById('confirm-title').textContent = title;
-                
-                const confirmButton = document.getElementById('confirm-button');
-                confirmButton.onclick = function() {
-                    hideConfirmModal();
-                    callback(true);
-                };
-                
-                document.getElementById('confirmModal').style.display = 'flex';
-            }
-            
-            function hideConfirmModal() {
-                document.getElementById('confirmModal').style.display = 'none';
-            }
-            
-            // Function to add a point to a student
-            function addPoint(idno, studentName) {
-                showConfirmModal(
-                    `Are you sure you want to add 1 point to ${studentName}?`,
-                    "Confirm Point Addition",
-                    (confirmed) => {
-                        if (confirmed) {
-                            // Show pending notification
-                            const pendingNotification = showNotification(
-                                "Processing", 
-                                "Adding point to student...",
-                                "info",
-                                0
-                            );
-                            
-                            // Send request to add point
-                            fetch('../controller/add_student_point.php', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                },
-                                body: `idno=${encodeURIComponent(idno)}`
-                            })
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error('Network response was not ok');
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                // Remove pending notification
-                                closeNotification(pendingNotification);
-                                
-                                if (data.success) {
-                                    let message = data.message;
-                                    
-                                    // Show success notification
-                                    showNotification(
-                                        "Success", 
-                                        message,
-                                        "success"
-                                    );
-                                    
-                                    // Reload the page after a short delay
-                                    setTimeout(() => window.location.reload(), 1500);
-                                } else {
-                                    showNotification(
-                                        "Error", 
-                                        data.message || "Failed to add point",
-                                        "error"
-                                    );
-                                }
-                            })
-                            .catch(error => {
-                                // Remove pending notification
-                                closeNotification(pendingNotification);
-                                
-                                console.error('Error:', error);
-                                showNotification(
-                                    "Error", 
-                                    "An error occurred while processing your request.",
-                                    "error"
-                                );
-                            });
-                        }
-                    }
-                );
-            }
-        });
-
-        // Make sure addPoint function is available globally for onclick handlers
-        function addPoint(idno, studentName) {
-            showConfirmModal(
-                `Are you sure you want to add 1 point to ${studentName}?`,
-                "Confirm Point Addition",
-                (confirmed) => {
-                    if (confirmed) {
-                        // Show pending notification
-                        const pendingNotification = showNotification(
-                            "Processing", 
-                            "Adding point to student...",
-                            "info",
-                            0
-                        );
-                        
-                        // Send request to add point
-                        fetch('../controller/add_student_point.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: `idno=${encodeURIComponent(idno)}`
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            // Remove pending notification
-                            closeNotification(pendingNotification);
-                            
-                            if (data.success) {
-                                let message = data.message;
-                                
-                                // Show success notification
-                                showNotification(
-                                    "Success", 
-                                    message,
-                                    "success"
-                                );
-                                
-                                // Reload the page after a short delay
-                                setTimeout(() => window.location.reload(), 1500);
-                            } else {
-                                showNotification(
-                                    "Error", 
-                                    data.message || "Failed to add point",
-                                    "error"
-                                );
-                            }
-                        })
-                        .catch(error => {
-                            // Remove pending notification
-                            closeNotification(pendingNotification);
-                            
-                            console.error('Error:', error);
-                            showNotification(
-                                "Error", 
-                                "An error occurred while processing your request.",
-                                "error"
-                            );
-                        });
-                    }
-                }
-            );
-        }
-
-        // Helper function to show notifications - must be global
-        function showNotification(title, message, type = 'info', duration = 5000) {
-            const notificationContainer = document.getElementById('notification-container');
-            
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            
-            // Set icon based on type
-            let iconClass = 'ri-information-line';
-            if (type === 'success') iconClass = 'ri-check-line';
-            if (type === 'error') iconClass = 'ri-error-warning-line';
-            if (type === 'warning') iconClass = 'ri-alert-line';
-            
-            notification.innerHTML = `
-                <div class="notification-icon">
-                    <i class="${iconClass}"></i>
-                </div>
-                <div class="notification-content">
-                    <div class="notification-title">${title}</div>
-                    <div class="notification-message">${message}</div>
-                </div>
-                <button class="notification-close" onclick="closeNotification(this)">×</button>
-            `;
-            
-            // Add to container
-            notificationContainer.appendChild(notification);
-            
-            // Auto-remove after duration
-            if (duration > 0) {
-                setTimeout(() => closeNotification(notification), duration);
-            }
-            
-            return notification;
-        }
-        
-        // Helper function to close notifications - must be global
-        function closeNotification(notification) {
-            if (!notification) return;
-            
-            // If notification is a button, find its parent notification
-            if (notification.tagName === 'BUTTON') {
-                notification = notification.closest('.notification');
-            }
-            
-            notification.classList.add('removing');
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 400);
-        }
-        
-        // Confirm modal functions - must be global
-        function showConfirmModal(message, title, callback) {
-            document.getElementById('confirm-message').textContent = message;
-            document.getElementById('confirm-title').textContent = title;
-            
-            const confirmButton = document.getElementById('confirm-button');
-            confirmButton.onclick = function() {
-                hideConfirmModal();
-                callback(true);
-            };
-            
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-        
-        function hideConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'none';
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // ...existing code...
-
-            // Add CSS for the entries selector
-            document.head.insertAdjacentHTML('beforeend', `
-                <style>
-                    /* ...existing styles... */
-                    
-                    .entries-selector {
-                        margin-left: 1rem;
-                    }
-                    
-                    .entries-select {
-                        padding: 0.5rem;
-                        border: 1px solid #e2e8f0;
-                        border-radius: 6px;
-                        background-color: white;
-                        color: #4b5563;
-                        font-size: 0.9rem;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                    }
-                    
-                    .entries-select:focus {
-                        outline: none;
-                        border-color: #7556cc;
-                        box-shadow: 0 0 0 2px rgba(117, 86, 204, 0.1);
-                    }
-                    
-                    /* Responsive pagination for entries selector */
-                    @media (max-width: 768px) {
-                        .pagination-controls {
-                            flex-wrap: wrap;
-                            gap: 0.75rem;
-                        }
-                        
-                        .entries-selector {
-                            margin-left: 0;
-                            margin-top: 0.5rem;
-                            width: 100%;
-                        }
-                        
-                        .entries-select {
-                            width: 100%;
-                        }
-                    }
-                </style>
-            `);
-            
-            // Pagination functionality with entries per page option
-            function setupPagination(tableSelector, paginationIds, defaultItemsPerPage = 10) {
-                const tableBody = document.querySelector(`${tableSelector} tbody`);
-                const rows = Array.from(tableBody.querySelectorAll('tr')).filter(row => !row.classList.contains('empty-state') && !row.classList.contains('empty-search'));
-                
-                // Get pagination elements
-                const prevButton = document.getElementById(paginationIds.prev);
-                const nextButton = document.getElementById(paginationIds.next);
-                const pagesContainer = document.getElementById(paginationIds.pages);
-                const startElement = document.getElementById(paginationIds.start);
-                const endElement = document.getElementById(paginationIds.end);
-                const totalElement = document.getElementById(paginationIds.total);
-                const entriesSelect = document.getElementById(paginationIds.entries);
-                
-                if (!tableBody || !prevButton || !nextButton || !pagesContainer) return;
-                
-                let currentPage = 1;
-                let itemsPerPage = defaultItemsPerPage;
-                let totalPages = Math.ceil(rows.length / itemsPerPage);
-                
-                // Set total count
-                if (totalElement) totalElement.textContent = rows.length;
-                
-                // Function to render page numbers
-                function renderPageNumbers() {
-                    pagesContainer.innerHTML = '';
-                    
-                    // Recalculate total pages
-                    totalPages = Math.ceil(rows.length / itemsPerPage);
-                    
-                    // If there are no pages, exit
-                    if (totalPages === 0) return;
-                    
-                    // Ensure current page is not out of bounds
-                    if (currentPage > totalPages) {
-                        currentPage = totalPages;
-                    }
-                    
-                    // Calculate visible page numbers
-                    let startPage = Math.max(1, currentPage - 2);
-                    let endPage = Math.min(totalPages, startPage + 4);
-                    
-                    if (endPage - startPage < 4) {
-                        startPage = Math.max(1, endPage - 4);
-                    }
-                    
-                    // Add first page if not visible
-                    if (startPage > 1) {
-                        const firstPage = document.createElement('div');
-                        firstPage.className = 'page-number';
-                        firstPage.textContent = '1';
-                        firstPage.addEventListener('click', () => goToPage(1));
-                        pagesContainer.appendChild(firstPage);
-                        
-                        if (startPage > 2) {
-                            const dots = document.createElement('div');
-                            dots.className = 'page-number dots';
-                            dots.textContent = '...';
-                            dots.style.cursor = 'default';
-                            pagesContainer.appendChild(dots);
-                        }
-                    }
-                    
-                    // Add page numbers
-                    for (let i = startPage; i <= endPage; i++) {
-                        const pageNumber = document.createElement('div');
-                        pageNumber.className = `page-number ${i === currentPage ? 'active' : ''}`;
-                        pageNumber.textContent = i;
-                        pageNumber.addEventListener('click', () => goToPage(i));
-                        pagesContainer.appendChild(pageNumber);
-                    }
-                    
-                    // Add last page if not visible
-                    if (endPage < totalPages) {
-                        if (endPage < totalPages - 1) {
-                            const dots = document.createElement('div');
-                            dots.className = 'page-number dots';
-                            dots.textContent = '...';
-                            dots.style.cursor = 'default';
-                            pagesContainer.appendChild(dots);
-                        }
-                        
-                        const lastPage = document.createElement('div');
-                        lastPage.className = 'page-number';
-                        lastPage.textContent = totalPages;
-                        lastPage.addEventListener('click', () => goToPage(totalPages));
-                        pagesContainer.appendChild(lastPage);
-                    }
-                }
-                
-                // Function to go to a specific page
-                function goToPage(page) {
-                    if (page < 1 || page > totalPages) return;
-                    
-                    currentPage = page;
-                    showCurrentPage();
-                    
-                    // Update pagination UI
-                    prevButton.disabled = currentPage === 1;
-                    nextButton.disabled = currentPage === totalPages || totalPages === 0;
-                    renderPageNumbers();
-                    
-                    // Update info text
-                    if (startElement && endElement) {
-                        if (rows.length === 0) {
-                            startElement.textContent = '0';
-                            endElement.textContent = '0';
-                        } else {
-                            const start = (currentPage - 1) * itemsPerPage + 1;
-                            const end = Math.min(start + itemsPerPage - 1, rows.length);
-                            startElement.textContent = start;
-                            endElement.textContent = end;
-                        }
-                    }
-                }
-                
-                // Function to show current page rows with animation
-                function showCurrentPage() {
-                    const start = (currentPage - 1) * itemsPerPage;
-                    const end = start + itemsPerPage;
-                    
-                    // First hide all rows
-                    rows.forEach(row => {
-                        row.style.display = 'none';
-                        row.classList.remove('animate-new');
-                    });
-                    
-                    // Then show and animate the current page rows
-                    rows.forEach((row, index) => {
-                        if (index >= start && index < end) {
-                            // Remove any existing animation classes
-                            row.style.removeProperty('animation-delay');
-                            
-                            // Set display to empty string (show the row)
-                            row.style.display = '';
-                            
-                            // Add animation class with a small delay based on position
-                            const delay = 0.05 * (index - start);
-                            row.style.animationDelay = delay + 's';
-                            row.classList.add('animate-new');
-                        }
-                    });
-                }
-                
-                // Function to change items per page
-                function changeItemsPerPage(newItemsPerPage) {
-                    itemsPerPage = parseInt(newItemsPerPage);
-                    goToPage(1); // Reset to first page when changing items per page
-                }
-                
-                // Setup pagination event listeners
-                prevButton.addEventListener('click', () => goToPage(currentPage - 1));
-                nextButton.addEventListener('click', () => goToPage(currentPage + 1));
-                
-                // Setup entries select
-                if (entriesSelect) {
-                    entriesSelect.addEventListener('change', function() {
-                        changeItemsPerPage(this.value);
-                    });
-                }
-                
-                // Initial setup
-                renderPageNumbers();
-                showCurrentPage();
-                
-                // Return the reset function
-                return function resetPagination() {
-                    goToPage(1);
-                };
-            }
-            
-            // Initialize pagination with entries per page
-            const resetAllStudentsPagination = setupPagination(
-                '#all-students .modern-table', 
-                {
-                    prev: 'all-students-prev',
-                    next: 'all-students-next',
-                    pages: 'all-students-pages',
-                    start: 'all-students-start',
-                    end: 'all-students-end',
-                    total: 'all-students-total',
-                    entries: 'all-students-entries'
-                }
-            );
-            
-            const resetPointsPagination = setupPagination(
-                '#students-points .modern-table', 
-                {
-                    prev: 'points-students-prev',
-                    next: 'points-students-next',
-                    pages: 'points-students-pages',
-                    start: 'points-students-start',
-                    end: 'points-students-end',
-                    total: 'points-students-total',
-                    entries: 'points-students-entries'
-                }
-            );
-            
-            // ...existing code...
         });
     </script>
 </body>
