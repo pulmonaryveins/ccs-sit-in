@@ -144,7 +144,7 @@ function formatYearLevel($year) {
         .action-buttons {
             display: flex;
             gap: 10px;
-            justify-content: center;
+            justify-content: left;
         }
         
         .action-btn {
@@ -184,7 +184,6 @@ function formatYearLevel($year) {
         }
         
         .action-btn i {
-            margin-right: 6px;
             font-size: 1rem;
         }
         
@@ -362,8 +361,8 @@ function formatYearLevel($year) {
                             <th>Year</th>
                             <th class="text-center">Total Sit-ins</th>
                             <th class="text-center">Points</th>
-                            <th class="text-center">Progession</th>
                             <th class="text-center">Sessions</th>
+                            <th class="text-center">Progession</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -390,15 +389,16 @@ function formatYearLevel($year) {
                                     <td class="text-center">
                                         <span class="points-badge"><?php echo $student['points']; ?> points</span>
                                     </td>
-                                    <td class="text-center">                                        <div class="points-progress">
-                                            <span class="points-progress-text">(<?php echo $student['points_until_next_session']; ?> points until next session)</span>
-                                        </div>
-                                    </td>
                                     <td class="text-center">
                                         <span class="sessions-badge <?php echo $student['remaining_sessions'] <= 5 ? 'sessions-low' : ($student['remaining_sessions'] <= 10 ? 'sessions-medium' : ''); ?>">
                                             <?php echo $student['remaining_sessions']; ?> sessions
                                         </span>
                                     </td>
+                                    <td class="text-center">                                        <div class="points-progress">
+                                            <span class="points-progress-text">(<?php echo $student['points_until_next_session']; ?> points until next session)</span>
+                                        </div>
+                                    </td>
+                                    
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -461,8 +461,8 @@ function formatYearLevel($year) {
                             <th>Course</th>
                             <th>Year</th>
                             <th class="text-center">Points</th>
-                            <th class="text-center">Progression</th>
                             <th class="text-center">Sessions</th>
+                            <th class="text-center">Progression</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -486,20 +486,20 @@ function formatYearLevel($year) {
                                     <td class="text-center">
                                         <span class="points-badge"><?php echo $student['points']; ?> points</span>
                                     </td>
-                                    <td class="text-center">                                        <div class="points-progress">
-                                            <span class="points-progress-text">(<?php echo $student['points_until_next_session']; ?> points until next session)</span>
-                                    </td>
                                     <td class="text-center">
                                         <span class="sessions-badge <?php echo $student['remaining_sessions'] <= 5 ? 'sessions-low' : ($student['remaining_sessions'] <= 10 ? 'sessions-medium' : ''); ?>">
                                             <?php echo $student['remaining_sessions']; ?> sessions
                                         </span>
                                     </td>
+                                    <td class="text-center">                                        <div class="points-progress">
+                                            <span class="points-progress-text">(<?php echo $student['points_until_next_session']; ?> points until next session)</span>
+                                    </td>
                                     <td class="text-center action-buttons">
                                         <button class="action-btn primary" onclick="addPoint('<?php echo $student['idno']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
-                                            <i class="ri-add-circle-line"></i> Add Point
+                                            <i class="ri-add-circle-line"></i>
                                         </button>
                                         <button class="action-btn danger" onclick="clearPoints('<?php echo $student['idno']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
-                                            <i class="ri-delete-bin-line"></i> Clear Points
+                                            <i class="ri-delete-bin-line"></i>
                                         </button>
                                     </td>
                                 </tr>
