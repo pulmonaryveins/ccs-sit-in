@@ -195,12 +195,19 @@ $conn->close();
                                     <div class="detail-label">Purpose</div>
                                     <div class="detail-value">
                                         <select name="purpose" required>
-                                            <option value="">Select Purpose</option>
-                                            <option value="c_programming">C Programming</option>
-                                            <option value="java_programming">Java Programming</option>
-                                            <option value="csharp">C#</option>
-                                            <option value="php">PHP</option>
-                                            <option value="aspnet">ASP.Net</option>
+                                        <option value="">Select Purpose</option>
+                                                        <option value="C Programming">C Programming</option>
+                                                        <option value="Java Programming">Java Programming</option>
+                                                        <option value="C#">C#</option>
+                                                        <option value="PHP">PHP</option>
+                                                        <option value="ASP.Net">ASP.Net</option>
+                                                        <option value="MySQL Database">MySQL Database</option>
+                                                        <option value="PHP">PHP</option>
+                                                        <option value="Web Development">Web Development</option>
+                                                        <option value="System Architecture">System Architecture</option>
+                                                        <option value="System Analysis and Design">System Analysis and Design</option>
+                                                        <option value="Information Security">Information Security</option>
+                                                        <option value="Research">Research</option>
                                         </select>
                                     </div>
                                 </div>
@@ -214,6 +221,7 @@ $conn->close();
                                     <div class="detail-value">
                                         <select name="laboratory" required>
                                             <option value="">Select Laboratory</option>
+                                            <option value="517">517</option>
                                             <option value="524">524</option>
                                             <option value="526">526</option>
                                             <option value="528">528</option>
@@ -280,6 +288,7 @@ $conn->close();
                     <h3>Select a PC</h3>
                     <select id="labSelect" class="lab-select" name="laboratory">
                         <option value="">Select Laboratory</option>
+                        <option value="517">Laboratory 517</option>
                         <option value="524">Laboratory 524</option>
                         <option value="526">Laboratory 526</option>
                         <option value="528">Laboratory 528</option>
@@ -866,7 +875,7 @@ $conn->close();
                     const grid = document.getElementById('computerGrid');
                     grid.innerHTML = '';
                     
-                    for (let i = 1; i <= 40; i++) {
+                    for (let i = 1; i <= 50; i++) {
                         const status = data[i] || 'available';
                         grid.innerHTML += `
                             <div class="computer-unit ${status}" data-pc="${i}">

@@ -131,6 +131,7 @@ if ($result) {
                     <h3>Laboratory Computer Control</h3>
                     <select id="labSelect" class="lab-select">
                         <option value="">Select Laboratory</option>
+                        <option value="517">Laboratory 517</option>
                         <option value="524">Laboratory 524</option>
                         <option value="526">Laboratory 526</option>
                         <option value="528">Laboratory 528</option>
@@ -546,7 +547,7 @@ if ($result) {
                     const grid = document.getElementById('computerGrid');
                     grid.innerHTML = '';
                     
-                    for (let i = 1; i <= 40; i++) {
+                    for (let i = 1; i <= 50; i++) {
                         const status = data[i] || 'available';
                         grid.innerHTML += `
                             <div class="computer-unit" data-pc="${i}" data-lab="${laboratory}">
