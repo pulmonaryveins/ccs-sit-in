@@ -172,6 +172,808 @@ if ($result) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .content-wrapper {
+            animation: fadeIn 0.5s ease-out forwards;
+            padding-top: 80px;
+            padding-bottom: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #7556cc !important;
+            margin-bottom: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .table-wrapper {
+            animation: fadeIn 0.6s ease-out forwards;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .table-wrapper:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .filter-tabs {
+            animation: fadeIn 0.7s ease-out forwards;
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            border-bottom: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .filter-tab {
+            padding: 16px 24px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            position: relative;
+        }
+        
+        .filter-tab:hover {
+            color: #7556cc;
+            background-color: rgba(117, 86, 204, 0.05);
+        }
+        
+        .filter-tab.active {
+            color: #7556cc;
+            border-bottom: 3px solid #7556cc;
+            background-color: rgba(117, 86, 204, 0.1);
+        }
+        
+        .filter-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #7556cc, #9556cc);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .table-header {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(to right, #f8fafc, #ffffff);
+        }
+        
+        .table-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .table-header h2 i {
+            color: #7556cc;
+            font-size: 1.75rem;
+        }
+        
+        .table-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: #f1f5f9;
+            border-radius: 10px;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .search-box:focus-within {
+            background-color: white;
+            box-shadow: 0 0 0 2px rgba(117, 86, 204, 0.2);
+            border-color: rgba(117, 86, 204, 0.3);
+        }
+        
+        .search-box i {
+            color: #64748b;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            color: #334155;
+            width: 200px;
+            font-size: 0.95rem;
+        }
+        
+        .search-box input::placeholder {
+            color: #94a3b8;
+        }
+        
+        .bulk-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+        
+        .bulk-action-btn.primary {
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            color: white;
+        }
+        
+        .bulk-action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(117, 86, 204, 0.3);
+        }
+        
+        .bulk-action-btn i {
+            font-size: 1.1rem;
+        }
+        
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .modern-table thead tr {
+            background-color: #f8fafc;
+        }
+        
+        .modern-table th {
+            padding: 16px 24px;
+            font-weight: 600;
+            color: #475569;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+        }
+        
+        .modern-table th:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(117, 86, 204, 0.2), rgba(149, 86, 204, 0));
+        }
+        
+        .modern-table td {
+            padding: 16px 24px;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+        }
+        
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .modern-table tbody tr:hover td {
+            background-color: transparent;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .action-button.edit {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+        }
+        
+        .action-button.edit:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .action-button.delete {
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+        }
+        
+        .action-button.delete:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+        
+        .action-button i {
+            font-size: 1.1rem;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 16px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(30px) scale(0.95);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+        
+        .modal-backdrop.active .modal {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(to right, #f8fafc, #ffffff);
+        }
+        
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-header h3 i {
+            color: #7556cc;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            color: #ef4444;
+            background-color: #fee2e2;
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            padding: 20px 24px;
+            border-top: 1px solid #e2e8f0;
+            background: linear-gradient(to right, #ffffff, #f8fafc);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(117, 86, 204, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(203, 213, 225, 0.5);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #7556cc;
+            box-shadow: 0 0 0 3px rgba(117, 86, 204, 0.2);
+            outline: none;
+            background-color: white;
+        }
+        
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: #94a3b8;
+        }
+        
+        /* Status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .status-badge.active {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+            border: 1px solid rgba(22, 101, 52, 0.1);
+        }
+        
+        .status-badge.completed {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            border: 1px solid rgba(30, 64, 175, 0.1);
+        }
+        
+        .status-badge.approved {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            color: #166534;
+            border: 1px solid rgba(22, 101, 52, 0.1);
+        }
+        
+        .status-badge.pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid rgba(146, 64, 14, 0.1);
+        }
+        
+        .time-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #475569;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .time-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .time-badge i {
+            margin-right: 8px;
+            color: #7556cc;
+            font-size: 1rem;
+        }
+        
+        /* Laboratory-specific styles */
+        .day-selection {
+            padding: 16px 24px;
+            background: linear-gradient(to right, #f8fafc, #ffffff);
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .day-selection .day-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .day-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: white;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .day-btn:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        
+        .day-btn.active {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            color: #7556cc;
+            border-color: #c4b5fd;
+            box-shadow: 0 2px 5px rgba(117, 86, 204, 0.15);
+        }
+        
+        .empty-state {
+            padding: 48px 24px;
+            text-align: center;
+        }
+        
+        .empty-state-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.6s ease-out forwards;
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+        
+        .empty-state-content i {
+            font-size: 3rem;
+            color: #a0aec0;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state-content p {
+            font-size: 1.1rem;
+            color: #a0aec0;
+            font-weight: 400;
+        }
+        
+        /* Animation utilities */
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .table-actions {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+            
+            .filter-tab {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .day-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .modern-table th,
+            .modern-table td {
+                padding: 12px 16px;
+            }
+            
+            .modal {
+                width: 95%;
+            }
+        }
+        
+        /* Notification System */
+        #notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+            max-width: 90vw;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .notification {
+            display: flex;
+            align-items: flex-start;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            border-left: 4px solid #7556cc;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #7556cc, #9556cc);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification.info {
+            border-left-color: #3b82f6;
+        }
+        
+        .notification.info::before {
+            background: linear-gradient(to bottom, #3b82f6, #60a5fa);
+        }
+        
+        .notification.success {
+            border-left-color: #10b981;
+        }
+        
+        .notification.success::before {
+            background: linear-gradient(to bottom, #10b981, #34d399);
+        }
+        
+        .notification.warning {
+            border-left-color: #f59e0b;
+        }
+        
+        .notification.warning::before {
+            background: linear-gradient(to bottom, #f59e0b, #fbbf24);
+        }
+        
+        .notification.error {
+            border-left-color: #ef4444;
+        }
+        
+        .notification.error::before {
+            background: linear-gradient(to bottom, #ef4444, #f87171);
+        }
+        
+        .notification-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            margin-top: 2px;
+        }
+        
+        .notification-icon i {
+            font-size: 24px;
+        }
+        
+        .notification.info .notification-icon i {
+            color: #3b82f6;
+        }
+        
+        .notification.success .notification-icon i {
+            color: #10b981;
+        }
+        
+        .notification.warning .notification-icon i {
+            color: #f59e0b;
+        }
+        
+        .notification.error .notification-icon i {
+            color: #ef4444;
+        }
+        
+        .notification-content {
+            flex-grow: 1;
+        }
+        
+        .notification-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1e293b;
+        }
+        
+        .notification-message {
+            font-size: 0.95rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+        
+        .notification-close {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #94a3b8;
+            margin-left: 16px;
+            padding: 0;
+            line-height: 1;
+            transition: all 0.2s ease;
+            height: 24px;
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .notification-close:hover {
+            color: #ef4444;
+            background-color: #fee2e2;
+            transform: rotate(90deg);
+        }
+        
+        .nav-container {
+            margin: 0 auto;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -231,106 +1033,109 @@ if ($result) {
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 pt-20 pb-12">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Laboratory Management</h1>
-            <p class="text-gray-600">Manage laboratory schedules and availability</p>
-        </div>
+    <!-- Notification System -->
+    <div id="notification-container"></div>
 
-        <?php if (isset($_GET['success'])): ?>
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
-            <p><?php echo htmlspecialchars($_GET['success']); ?></p>
+    <div class="content-wrapper">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <i class="ri-computer-line"></i>
+                <span>Laboratory Management</span>
+            </div>
         </div>
-        <?php endif; ?>
-
-        <?php if (isset($error_message)): ?>
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" role="alert">
-            <p><?php echo htmlspecialchars($error_message); ?></p>
-        </div>
-        <?php endif; ?>
-
-        <!-- Laboratory Schedules Section -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold text-gray-800">Laboratory Schedules</h2>
-                <button id="addScheduleBtn" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition">
-                    <i class="fas fa-plus mr-2"></i> Add Schedule
-                </button>
+        
+        <div class="table-wrapper">
+            <div class="table-header">
+                <h2><i class="ri-building-4-line"></i> Laboratory Schedules</h2>
+                <div class="table-actions">
+                    <button id="addScheduleBtn" class="bulk-action-btn primary">
+                        <i class="ri-add-line"></i> Add Schedule
+                    </button>
+                    <div class="search-box">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="searchInput" placeholder="Search schedules...">
+                    </div>
+                </div>
             </div>
 
-            <!-- Laboratory and Day Selection -->
-            <div class="flex flex-wrap gap-4 mb-6">
-                <div class="filter-section">
-                    <label for="lab-filter" class="block text-sm font-medium text-gray-700 mb-1">Laboratory:</label>
-                    <select id="lab-filter" name="lab" class="lab-select bg-gray-50" onchange="this.form.submit()">
-                        <option value="Laboratory 517" <?php echo $selected_lab == 'Laboratory 517' ? 'selected' : ''; ?>>Laboratory 517</option>
-                        <option value="Laboratory 524" <?php echo $selected_lab == 'Laboratory 524' ? 'selected' : ''; ?>>Laboratory 524</option>
-                        <option value="Laboratory 526" <?php echo $selected_lab == 'Laboratory 526' ? 'selected' : ''; ?>>Laboratory 526</option>
-                        <option value="Laboratory 528" <?php echo $selected_lab == 'Laboratory 528' ? 'selected' : ''; ?>>Laboratory 528</option>
-                        <option value="Laboratory 530" <?php echo $selected_lab == 'Laboratory 530' ? 'selected' : ''; ?>>Laboratory 530</option>
-                        <option value="Laboratory 542" <?php echo $selected_lab == 'Laboratory 542' ? 'selected' : ''; ?>>Laboratory 542</option>
-                    </select>
-                </div>
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <div class="filter-tab active" data-target="lab-517">Laboratory 517</div>
+                <div class="filter-tab" data-target="lab-524">Laboratory 524</div>
+                <div class="filter-tab" data-target="lab-526">Laboratory 526</div>
+                <div class="filter-tab" data-target="lab-528">Laboratory 528</div>
+                <div class="filter-tab" data-target="lab-530">Laboratory 530</div>
+                <div class="filter-tab" data-target="lab-542">Laboratory 542</div>
+            </div>
 
-                <div class="filter-section">
-                    <label for="day-filter" class="block text-sm font-medium text-gray-700 mb-1">Day:</label>
-                    <select id="day-filter" name="day" class="lab-select bg-gray-50" onchange="this.form.submit()">
-                        <option value="Monday" <?php echo $selected_day == 'Monday' ? 'selected' : ''; ?>>Monday</option>
-                        <option value="Tuesday" <?php echo $selected_day == 'Tuesday' ? 'selected' : ''; ?>>Tuesday</option>
-                        <option value="Wednesday" <?php echo $selected_day == 'Wednesday' ? 'selected' : ''; ?>>Wednesday</option>
-                        <option value="Thursday" <?php echo $selected_day == 'Thursday' ? 'selected' : ''; ?>>Thursday</option>
-                        <option value="Friday" <?php echo $selected_day == 'Friday' ? 'selected' : ''; ?>>Friday</option>
-                        <option value="Saturday" <?php echo $selected_day == 'Saturday' ? 'selected' : ''; ?>>Saturday</option>
-                    </select>
+            <!-- Day Selection -->
+            <div class="day-selection">
+                <div class="day-buttons">
+                    <button class="day-btn active" data-day="Monday">Monday</button>
+                    <button class="day-btn" data-day="Tuesday">Tuesday</button>
+                    <button class="day-btn" data-day="Wednesday">Wednesday</button>
+                    <button class="day-btn" data-day="Thursday">Thursday</button>
+                    <button class="day-btn" data-day="Friday">Friday</button>
+                    <button class="day-btn" data-day="Saturday">Saturday</button>
                 </div>
             </div>
 
             <!-- Schedule Table -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border border-gray-200 rounded-md">
+            <div class="table-container">
+                <table class="modern-table">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="py-3 px-4 text-left border-b">Time</th>
-                            <th class="py-3 px-4 text-left border-b">Subject</th>
-                            <th class="py-3 px-4 text-left border-b">Professor</th>
-                            <th class="py-3 px-4 text-left border-b">Actions</th>
+                        <tr>
+                            <th class="w-1/4">Time</th>
+                            <th class="w-1/4">Subject</th>
+                            <th class="w-1/4">Professor</th>
+                            <th class="w-1/4">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="schedule-table-body">
                         <?php if (empty($lab_schedules)): ?>
                         <tr>
-                            <td colspan="4" class="py-6 text-center text-gray-500">No schedules found for <?php echo htmlspecialchars($selected_lab); ?> on <?php echo htmlspecialchars($selected_day); ?></td>
+                            <td colspan="4" class="empty-state">
+                                <div class="empty-state-content">
+                                    <i class="ri-calendar-todo-line"></i>
+                                    <p>No schedules found for <?php echo htmlspecialchars($selected_lab); ?> on <?php echo htmlspecialchars($selected_day); ?></p>
+                                </div>
+                            </td>
                         </tr>
                         <?php else: ?>
                             <?php foreach ($lab_schedules as $schedule): ?>
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="py-3 px-4 border-b">
-                                    <?php 
-                                        $time_start = new DateTime($schedule['time_start']);
-                                        $time_end = new DateTime($schedule['time_end']);
-                                        echo $time_start->format('g:i A') . ' - ' . $time_end->format('g:i A'); 
-                                    ?>
+                            <tr>
+                                <td>
+                                    <span class="time-badge">
+                                        <i class="ri-time-line"></i>
+                                        <?php 
+                                            $time_start = new DateTime($schedule['time_start']);
+                                            $time_end = new DateTime($schedule['time_end']);
+                                            echo $time_start->format('g:i A') . ' - ' . $time_end->format('g:i A'); 
+                                        ?>
+                                    </span>
                                 </td>
-                                <td class="py-3 px-4 border-b"><?php echo htmlspecialchars($schedule['subject']); ?></td>
-                                <td class="py-3 px-4 border-b"><?php echo htmlspecialchars($schedule['professor']); ?></td>
-                                <td class="py-3 px-4 border-b">
-                                    <button class="edit-btn text-blue-500 hover:text-blue-700 mr-3" 
-                                            data-id="<?php echo $schedule['id']; ?>"
-                                            data-day="<?php echo htmlspecialchars($schedule['day']); ?>"
-                                            data-lab="<?php echo htmlspecialchars($schedule['laboratory']); ?>"
-                                            data-timestart="<?php echo htmlspecialchars($schedule['time_start']); ?>"
-                                            data-timeend="<?php echo htmlspecialchars($schedule['time_end']); ?>"
-                                            data-subject="<?php echo htmlspecialchars($schedule['subject']); ?>"
-                                            data-professor="<?php echo htmlspecialchars($schedule['professor']); ?>">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button class="delete-btn text-red-500 hover:text-red-700" 
-                                            data-id="<?php echo $schedule['id']; ?>"
-                                            data-day="<?php echo htmlspecialchars($schedule['day']); ?>"
-                                            data-lab="<?php echo htmlspecialchars($schedule['laboratory']); ?>">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
+                                <td><?php echo htmlspecialchars($schedule['subject']); ?></td>
+                                <td><?php echo htmlspecialchars($schedule['professor']); ?></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-button edit edit-btn" 
+                                                data-id="<?php echo $schedule['id']; ?>"
+                                                data-day="<?php echo htmlspecialchars($schedule['day']); ?>"
+                                                data-lab="<?php echo htmlspecialchars($schedule['laboratory']); ?>"
+                                                data-timestart="<?php echo htmlspecialchars($schedule['time_start']); ?>"
+                                                data-timeend="<?php echo htmlspecialchars($schedule['time_end']); ?>"
+                                                data-subject="<?php echo htmlspecialchars($schedule['subject']); ?>"
+                                                data-professor="<?php echo htmlspecialchars($schedule['professor']); ?>">
+                                            <i class="ri-edit-line"></i>
+                                        </button>
+                                        <button class="action-button delete delete-btn" 
+                                                data-id="<?php echo $schedule['id']; ?>"
+                                                data-day="<?php echo htmlspecialchars($schedule['day']); ?>"
+                                                data-lab="<?php echo htmlspecialchars($schedule['laboratory']); ?>">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -342,317 +1147,605 @@ if ($result) {
     </div>
 
     <!-- Add Schedule Modal -->
-    <div id="addScheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div class="border-b px-6 py-4 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-800">Add Laboratory Schedule</h3>
-                <button id="closeAddModal" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times"></i>
-                </button>
+    <div id="addScheduleModal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="ri-add-circle-line"></i> Add Laboratory Schedule</h3>
+                <button id="closeAddModal" class="modal-close">&times;</button>
             </div>
-            <form action="" method="POST" class="p-6 space-y-4">
-                <input type="hidden" name="action" value="add_schedule">
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="day" class="block text-sm font-medium text-gray-700 mb-1">Day</label>
-                        <select name="day" id="day" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
-                        </select>
+            <div class="modal-body">
+                <form id="addScheduleForm" action="" method="POST">
+                    <input type="hidden" name="action" value="add_schedule">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="day">Day</label>
+                            <select name="day" id="day" required>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="laboratory">Laboratory</label>
+                            <select name="laboratory" id="laboratory" required>
+                                <option value="Laboratory 517">Laboratory 517</option>
+                                <option value="Laboratory 524">Laboratory 524</option>
+                                <option value="Laboratory 526">Laboratory 526</option>
+                                <option value="Laboratory 528">Laboratory 528</option>
+                                <option value="Laboratory 530">Laboratory 530</option>
+                                <option value="Laboratory 542">Laboratory 542</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div>
-                        <label for="laboratory" class="block text-sm font-medium text-gray-700 mb-1">Laboratory</label>
-                        <select name="laboratory" id="laboratory" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
-                            <option value="Laboratory 517">Laboratory 517</option>
-                            <option value="Laboratory 524">Laboratory 524</option>
-                            <option value="Laboratory 526">Laboratory 526</option>
-                            <option value="Laboratory 528">Laboratory 528</option>
-                            <option value="Laboratory 530">Laboratory 530</option>
-                            <option value="Laboratory 542">Laboratory 542</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="time_start" class="block text-sm font-medium text-gray-700 mb-1">Time Start</label>
-                        <input type="time" name="time_start" id="time_start" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="time_start">Time Start</label>
+                            <input type="time" name="time_start" id="time_start" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="time_end">Time End</label>
+                            <input type="time" name="time_end" id="time_end" required>
+                        </div>
                     </div>
                     
-                    <div>
-                        <label for="time_end" class="block text-sm font-medium text-gray-700 mb-1">Time End</label>
-                        <input type="time" name="time_end" id="time_end" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" name="subject" id="subject" required>
                     </div>
-                </div>
-                
-                <div>
-                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                    <input type="text" name="subject" id="subject" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
-                </div>
-                
-                <div>
-                    <label for="professor" class="block text-sm font-medium text-gray-700 mb-1">Professor</label>
-                    <input type="text" name="professor" id="professor" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
-                </div>
-                
-                <div class="flex justify-end mt-6">
-                    <button type="button" id="cancelAddBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 hover:bg-gray-400 transition">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition">
-                        <i class="fas fa-plus mr-2"></i> Add Schedule
-                    </button>
-                </div>
-            </form>
+                    
+                    <div class="form-group">
+                        <label for="professor">Professor</label>
+                        <input type="text" name="professor" id="professor" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelAddBtn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="submitAddBtn" class="btn btn-primary">Add Schedule</button>
+            </div>
         </div>
     </div>
 
     <!-- Edit Schedule Modal -->
-    <div id="editScheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div class="border-b px-6 py-4 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-800">Edit Laboratory Schedule</h3>
-                <button id="closeEditModal" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times"></i>
-                </button>
+    <div id="editScheduleModal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="ri-edit-box-line"></i> Edit Laboratory Schedule</h3>
+                <button id="closeEditModal" class="modal-close">&times;</button>
             </div>
-            <form action="" method="POST" class="p-6 space-y-4">
-                <input type="hidden" name="action" value="update_schedule">
-                <input type="hidden" name="schedule_id" id="edit_schedule_id">
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="edit_day" class="block text-sm font-medium text-gray-700 mb-1">Day</label>
-                        <select name="day" id="edit_day" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
-                        </select>
+            <div class="modal-body">
+                <form id="editScheduleForm" action="" method="POST">
+                    <input type="hidden" name="action" value="update_schedule">
+                    <input type="hidden" name="schedule_id" id="edit_schedule_id">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="edit_day">Day</label>
+                            <select name="day" id="edit_day" required>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit_laboratory">Laboratory</label>
+                            <select name="laboratory" id="edit_laboratory" required>
+                                <option value="Laboratory 517">Laboratory 517</option>
+                                <option value="Laboratory 524">Laboratory 524</option>
+                                <option value="Laboratory 526">Laboratory 526</option>
+                                <option value="Laboratory 528">Laboratory 528</option>
+                                <option value="Laboratory 530">Laboratory 530</option>
+                                <option value="Laboratory 542">Laboratory 542</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div>
-                        <label for="edit_laboratory" class="block text-sm font-medium text-gray-700 mb-1">Laboratory</label>
-                        <select name="laboratory" id="edit_laboratory" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
-                            <option value="Laboratory 517">Laboratory 517</option>
-                            <option value="Laboratory 524">Laboratory 524</option>
-                            <option value="Laboratory 526">Laboratory 526</option>
-                            <option value="Laboratory 528">Laboratory 528</option>
-                            <option value="Laboratory 530">Laboratory 530</option>
-                            <option value="Laboratory 542">Laboratory 542</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="edit_time_start" class="block text-sm font-medium text-gray-700 mb-1">Time Start</label>
-                        <input type="time" name="time_start" id="edit_time_start" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="edit_time_start">Time Start</label>
+                            <input type="time" name="time_start" id="edit_time_start" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit_time_end">Time End</label>
+                            <input type="time" name="time_end" id="edit_time_end" required>
+                        </div>
                     </div>
                     
-                    <div>
-                        <label for="edit_time_end" class="block text-sm font-medium text-gray-700 mb-1">Time End</label>
-                        <input type="time" name="time_end" id="edit_time_end" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
+                    <div class="form-group">
+                        <label for="edit_subject">Subject</label>
+                        <input type="text" name="subject" id="edit_subject" required>
                     </div>
-                </div>
-                
-                <div>
-                    <label for="edit_subject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                    <input type="text" name="subject" id="edit_subject" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
-                </div>
-                
-                <div>
-                    <label for="edit_professor" class="block text-sm font-medium text-gray-700 mb-1">Professor</label>
-                    <input type="text" name="professor" id="edit_professor" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3" required>
-                </div>
-                
-                <div class="flex justify-end mt-6">
-                    <button type="button" id="cancelEditBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 hover:bg-gray-400 transition">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-                        <i class="fas fa-save mr-2"></i> Save Changes
-                    </button>
-                </div>
-            </form>
+                    
+                    <div class="form-group">
+                        <label for="edit_professor">Professor</label>
+                        <input type="text" name="professor" id="edit_professor" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="submitEditBtn" class="btn btn-primary">Save Changes</button>
+            </div>
         </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Confirm Deletion</h3>
-            <p class="text-gray-600 mb-6">Are you sure you want to delete this schedule? This action cannot be undone.</p>
-            
-            <form action="" method="POST" class="flex justify-end">
-                <input type="hidden" name="action" value="delete_schedule">
-                <input type="hidden" name="schedule_id" id="delete_schedule_id">
-                <input type="hidden" name="day" id="delete_day">
-                <input type="hidden" name="laboratory" id="delete_laboratory">
-                
-                <button type="button" id="cancelDeleteBtn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 hover:bg-gray-400 transition">
-                    Cancel
-                </button>
-                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
-                    <i class="fas fa-trash mr-2"></i> Delete
-                </button>
-            </form>
+    <div id="deleteModal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="ri-delete-bin-line"></i> Delete Schedule</h3>
+                <button id="closeDeleteModal" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+                        <i class="ri-error-warning-line text-3xl text-red-500"></i>
+                    </div>
+                    <p class="text-lg font-medium text-gray-900 mb-2">Are you sure you want to delete this schedule?</p>
+                    <p class="text-gray-500">This action cannot be undone.</p>
+                </div>
+                <form id="deleteScheduleForm" action="" method="POST">
+                    <input type="hidden" name="action" value="delete_schedule">
+                    <input type="hidden" name="schedule_id" id="delete_schedule_id">
+                    <input type="hidden" name="day" id="delete_day">
+                    <input type="hidden" name="laboratory" id="delete_laboratory">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+            </div>
         </div>
     </div>
 
-    <style>
-        .nav-container {
-            margin: 0 auto;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
-            z-index: 1000;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
-                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
-        }
-        .lab-select {
-            padding: 0.5rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-left: 1rem;
-        }
-        
-        .lab-select:hover, .lab-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 2px 5px rgba(117, 86, 204, 0.15);
-        }
-        
-        /* Enhanced Lab Controls Section */
-        .profile-card {
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .profile-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.25rem 1.5rem;
-            background: white;
-            border-bottom: 1px solid #e8edf5;
-        }
-        
-        .profile-header h3 {
-            font-size: 1.25rem;
-            font-weight: 500;
-            color: #2d3748;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-    </style>
-
     <script>
-        // Modal handling for Add Schedule
-        const addScheduleBtn = document.getElementById('addScheduleBtn');
-        const addScheduleModal = document.getElementById('addScheduleModal');
-        const closeAddModal = document.getElementById('closeAddModal');
-        const cancelAddBtn = document.getElementById('cancelAddBtn');
-
-        addScheduleBtn.addEventListener('click', () => {
-            addScheduleModal.classList.remove('hidden');
+        // Enhanced Notification System
+        function showNotification(title, message, type = 'info', duration = 5000) {
+            const notificationContainer = document.getElementById('notification-container');
             
-            // Pre-populate with current filter selections
-            const labFilter = document.getElementById('lab-filter');
-            const dayFilter = document.getElementById('day-filter');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
             
-            if(labFilter && dayFilter) {
-                document.getElementById('laboratory').value = labFilter.value;
-                document.getElementById('day').value = dayFilter.value;
+            let icon = 'information-line';
+            if (type === 'success') icon = 'check-line';
+            if (type === 'error') icon = 'error-warning-line';
+            if (type === 'warning') icon = 'alert-line';
+            
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="ri-${icon}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close" onclick="closeNotification(this)">&times;</button>
+            `;
+            
+            notificationContainer.appendChild(notification);
+            
+            // Force reflow to enable animation
+            notification.getBoundingClientRect();
+            notification.classList.add('show');
+            
+            if (duration > 0) {
+                setTimeout(() => closeNotification(notification), duration);
             }
-        });
-
-        closeAddModal.addEventListener('click', () => {
-            addScheduleModal.classList.add('hidden');
-        });
-
-        cancelAddBtn.addEventListener('click', () => {
-            addScheduleModal.classList.add('hidden');
-        });
-
-        // Modal handling for Edit Schedule
-        const editScheduleModal = document.getElementById('editScheduleModal');
-        const closeEditModal = document.getElementById('closeEditModal');
-        const cancelEditBtn = document.getElementById('cancelEditBtn');
+            
+            return notification;
+        }
         
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.getAttribute('data-id');
-                const day = button.getAttribute('data-day');
-                const lab = button.getAttribute('data-lab');
-                const timeStart = button.getAttribute('data-timestart');
-                const timeEnd = button.getAttribute('data-timeend');
-                const subject = button.getAttribute('data-subject');
-                const professor = button.getAttribute('data-professor');
-                
-                document.getElementById('edit_schedule_id').value = id;
-                document.getElementById('edit_day').value = day;
-                document.getElementById('edit_laboratory').value = lab;
-                document.getElementById('edit_time_start').value = timeStart.substr(0, 5);
-                document.getElementById('edit_time_end').value = timeEnd.substr(0, 5);
-                document.getElementById('edit_subject').value = subject;
-                document.getElementById('edit_professor').value = professor;
-                
-                editScheduleModal.classList.remove('hidden');
+        function closeNotification(notification) {
+            if (!notification) return;
+            
+            if (notification.tagName === 'BUTTON') {
+                notification = notification.closest('.notification');
+            }
+            
+            notification.classList.remove('show');
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.parentElement.removeChild(notification);
+                }
+            }, 400);
+        }
+
+        // Enhanced initial setup
+        document.addEventListener('DOMContentLoaded', function() {
+            // Success message handling
+            <?php if (isset($_GET['success'])): ?>
+            showNotification('Success', '<?php echo htmlspecialchars($_GET['success']); ?>', 'success');
+            <?php endif; ?>
+            
+            <?php if (isset($error_message)): ?>
+            showNotification('Error', '<?php echo htmlspecialchars($error_message); ?>', 'error');
+            <?php endif; ?>
+            
+            // Set active tab based on URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const lab = urlParams.get('lab');
+            if (lab) {
+                const labTarget = lab.replace('Laboratory ', 'lab-');
+                document.querySelectorAll('.filter-tab').forEach(tab => {
+                    if (tab.getAttribute('data-target') === labTarget) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Set active day button based on URL parameter
+            const day = urlParams.get('day');
+            if (day) {
+                document.querySelectorAll('.day-btn').forEach(btn => {
+                    if (btn.getAttribute('data-day') === day) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Filter tab click handler with animation
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Update active class with animation
+                    document.querySelectorAll('.filter-tab').forEach(t => {
+                        t.classList.remove('active');
+                        t.style.transition = 'all 0.3s ease';
+                    });
+                    
+                    this.classList.add('active');
+                    
+                    // Get lab from data-target
+                    const labTarget = this.getAttribute('data-target');
+                    const lab = 'Laboratory ' + labTarget.replace('lab-', '');
+                    
+                    // Get current day
+                    const activeDay = document.querySelector('.day-btn.active').getAttribute('data-day');
+                    
+                    // Show loading state
+                    const tableBody = document.getElementById('schedule-table-body');
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <div class="empty-state-content animate-pulse">
+                                    <i class="ri-loader-4-line"></i>
+                                    <p>Loading schedules...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // Redirect to update the view
+                    setTimeout(() => {
+                        window.location.href = `laboratories.php?lab=${lab}&day=${activeDay}`;
+                    }, 300);
+                });
             });
-        });
-
-        closeEditModal.addEventListener('click', () => {
-            editScheduleModal.classList.add('hidden');
-        });
-
-        cancelEditBtn.addEventListener('click', () => {
-            editScheduleModal.classList.add('hidden');
-        });
-
-        // Modal handling for Delete Schedule
-        const deleteModal = document.getElementById('deleteModal');
-        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-        
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.getAttribute('data-id');
-                const day = button.getAttribute('data-day');
-                const lab = button.getAttribute('data-lab');
-                
-                document.getElementById('delete_schedule_id').value = id;
-                document.getElementById('delete_day').value = day;
-                document.getElementById('delete_laboratory').value = lab;
-                
-                deleteModal.classList.remove('hidden');
+            
+            // Day button click handler with animation
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active class with animation
+                    document.querySelectorAll('.day-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.style.transition = 'all 0.3s ease';
+                    });
+                    
+                    this.classList.add('active');
+                    
+                    // Get day from data attribute
+                    const day = this.getAttribute('data-day');
+                    
+                    // Get current lab
+                    const labTarget = document.querySelector('.filter-tab.active').getAttribute('data-target');
+                    const lab = 'Laboratory ' + labTarget.replace('lab-', '');
+                    
+                    // Show loading state
+                    const tableBody = document.getElementById('schedule-table-body');
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <div class="empty-state-content animate-pulse">
+                                    <i class="ri-loader-4-line"></i>
+                                    <p>Loading schedules...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // Redirect to update the view
+                    setTimeout(() => {
+                        window.location.href = `laboratories.php?lab=${lab}&day=${day}`;
+                    }, 300);
+                });
             });
+            
+            // Enhanced search functionality
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    const searchText = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('#schedule-table-body tr:not(.empty-state)');
+                    
+                    let hasResults = false;
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        if (text.includes(searchText)) {
+                            row.style.display = '';
+                            hasResults = true;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                    
+                    // Show empty state if no results
+                    const emptyRow = document.querySelector('.empty-state');
+                    if (emptyRow) {
+                        if (!hasResults && rows.length > 0) {
+                            emptyRow.style.display = 'table-cell';
+                            const emptyStateContent = emptyRow.querySelector('.empty-state-content p');
+                            if (emptyStateContent) {
+                                emptyStateContent.textContent = `No schedules found matching "${searchText}"`;
+                            }
+                        } else if (rows.length > 0) {
+                            emptyRow.style.display = 'none';
+                        }
+                    }
+                });
+                
+                // Add search animation
+                searchInput.addEventListener('focus', function() {
+                    this.parentNode.classList.add('focused');
+                });
+                
+                searchInput.addEventListener('blur', function() {
+                    this.parentNode.classList.remove('focused');
+                });
+            }
+
+            // Quick add button from empty state
+            const quickAddBtn = document.getElementById('quickAddBtn');
+            if (quickAddBtn) {
+                quickAddBtn.addEventListener('click', function() {
+                    document.getElementById('addScheduleBtn').click();
+                });
+            }
+
+            // Set up modal event handlers
+            setupModals();
         });
 
-        cancelDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-        });
+        // Enhanced modal handling
+        function setupModals() {
+            // Add Schedule Modal
+            const addScheduleBtn = document.getElementById('addScheduleBtn');
+            const addScheduleModal = document.getElementById('addScheduleModal');
+            const closeAddModal = document.getElementById('closeAddModal');
+            const cancelAddBtn = document.getElementById('cancelAddBtn');
+            const submitAddBtn = document.getElementById('submitAddBtn');
 
-        // Handle filter changes
-        document.getElementById('lab-filter').addEventListener('change', function() {
-            window.location.href = 'laboratories.php?lab=' + this.value + '&day=' + document.getElementById('day-filter').value;
-        });
+            addScheduleBtn.addEventListener('click', () => {
+                addScheduleModal.classList.add('active');
+                
+                // Pre-populate with current filter selections
+                const activeTab = document.querySelector('.filter-tab.active');
+                const activeDay = document.querySelector('.day-btn.active');
+                
+                if (activeTab && activeDay) {
+                    const labTarget = activeTab.getAttribute('data-target');
+                    const lab = 'Laboratory ' + labTarget.replace('lab-', '');
+                    const day = activeDay.getAttribute('data-day');
+                    
+                    document.getElementById('laboratory').value = lab;
+                    document.getElementById('day').value = day;
+                    
+                    // Focus on time_start after a short delay
+                    setTimeout(() => {
+                        document.getElementById('time_start').focus();
+                    }, 300);
+                }
+            });
 
-        document.getElementById('day-filter').addEventListener('change', function() {
-            window.location.href = 'laboratories.php?lab=' + document.getElementById('lab-filter').value + '&day=' + this.value;
-        });
+            closeAddModal.addEventListener('click', () => {
+                addScheduleModal.classList.remove('active');
+            });
+
+            cancelAddBtn.addEventListener('click', () => {
+                addScheduleModal.classList.remove('active');
+            });
+
+            submitAddBtn.addEventListener('click', () => {
+                // Validate form
+                const form = document.getElementById('addScheduleForm');
+                
+                // Custom validation
+                const timeStart = document.getElementById('time_start').value;
+                const timeEnd = document.getElementById('time_end').value;
+                
+                if (timeStart >= timeEnd) {
+                    showNotification('Validation Error', 'End time must be after start time', 'error');
+                    return;
+                }
+                
+                if (form.checkValidity()) {
+                    // Show processing notification
+                    const notification = showNotification('Processing', 'Adding schedule...', 'info', 0);
+                    
+                    // Submit form with animation
+                    submitAddBtn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Processing...';
+                    submitAddBtn.disabled = true;
+                    cancelAddBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                } else {
+                    form.reportValidity();
+                }
+            });
+
+            // Edit Schedule Modal
+            const editScheduleModal = document.getElementById('editScheduleModal');
+            const closeEditModal = document.getElementById('closeEditModal');
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
+            const submitEditBtn = document.getElementById('submitEditBtn');
+            
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.getAttribute('data-id');
+                    const day = button.getAttribute('data-day');
+                    const lab = button.getAttribute('data-lab');
+                    const timeStart = button.getAttribute('data-timestart');
+                    const timeEnd = button.getAttribute('data-timeend');
+                    const subject = button.getAttribute('data-subject');
+                    const professor = button.getAttribute('data-professor');
+                    
+                    document.getElementById('edit_schedule_id').value = id;
+                    document.getElementById('edit_day').value = day;
+                    document.getElementById('edit_laboratory').value = lab;
+                    document.getElementById('edit_time_start').value = timeStart.substr(0, 5);
+                    document.getElementById('edit_time_end').value = timeEnd.substr(0, 5);
+                    document.getElementById('edit_subject').value = subject;
+                    document.getElementById('edit_professor').value = professor;
+                    
+                    editScheduleModal.classList.add('active');
+                });
+            });
+
+            closeEditModal.addEventListener('click', () => {
+                editScheduleModal.classList.remove('active');
+            });
+
+            cancelEditBtn.addEventListener('click', () => {
+                editScheduleModal.classList.remove('active');
+            });
+
+            submitEditBtn.addEventListener('click', () => {
+                // Validate form
+                const form = document.getElementById('editScheduleForm');
+                
+                // Custom validation
+                const timeStart = document.getElementById('edit_time_start').value;
+                const timeEnd = document.getElementById('edit_time_end').value;
+                
+                if (timeStart >= timeEnd) {
+                    showNotification('Validation Error', 'End time must be after start time', 'error');
+                    return;
+                }
+                
+                if (form.checkValidity()) {
+                    // Show processing notification
+                    const notification = showNotification('Processing', 'Updating schedule...', 'info', 0);
+                    
+                    // Submit form with animation
+                    submitEditBtn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Processing...';
+                    submitEditBtn.disabled = true;
+                    cancelEditBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                } else {
+                    form.reportValidity();
+                }
+            });
+
+            // Delete Confirmation Modal
+            const deleteModal = document.getElementById('deleteModal');
+            const closeDeleteModal = document.getElementById('closeDeleteModal');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.getAttribute('data-id');
+                    const day = button.getAttribute('data-day');
+                    const lab = button.getAttribute('data-lab');
+                    
+                    document.getElementById('delete_schedule_id').value = id;
+                    document.getElementById('delete_day').value = day;
+                    document.getElementById('delete_laboratory').value = lab;
+                    
+                    deleteModal.classList.add('active');
+                });
+            });
+
+            closeDeleteModal.addEventListener('click', () => {
+                deleteModal.classList.remove('active');
+            });
+
+            cancelDeleteBtn.addEventListener('click', () => {
+                deleteModal.classList.remove('active');
+            });
+
+            confirmDeleteBtn.addEventListener('click', () => {
+                // Show processing notification
+                const notification = showNotification('Processing', 'Deleting schedule...', 'info', 0);
+                
+                // Submit form with animation
+                confirmDeleteBtn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Processing...';
+                confirmDeleteBtn.disabled = true;
+                cancelDeleteBtn.disabled = true;
+                
+                setTimeout(() => {
+                    document.getElementById('deleteScheduleForm').submit();
+                }, 500);
+            });
+            
+            // Close modals when clicking outside
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.addEventListener('click', (e) => {
+                    if (e.target === backdrop) {
+                        backdrop.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Escape key to close modals
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal-backdrop.active').forEach(modal => {
+                        modal.classList.remove('active');
+                    });
+                }
+                
+                // Enter key in modals to submit
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    // Check if a modal is active and focus is not in a textarea
+                    if (document.querySelector('.modal-backdrop.active') && document.activeElement.tagName !== 'TEXTAREA') {
+                        // Prevent default to stop form submission
+                        e.preventDefault();
+                        
+                        // Determine which modal is active and click its submit button
+                        if (document.getElementById('addScheduleModal').classList.contains('active')) {
+                            document.getElementById('submitAddBtn').click();
+                        } else if (document.getElementById('editScheduleModal').classList.contains('active')) {
+                            document.getElementById('submitEditBtn').click();
+                        } else if (document.getElementById('deleteModal').classList.contains('active')) {
+                            document.getElementById('confirmDeleteBtn').click();
+                        }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
