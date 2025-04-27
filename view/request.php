@@ -338,7 +338,6 @@ if ($result) {
     </div>
 
     <style>
-
         .nav-container {
             margin: 0 auto;
             width: 100%;
@@ -489,8 +488,9 @@ if ($result) {
             flex-direction: column;
             gap: 1rem;
             padding: 1.5rem;
-            max-height: 600px;
+            max-height: 550px;
             overflow-y: auto;
+            position: relative; /* Added for stacking context */
         }
         
         .no-requests {
@@ -511,6 +511,7 @@ if ($result) {
             opacity: 0.5;
         }
         
+        /* Fix for request-item overflow hiding the buttons */
         .request-item {
             background: white;
             border: 1px solid #e8edf5;
@@ -519,15 +520,51 @@ if ($result) {
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
             position: relative;
-            overflow: hidden;
+            overflow: visible; /* Changed from hidden to visible to prevent buttons from being cut off */
+            margin-bottom: 0.5rem;
         }
         
-        .request-item:hover {
-            border-color: #d3dce9;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transform: translateY(-2px);
+        /* Ensure buttons remain visible */
+        .request-actions {
+            display: flex;
+            gap: 1rem;
+            position: relative; /* Added to ensure proper stacking context */
+            z-index: 5; /* Higher z-index to appear above other elements */
+            width: 100%;
+            margin-top: 0.5rem;
         }
         
+        .action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            font-size: 0.9rem;
+            min-width: 100px; /* Ensure minimum width */
+            position: relative; /* Added positioning context */
+        }
+        
+        /* Reset the overflow behavior for the containers */
+        .requests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.5rem;
+            max-height: 550px;
+            overflow-y: auto;
+            position: relative; /* Added for stacking context */
+        }
+        
+        /* Additional style for the gradient accent to not interfere with buttons */
         .request-item:before {
             content: '';
             position: absolute;
@@ -537,6 +574,7 @@ if ($result) {
             height: 100%;
             background: linear-gradient(to bottom, #f59e0b, #d97706);
             border-radius: 2px;
+            z-index: 1; /* Lower z-index to stay behind content */
         }
         
         .request-header {
@@ -1032,8 +1070,39 @@ if ($result) {
             }
         }
 
-        // Tab navigation functionality
+        // Add function to ensure buttons are visible after content loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Fix for disappearing buttons
+            const fixButtonVisibility = function() {
+                document.querySelectorAll('.request-item').forEach(item => {
+                    const actionsContainer = item.querySelector('.request-actions');
+                    if (actionsContainer) {
+                        // Ensure actions container is visible
+                        actionsContainer.style.display = 'flex';
+                        
+                        // Make sure each button is visible
+                        const buttons = actionsContainer.querySelectorAll('.action-btn');
+                        buttons.forEach(btn => {
+                            // Reset any styles that might hide the button
+                            btn.style.visibility = 'visible';
+                            btn.style.display = 'flex';
+                            btn.style.opacity = '1';
+                        });
+                    }
+                });
+            };
+            
+            // Run the fix immediately and after a small delay to catch dynamically loaded content
+            fixButtonVisibility();
+            setTimeout(fixButtonVisibility, 300);
+            
+            // Also run the fix whenever new content might be loaded
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    setTimeout(fixButtonVisibility, 300);
+                });
+            });
+            
             // Tab switching
             const tabButtons = document.querySelectorAll('.tab-button');
             tabButtons.forEach(button => {
