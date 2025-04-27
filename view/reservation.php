@@ -875,7 +875,7 @@ $conn->close();
                     const grid = document.getElementById('computerGrid');
                     grid.innerHTML = '';
                     
-                    for (let i = 1; i <= 40; i++) {
+                    for (let i = 1; i <= 50; i++) {
                         const status = data[i] || 'available';
                         grid.innerHTML += `
                             <div class="computer-unit ${status}" data-pc="${i}">
