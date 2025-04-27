@@ -9,9 +9,26 @@ if (!isset($_SESSION['admin_logged_in'])) {
 require_once '../config/ensure_tables.php';
 require_once '../config/db_connect.php';
 
+// Get reservation_id from URL if exists (for redirects from request.php)
+$highlight_id = isset($_GET['reservation_id']) ? intval($_GET['reservation_id']) : 0;
+
 // Fetch current sit-in students from the sit_ins table
 $current_students = [];
-$query = "SELECT s.*, u.firstname, u.lastname 
+
+// Query for active sit-ins ONLY (no longer combining with reservations)
+$query = "SELECT 
+            'sit_in' AS record_type,
+            s.id,
+            s.idno,
+            s.fullname,
+            s.purpose,
+            s.laboratory,
+            s.pc_number,
+            s.time_in,
+            s.date,
+            s.status,
+            u.firstname,
+            u.lastname
           FROM sit_ins s
           LEFT JOIN users u ON s.idno = u.idno
           WHERE s.time_out IS NULL
@@ -25,8 +42,76 @@ if ($result) {
     }
 }
 
+// Get approved reservations separately
+$approved_reservations = [];
+$reservation_query = "SELECT 
+                        'reservation' AS record_type,
+                        r.id,
+                        r.idno,
+                        r.fullname,
+                        r.purpose,
+                        r.laboratory,
+                        r.pc_number,
+                        r.time_in,
+                        r.date,
+                        r.status,
+                        u.firstname,
+                        u.lastname
+                      FROM reservations r
+                      LEFT JOIN users u ON r.idno = u.idno
+                      WHERE r.status = 'approved'
+                      AND r.time_out IS NULL
+                      AND r.date >= CURDATE()
+                      ORDER BY r.date ASC, r.time_in ASC";
+
+$result = $conn->query($reservation_query);
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $approved_reservations[] = $row;
+    }
+}
+
 // For debugging
 echo "<!-- Found " . count($current_students) . " current students -->";
+echo "<!-- Found " . count($approved_reservations) . " approved reservations -->";
+
+// Debug: Log each found student with their record type
+if (isset($_GET['debug']) && $_GET['debug'] == 1) {
+    echo "<div style='position:fixed; bottom:0; left:0; right:0; background:black; color:white; padding:10px; font-family:monospace; z-index:9999; max-height:200px; overflow:auto;'>";
+    echo "<h3>Debug Info:</h3>";
+    echo "<p>Records found: " . count($current_students) . " sit-ins, " . count($approved_reservations) . " reservations</p>";
+    
+    if (!empty($current_students) || !empty($approved_reservations)) {
+        echo "<table border='1' style='width:100%; font-size:12px;'>";
+        echo "<tr><th>Type</th><th>ID</th><th>Name</th><th>Lab</th><th>Date</th><th>Status</th></tr>";
+        
+        foreach ($current_students as $student) {
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($student['record_type']) . "</td>";
+            echo "<td>" . htmlspecialchars($student['id']) . "</td>";
+            echo "<td>" . htmlspecialchars($student['fullname']) . "</td>";
+            echo "<td>" . htmlspecialchars($student['laboratory']) . "</td>";
+            echo "<td>" . htmlspecialchars($student['date']) . "</td>";
+            echo "<td>" . htmlspecialchars($student['status']) . "</td>";
+            echo "</tr>";
+        }
+        
+        foreach ($approved_reservations as $reservation) {
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($reservation['record_type']) . "</td>";
+            echo "<td>" . htmlspecialchars($reservation['id']) . "</td>";
+            echo "<td>" . htmlspecialchars($reservation['fullname']) . "</td>";
+            echo "<td>" . htmlspecialchars($reservation['laboratory']) . "</td>";
+            echo "<td>" . htmlspecialchars($reservation['date']) . "</td>";
+            echo "<td>" . htmlspecialchars($reservation['status']) . "</td>";
+            echo "</tr>";
+        }
+        
+        echo "</table>";
+    }
+    
+    echo "</div>";
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -96,6 +181,72 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         
         .view-container {
             animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        /* Add styles for reservation badge */
+        .status-badge.reservation {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid rgba(49, 130, 206, 0.2);
+        }
+        
+        /* Highlighted row for newly approved reservations */
+        .highlighted-row {
+            animation: highlight 2s ease-in-out;
+        }
+        
+        @keyframes highlight {
+            0%, 100% {
+                background-color: transparent;
+            }
+            50% {
+                background-color: rgba(117, 86, 204, 0.15);
+            }
+        }
+        
+        /* Style for action buttons */
+        .action-button.primary {
+            background-color: #3182ce;
+        }
+        
+        .action-button.primary:hover {
+            background-color: #2c5282;
+        }
+
+        /* Enhanced action button group styling */
+        .action-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .action-button-group .action-button {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        /* Style specific to reservation rows */
+        .highlighted-row {
+            animation: highlight 2s ease-in-out;
+        }
+
+        @keyframes highlight {
+            0%, 100% {
+                background-color: transparent;
+            }
+            50% {
+                background-color: rgba(117, 86, 204, 0.15);
+            }
+        }
+
+        /* Add a subtle indicator to show its a future day */
+        tr.future-date {
+            background-color: #f8f9ff;
+        }
+        
+        tr.current-date {
+            background-color: #f0f7ff;
         }
     </style>
     <link rel="stylesheet" href="../assets/css/styles.css">
@@ -173,8 +324,9 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             
             <!-- Filter Tabs -->
             <div class="filter-tabs">
-                <div class="filter-tab active" data-target="current-students">Current Students in Laboratory</div>
-                <div class="filter-tab" data-target="add-sitin">Add Sit-in</div>
+                <div class="filter-tab" data-target="add-sitin">Add Direct Sit-in</div>
+                <div class="filter-tab active" data-target="current-students">Current Sit-in</div>
+                <div class="filter-tab" data-target="reservations">Reserved Students</div>
             </div>
             
             <!-- Current Students Container -->
@@ -187,7 +339,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                 <th>Full Name</th>
                                 <th>Purpose</th>
                                 <th>Laboratory</th>
-                                <!-- Removed PC Number column -->
+                                <th>PC Number</th>
                                 <th>Time in</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -196,7 +348,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                         <tbody>
                             <?php if (empty($current_students)): ?>
                                 <tr>
-                                    <td colspan="7" class="empty-state"> <!-- Adjusted colspan from 8 to 7 -->
+                                    <td colspan="8" class="empty-state">
                                         <div class="empty-state-content">
                                             <i class="ri-computer-line"></i>
                                             <p>No students currently sitting in</p>
@@ -205,7 +357,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($current_students as $student): ?>
-                                    <tr>
+                                    <tr class="<?php echo $student['id'] == $highlight_id && $student['record_type'] == 'sit_in' ? 'highlighted-row' : ''; ?>">
                                         <td class="font-mono"><?php echo htmlspecialchars($student['idno']); ?></td>
                                         <td>
                                             <?php 
@@ -218,13 +370,77 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                         </td>
                                         <td><span class="purpose-badge"><?php echo htmlspecialchars($student['purpose']); ?></span></td>
                                         <td>Laboratory <?php echo htmlspecialchars($student['laboratory']); ?></td>
-                                        <!-- Removed PC Number column -->
+                                        <td><?php echo htmlspecialchars($student['pc_number']); ?></td>
                                         <td><?php echo date('h:i A', strtotime($student['time_in'])); ?></td>
-                                        <td><span class="status-badge active">Active</span></td>
                                         <td>
-                                            <button class="action-button danger" onclick="markTimeOut('<?php echo $student['id']; ?>')">
+                                            <span class="status-badge active">Active</span>
+                                        </td>
+                                        <td>
+                                            <button class="action-button danger" onclick="markTimeOut('<?php echo $student['id']; ?>', 'sit_in')">
                                                 <i class="ri-logout-box-line"></i> Time Out
                                             </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Reserved Students Container -->
+            <div id="reservations" class="view-container">
+                <div class="table-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID Number</th>
+                                <th>Full Name</th>
+                                <th>Purpose</th>
+                                <th>Laboratory</th>
+                                <th>PC Number</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($approved_reservations)): ?>
+                                <tr>
+                                    <td colspan="8" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="ri-calendar-line"></i>
+                                            <p>No approved reservations</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($approved_reservations as $reservation): ?>
+                                    <tr class="<?php echo $reservation['id'] == $highlight_id ? 'highlighted-row' : ''; ?>">
+                                        <td class="font-mono"><?php echo htmlspecialchars($reservation['idno']); ?></td>
+                                        <td>
+                                            <?php 
+                                            if (!empty($reservation['firstname']) && !empty($reservation['lastname'])) {
+                                                echo htmlspecialchars($reservation['firstname'] . ' ' . $reservation['lastname']);
+                                            } else {
+                                                echo htmlspecialchars($reservation['fullname']);
+                                            } 
+                                            ?>
+                                        </td>
+                                        <td><span class="purpose-badge"><?php echo htmlspecialchars($reservation['purpose']); ?></span></td>
+                                        <td>Laboratory <?php echo htmlspecialchars($reservation['laboratory']); ?></td>
+                                        <td><?php echo htmlspecialchars($reservation['pc_number']); ?></td>
+                                        <td><?php echo htmlspecialchars($reservation['date']); ?></td>
+                                        <td><?php echo date('h:i A', strtotime($reservation['time_in'])); ?></td>
+                                        <td>
+                                            <div class="action-button-group">
+                                                <button class="action-button primary" onclick="convertToSitIn('<?php echo $reservation['id']; ?>')">
+                                                    <i class="ri-user-follow-line"></i> Check In
+                                                </button>
+                                                <button class="action-button danger" onclick="cancelReservation('<?php echo $reservation['id']; ?>')">
+                                                    <i class="ri-close-circle-line"></i> Cancel
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -253,6 +469,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                                     </div>
                                 </div>
                             
+
                                 <!-- Student info with redesigned layout -->
                                 <div id="studentInfo" class="student-info-grid" style="display: none;">
                                     <!-- Left Column - Profile and Sessions -->
@@ -435,6 +652,14 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                     row.style.display = text.includes(searchText) ? '' : 'none';
                 }
             });
+        } else if (activeView.id === 'reservations') {
+            let tableRows = activeView.querySelectorAll('.modern-table tbody tr');
+            tableRows.forEach(row => {
+                if (!row.querySelector('.empty-state')) {
+                    let text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchText) ? '' : 'none';
+                }
+            });
         }
     });
     
@@ -519,14 +744,14 @@ echo "<!-- Found " . count($current_students) . " current students -->";
         document.getElementById('confirmModal').classList.remove('show');
     }
 
-    function markTimeOut(sitInId) {
+    function markTimeOut(id, recordType) {
         showConfirmModal("Are you sure you want to mark this student as timed out?", "Confirm Time Out", (confirmed) => {
             if (confirmed) {
-                console.log("Timing out sit-in ID: " + sitInId); // Debug log
+                console.log("Timing out sit-in ID: " + id); // Debug log
                 
                 // Create form data to send
                 const formData = new FormData();
-                formData.append('sit_in_id', sitInId);
+                formData.append('sit_in_id', id);
                 
                 // Explicitly add the current time in Manila/GMT+8 timezone
                 const now = new Date();
@@ -571,7 +796,76 @@ echo "<!-- Found " . count($current_students) . " current students -->";
             }
         });
     }
-
+    
+    function convertToSitIn(reservationId) {
+        showConfirmModal("Are you sure you want to check in this student?", "Confirm Check In", (confirmed) => {
+            if (confirmed) {
+                console.log("Converting reservation ID: " + reservationId + " to sit-in"); // Debug log
+                
+                // Create form data to send
+                const formData = new FormData();
+                formData.append('reservation_id', reservationId);
+                
+                // Send AJAX request to convert reservation to sit-in
+                fetch('../controller/convert_to_sitin.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response data:", data);
+                    if (data.success) {
+                        showNotification("Success", "Student has been checked in successfully!", 'success');
+                        
+                        // Reload the page to reflect changes after a short delay
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        showNotification("Error", 'Error: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification("Error", 'An error occurred. Please try again.', 'error');
+                });
+            }
+        });
+    }
+    
+    function cancelReservation(reservationId) {
+        showConfirmModal("Are you sure you want to cancel this reservation?", "Confirm Cancellation", (confirmed) => {
+            if (confirmed) {
+                console.log("Cancelling reservation ID: " + reservationId); // Debug log
+                
+                // Create form data to send
+                const formData = new FormData();
+                formData.append('reservation_id', reservationId);
+                formData.append('action', 'cancel');
+                
+                // Send AJAX request to cancel reservation
+                fetch('../controller/process_reservation_update.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response data:", data);
+                    if (data.success) {
+                        showNotification("Success", "Reservation has been cancelled successfully!", 'success');
+                        
+                        // Reload the page to reflect changes after a short delay
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        showNotification("Error", 'Error: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification("Error", 'An error occurred. Please try again.', 'error');
+                });
+            }
+        });
+    }
+    
     // Consolidated function to update sessions display
     function updateSessionsDisplay(sessions) {
         const maxSessions = 30; // Maximum number of sessions
@@ -685,6 +979,7 @@ echo "<!-- Found " . count($current_students) . " current students -->";
                         const warningDiv = document.createElement('div');
                         warningDiv.className = 'active-student-warning';
                         warningDiv.innerHTML = `
+
                             <i class="ri-error-warning-line"></i>
                             <p>This student is currently active in Laboratory ${student.active_lab} since ${student.active_time}. 
                             They must be timed out before adding a new sit-in record.</p>

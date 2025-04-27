@@ -46,12 +46,32 @@ if ($result) {
 }
 
 // Get pending reservations
-$sql = "SELECT * FROM reservations WHERE status = 'pending' ORDER BY created_at DESC";
+$sql = "SELECT *, TIME_FORMAT(time_in, '%h:%i %p') as formatted_time FROM reservations WHERE status = 'pending' ORDER BY created_at DESC";
 $result = $conn->query($sql);
 $pending_reservations = [];
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $pending_reservations[] = $row;
+    }
+}
+
+// Get approved reservations
+$sql = "SELECT *, TIME_FORMAT(time_in, '%h:%i %p') as formatted_time FROM reservations WHERE status = 'approved' ORDER BY created_at DESC LIMIT 20";
+$result = $conn->query($sql);
+$approved_reservations = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $approved_reservations[] = $row;
+    }
+}
+
+// Get rejected reservations
+$sql = "SELECT *, TIME_FORMAT(time_in, '%h:%i %p') as formatted_time FROM reservations WHERE status = 'rejected' ORDER BY created_at DESC LIMIT 20";
+$result = $conn->query($sql);
+$rejected_reservations = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $rejected_reservations[] = $row;
     }
 }
 ?>
@@ -147,62 +167,170 @@ if ($result) {
             </div>
         </div>
 
-        <!-- Right Column - Reservation Requests -->
+        <!-- Right Column - Reservation Requests with Tabs -->
         <div class="dashboard-column">
             <div class="profile-card">
                 <div class="profile-header">
                     <h3>Reservation Requests</h3>
                 </div>
-                <div class="profile-content">
-                    <div class="requests-list">
-                        <?php if (empty($pending_reservations)): ?>
-                            <div class="no-requests">
-                                No pending reservation requests
+                <div class="tabs-container">
+                    <div class="tabs-navigation">
+                        <button class="tab-button active" data-tab="pending-tab">Pending Requests</button>
+                        <button class="tab-button" data-tab="logs-tab">Request Logs</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="pending-tab">
+                        <div class="profile-content">
+                            <div class="requests-list">
+                                <?php if (empty($pending_reservations)): ?>
+                                    <div class="no-requests">
+                                        No pending reservation requests
+                                    </div>
+                                <?php else: ?>
+                                    <?php foreach ($pending_reservations as $reservation): ?>
+                                        <div class="request-item">
+                                            <div class="request-header">
+                                                <span class="student-name"><?php echo htmlspecialchars($reservation['fullname']); ?></span>
+                                                <span class="request-status pending">Pending</span>
+                                            </div>
+                                            <div class="request-details">
+                                                <div class="detail-row">
+                                                    <span class="label">ID Number:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['idno']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Laboratory:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['laboratory']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">PC Number:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['pc_number']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Date:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['date']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Time:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['formatted_time']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Purpose:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['purpose']); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="request-actions">
+                                                <button class="action-btn approve" onclick="processReservation(<?php echo $reservation['id']; ?>, 'approve')">
+                                                    <i class="ri-check-line"></i> Approve
+                                                </button>
+                                                <button class="action-btn reject" onclick="processReservation(<?php echo $reservation['id']; ?>, 'reject')">
+                                                    <i class="ri-close-line"></i> Reject
+                                                </button>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
-                        <?php else: ?>
-                            <?php foreach ($pending_reservations as $reservation): ?>
-                                <div class="request-item">
-                                    <div class="request-header">
-                                        <span class="student-name"><?php echo htmlspecialchars($reservation['fullname']); ?></span>
-                                        <span class="request-status pending">Pending</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="logs-tab">
+                        <div class="logs-filter">
+                            <div class="filter-option active" data-filter="approved">Approved Requests</div>
+                            <div class="filter-option" data-filter="rejected">Rejected Requests</div>
+                        </div>
+                        
+                        <!-- Approved Requests Log -->
+                        <div class="logs-container active" id="approved-logs">
+                            <div class="requests-list">
+                                <?php if (empty($approved_reservations)): ?>
+                                    <div class="no-requests">
+                                        No approved reservation requests
                                     </div>
-                                    <div class="request-details">
-                                        <div class="detail-row">
-                                            <span class="label">ID Number:</span>
-                                            <span class="value"><?php echo htmlspecialchars($reservation['idno']); ?></span>
+                                <?php else: ?>
+                                    <?php foreach ($approved_reservations as $reservation): ?>
+                                        <div class="request-item approved-item">
+                                            <div class="request-header">
+                                                <span class="student-name"><?php echo htmlspecialchars($reservation['fullname']); ?></span>
+                                                <span class="request-status approved">Approved</span>
+                                            </div>
+                                            <div class="request-details">
+                                                <div class="detail-row">
+                                                    <span class="label">ID Number:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['idno']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Laboratory:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['laboratory']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">PC Number:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['pc_number']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Date:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['date']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Time:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['formatted_time']); ?></span>
+                                                </div>
+                                                <div class="detail-row timestamp">
+                                                    <span class="label">Approved on:</span>
+                                                    <span class="value"><?php echo isset($reservation['updated_at']) ? htmlspecialchars($reservation['updated_at']) : htmlspecialchars($reservation['created_at']); ?></span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="detail-row">
-                                            <span class="label">Laboratory:</span>
-                                            <span class="value"><?php echo htmlspecialchars($reservation['laboratory']); ?></span>
-                                        </div>
-                                        <div class="detail-row">
-                                            <span class="label">PC Number:</span>
-                                            <span class="value"><?php echo htmlspecialchars($reservation['pc_number']); ?></span>
-                                        </div>
-                                        <div class="detail-row">
-                                            <span class="label">Date:</span>
-                                            <span class="value"><?php echo htmlspecialchars($reservation['date']); ?></span>
-                                        </div>
-                                        <div class="detail-row">
-                                            <span class="label">Time:</span>
-                                            <span class="value"><?php echo htmlspecialchars($reservation['time_in']); ?></span>
-                                        </div>
-                                        <div class="detail-row">
-                                            <span class="label">Purpose:</span>
-                                            <span class="value"><?php echo htmlspecialchars($reservation['purpose']); ?></span>
-                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Rejected Requests Log -->
+                        <div class="logs-container" id="rejected-logs">
+                            <div class="requests-list">
+                                <?php if (empty($rejected_reservations)): ?>
+                                    <div class="no-requests">
+                                        No rejected reservation requests
                                     </div>
-                                    <div class="request-actions">
-                                        <button class="action-btn approve" onclick="processReservation(<?php echo $reservation['id']; ?>, 'approve')">
-                                            <i class="ri-check-line"></i> Approve
-                                        </button>
-                                        <button class="action-btn reject" onclick="processReservation(<?php echo $reservation['id']; ?>, 'reject')">
-                                            <i class="ri-close-line"></i> Reject
-                                        </button>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                                <?php else: ?>
+                                    <?php foreach ($rejected_reservations as $reservation): ?>
+                                        <div class="request-item rejected-item">
+                                            <div class="request-header">
+                                                <span class="student-name"><?php echo htmlspecialchars($reservation['fullname']); ?></span>
+                                                <span class="request-status rejected">Rejected</span>
+                                            </div>
+                                            <div class="request-details">
+                                                <div class="detail-row">
+                                                    <span class="label">ID Number:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['idno']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Laboratory:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['laboratory']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">PC Number:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['pc_number']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Date:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['date']); ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="label">Time:</span>
+                                                    <span class="value"><?php echo htmlspecialchars($reservation['formatted_time']); ?></span>
+                                                </div>
+                                                <div class="detail-row timestamp">
+                                                    <span class="label">Rejected on:</span>
+                                                    <span class="value"><?php echo isset($reservation['updated_at']) ? htmlspecialchars($reservation['updated_at']) : htmlspecialchars($reservation['created_at']); ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -514,6 +642,172 @@ if ($result) {
         .action-btn i {
             font-size: 1.1rem;
         }
+
+        /* Tab Navigation Styles */
+        .tabs-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .tabs-navigation {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e8edf5;
+        }
+        
+        .tab-button {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e8edf5;
+        }
+        
+        .tab-button.active {
+            background: #7556cc;
+            color: white;
+            border-color: #7556cc;
+            box-shadow: 0 2px 5px rgba(117, 86, 204, 0.2);
+        }
+        
+        .tab-button:hover:not(.active) {
+            background: #f1f5f9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 0;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Logs Filter Styles */
+        .logs-filter {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-bottom: 1px solid #f0f3f8;
+        }
+        
+        .filter-option {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #4a5568;
+            background: #f8fafc;
+            border: 1px solid #e8edf5;
+        }
+        
+        .filter-option.active {
+            background: #ebf4ff;
+            color: #3182ce;
+            border-color: #bee3f8;
+            font-weight: 500;
+        }
+        
+        .filter-option:hover:not(.active) {
+            background: #f1f5f9;
+        }
+        
+        .logs-container {
+            display: none;
+            height: 100%;
+            overflow: auto;
+        }
+        
+        .logs-container.active {
+            display: block;
+        }
+        
+        /* Request Item Status-specific Styles */
+        .request-item.approved-item:before {
+            background: linear-gradient(to bottom, #38a169, #2f855a);
+        }
+        
+        .request-item.rejected-item:before {
+            background: linear-gradient(to bottom, #e53e3e, #c53030);
+        }
+        
+        .request-status.approved {
+            background: #f0fff4;
+            color: #2f855a;
+            border: 1px solid rgba(47, 133, 90, 0.2);
+        }
+        
+        .request-status.rejected {
+            background: #fff5f5;
+            color: #c53030;
+            border: 1px solid rgba(197, 48, 48, 0.2);
+        }
+        
+        .timestamp {
+            grid-column: span 2;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #e8edf5;
+        }
+        
+        .timestamp .value {
+            color: #718096;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* Style for computers that were just approved */
+        .computer-unit.just-approved {
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 0 0 rgba(117, 86, 204, 0.7);
+            border: 2px solid #7556cc;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(117, 86, 204, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(117, 86, 204, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(117, 86, 204, 0);
+            }
+        }
+        
+        /* Student assignment style */
+        .computer-unit.student-assigned {
+            position: relative;
+        }
+        
+        .computer-unit.student-assigned::after {
+            content: "Student";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7556cc;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.6rem;
+            letter-spacing: 0.02em;
+            opacity: 0.9;
+        }
     </style>
 
     <script>
@@ -538,8 +832,11 @@ if ($result) {
             loadComputerStatus(this.value);
         });
 
-        function loadComputerStatus(laboratory) {
-            if (!laboratory) return;
+        function loadComputerStatus(laboratory, callback) {
+            if (!laboratory) {
+                if (typeof callback === 'function') callback();
+                return;
+            }
 
             fetch(`../controllers/get_computer_status.php?lab=${laboratory}`)
                 .then(response => response.json())
@@ -564,6 +861,9 @@ if ($result) {
 
                     // Add click handlers to new elements
                     attachComputerClickHandlers();
+                    
+                    // Run callback if provided
+                    if (typeof callback === 'function') callback();
                 });
         }
 
@@ -604,6 +904,13 @@ if ($result) {
                 return;
             }
 
+            // Show loading indicator or disable buttons
+            const buttons = document.querySelectorAll('.action-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = 0.6;
+            });
+
             fetch('../controllers/process_approval.php', {
                 method: 'POST',
                 headers: {
@@ -611,20 +918,150 @@ if ($result) {
                 },
                 body: `reservation_id=${id}&action=${action}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload(); // Refresh to show updated status
-                } else {
-                    alert('Error: ' + data.message);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text(); // Get as text first to check for errors
+            })
+            .then(text => {
+                // Try to parse the response as JSON
+                try {
+                    const data = JSON.parse(text);
+                    console.log("Received response:", data); // Debug log
+                    
+                    if (data.success) {
+                        // If approved, update the PC status in the UI and redirect
+                        if (action === 'approve') {
+                            // Update the computer status if we have the needed data
+                            if (data.reservation) {
+                                updateComputerStatusFromReservation(data.reservation);
+                                // Set timeout before redirecting to allow the status update to be seen
+                                setTimeout(() => {
+                                    alert(`Reservation ${action}d successfully. Redirecting to Sit-in page.`);
+                                    window.location.href = 'sit-in.php?reservation_id=' + id;
+                                }, 1000);
+                            } else {
+                                alert(data.message);
+                                location.reload();
+                            }
+                        } else {
+                            alert(data.message);
+                            location.reload();
+                        }
+                    } else {
+                        alert('Error: ' + data.message);
+                        // Re-enable buttons
+                        buttons.forEach(btn => {
+                            btn.disabled = false;
+                            btn.style.opacity = 1;
+                        });
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing response:', text);
+                    alert('Error: The server returned an invalid response. Please check the console for details.');
+                    // Re-enable buttons
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = 1;
+                    });
                 }
             })
             .catch(error => {
-                alert('Error processing request');
-                console.error('Error:', error);
+                console.error('Error processing request:', error);
+                alert('Error processing request: ' + error.message);
+                // Re-enable buttons
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = 1;
+                });
             });
         }
+
+        // Function to update computer status after reservation approval
+        function updateComputerStatusFromReservation(reservation) {
+            console.log("Updating computer status for:", reservation); // Debug log
+            const lab = reservation.laboratory;
+            const pcNumber = reservation.pc_number;
+            const studentName = reservation.fullname;
+            
+            // First select the lab if it's not already selected
+            if (document.getElementById('labSelect').value !== lab) {
+                document.getElementById('labSelect').value = lab;
+                loadComputerStatus(lab, function() {
+                    // This callback runs after the computers are loaded
+                    markComputerAsInUse(pcNumber, studentName);
+                });
+            } else {
+                // Lab is already selected, just mark the computer
+                markComputerAsInUse(pcNumber, studentName);
+            }
+        }
+        
+        // Function to mark a specific computer as in use
+        function markComputerAsInUse(pcNumber, studentName) {
+            const computerUnit = document.querySelector(`.computer-unit[data-pc="${pcNumber}"]`);
+            if (computerUnit) {
+                const statusElement = computerUnit.querySelector('.status');
+                if (statusElement) {
+                    statusElement.classList.remove('available');
+                    statusElement.classList.add('in-use');
+                    statusElement.textContent = 'In Use';
+                    
+                    // Add student info tooltip
+                    computerUnit.setAttribute('title', `In use by ${studentName}`);
+                    computerUnit.classList.add('student-assigned');
+                    
+                    // Visual feedback for the just-approved reservation
+                    computerUnit.classList.add('just-approved');
+                    
+                    // Update in database
+                    const laboratory = computerUnit.dataset.lab;
+                    fetch('../controllers/update_computer_status.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            laboratory: laboratory,
+                            pc_number: pcNumber,
+                            status: 'in-use'
+                        })
+                    });
+                }
+            }
+        }
+
+        // Tab navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                });
+            });
+            
+            // Logs filter functionality
+            const filterOptions = document.querySelectorAll('.filter-option');
+            filterOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all filters
+                    filterOptions.forEach(opt => opt.classList.remove('active'));
+                    document.querySelectorAll('.logs-container').forEach(container => container.classList.remove('active'));
+                    
+                    // Add active class to clicked filter and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.filter + '-logs').classList.add('active');
+                });
+            });
+        });
     </script>
 
 </body>

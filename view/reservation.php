@@ -860,6 +860,14 @@ $conn->close();
             document.querySelector('select[name="laboratory"]').value = this.value;
         });
 
+        // Add event listener for the laboratory selection in the reservation form
+        document.querySelector('select[name="laboratory"]').addEventListener('change', function() {
+            // Update the laboratory select in the PC selection section
+            document.getElementById('labSelect').value = this.value;
+            // Load the computer status for the selected laboratory
+            loadComputerStatus(this.value);
+        });
+
         function loadComputerStatus(laboratory) {
             if (!laboratory) {
                 document.getElementById('computerGrid').innerHTML = `
