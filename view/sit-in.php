@@ -336,7 +336,7 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
         
         /* Ensure all action buttons have consistent width and height */
         td .action-button {
-            min-width: 120px;
+            min-width: 50px;
             height: 36px;
         }
         

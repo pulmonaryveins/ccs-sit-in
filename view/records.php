@@ -398,9 +398,9 @@ function getYearLevelDisplay($yearLevel) {
                                 <th>Laboratory</th>
                                 <th>Time In</th>
                                 <th>Time Out</th>
-                                <th>Status</th>
-                                <th>Remaining Sessions</th>
                                 <th>Type</th>
+                                <th>Remaining Sessions</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="sitin-records-body">
@@ -436,6 +436,12 @@ function getYearLevelDisplay($yearLevel) {
                                         <td><?php echo date('h:i A', strtotime($record['time_in'])); ?></td>
                                         <td><?php echo $record['time_out'] ? date('h:i A', strtotime($record['time_out'])) : 'Active'; ?></td>
                                         <td>
+                                            <span class="source-badge <?php echo htmlspecialchars($record['source']); ?>">
+                                                <?php echo ($record['source'] == 'reservation') ? 'Reservation' : 'Walk-in'; ?>
+                                            </span>
+                                        </td>
+                                        <td><span class="<?php echo $sessionsClass; ?>"><?php echo $remaining_sessions; ?> sessions</span></td>
+                                        <td>
                                             <?php if ($record['time_out']): ?>
                                                 <span class="status-badge completed">Completed</span>
                                             <?php elseif ($record['status'] == 'approved' && $record['time_in']): ?>
@@ -445,12 +451,6 @@ function getYearLevelDisplay($yearLevel) {
                                             <?php else: ?>
                                                 <span class="status-badge pending">Pending</span>
                                             <?php endif; ?>
-                                        </td>
-                                        <td><span class="<?php echo $sessionsClass; ?>"><?php echo $remaining_sessions; ?> sessions</span></td>
-                                        <td>
-                                            <span class="source-badge <?php echo htmlspecialchars($record['source']); ?>">
-                                                <?php echo ($record['source'] == 'reservation') ? 'Reservation' : 'Walk-in'; ?>
-                                            </span>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
