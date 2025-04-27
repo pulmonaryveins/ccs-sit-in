@@ -230,6 +230,28 @@ $conn->close();
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
                         0 8px 30px -5px rgba(0, 0, 0, 0.1);
         }
+
+        /* Updated source badge styling to match sit-in.php type badges */
+        .source-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 20px;
+            text-align: center;
+        }
+        
+        .source-badge.sit_in {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid rgba(49, 130, 206, 0.2);
+        }
+        
+        .source-badge.reservation {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid rgba(217, 119, 6, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -458,7 +480,7 @@ $conn->close();
                                         <td><?php echo htmlspecialchars($record['purpose']); ?></td>
                                         <td>
                                             <span class="source-badge <?php echo htmlspecialchars($record['source']); ?>">
-                                                <?php echo $record['source'] === 'reservation' ? 'Reservation' : 'Sit-in'; ?>
+                                                <?php echo $record['source'] === 'reservation' ? 'Reservation' : 'Walk-in'; ?>
                                             </span>
                                         </td>
                                         <td>
@@ -710,25 +732,6 @@ $conn->close();
         
         .modern-table tr:hover td {
             background-color: #f8fafc;
-        }
-
-        .source-badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-        
-        .source-badge.reservation {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-        
-        .source-badge.sit_in {
-            background: #ddd6fe;
-            color: #6d28d9;
         }
 
         .status-badge {
@@ -1856,7 +1859,7 @@ $conn->close();
                         <td>${record.purpose}</td>
                         <td>
                             <span class="source-badge ${record.source}">
-                                ${record.source === 'reservation' ? 'Reservation' : 'Sit-in'}
+                                ${record.source === 'reservation' ? 'Reservation' : 'Walk-in'}
                             </span>
                         </td>
                         <td>${statusBadge}</td>

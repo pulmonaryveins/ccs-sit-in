@@ -464,6 +464,43 @@ if ($feedback_table_exists) {
                 padding-top: 10px;
             }
         }
+
+        /* Updated source badge styling to match sit-in.php type badges */
+        .source-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 20px;
+            text-align: center;
+        }
+        
+        .source-badge.sit_in {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid rgba(49, 130, 206, 0.2);
+        }
+        
+        .source-badge.reservation {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid rgba(217, 119, 6, 0.2);
+        }
+        
+        /* Override print styles for consistent appearance */
+        @media print {
+            .source-badge.sit_in {
+                background-color: #ebf8ff !important;
+                color: #3182ce !important;
+                border: 1px solid rgba(49, 130, 206, 0.2) !important;
+            }
+            
+            .source-badge.reservation {
+                background-color: #fef3c7 !important;
+                color: #d97706 !important;
+                border: 1px solid rgba(217, 119, 6, 0.2) !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -614,7 +651,7 @@ if ($feedback_table_exists) {
                                         <td><?php echo $record['time_out'] ? date('h:i A', strtotime($record['time_out'])) : 'Active'; ?></td>
                                         <td>
                                             <span class="source-badge <?php echo htmlspecialchars($record['source']); ?>">
-                                                <?php echo ($record['source'] == 'reservation') ? 'Reservation' : 'Sit-in'; ?>
+                                                <?php echo ($record['source'] == 'reservation') ? 'Reservation' : 'Walk-in'; ?>
                                             </span>
                                         </td>
                                     </tr>
@@ -709,7 +746,7 @@ if ($feedback_table_exists) {
                                         <td><?php echo htmlspecialchars($feedback['message'] ?? 'No comment provided'); ?></td>
                                         <td>
                                             <span class="source-badge <?php echo htmlspecialchars($feedback['source']); ?>">
-                                                <?php echo ($feedback['source'] == 'reservation') ? 'Reservation' : 'Sit-in'; ?>
+                                                <?php echo ($feedback['source'] == 'reservation') ? 'Reservation' : 'Walk-in'; ?>
                                             </span>
                                         </td>
                                     </tr>
@@ -967,7 +1004,7 @@ if ($feedback_table_exists) {
         }
         
         function filterFeedbackRows(filterValue, resetPage = true) {
-            // Update current filter
+            // Update current feedback filter
             currentFeedbackFilter = filterValue;
             console.log(`Filtering feedback rows by: ${filterValue}`);
             

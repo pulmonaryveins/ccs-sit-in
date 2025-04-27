@@ -182,6 +182,18 @@ function getYearLevelDisplay($yearLevel) {
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
                         0 8px 30px -5px rgba(0, 0, 0, 0.1);
         }
+
+        .source-badge.reservation {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid rgba(217, 119, 6, 0.2);
+        }
+
+        .source-badge.sit_in {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid rgba(49, 130, 206, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -388,6 +400,7 @@ function getYearLevelDisplay($yearLevel) {
                                 <th>Time Out</th>
                                 <th>Status</th>
                                 <th>Remaining Sessions</th>
+                                <th>Type</th>
                             </tr>
                         </thead>
                         <tbody id="sitin-records-body">
@@ -434,6 +447,11 @@ function getYearLevelDisplay($yearLevel) {
                                             <?php endif; ?>
                                         </td>
                                         <td><span class="<?php echo $sessionsClass; ?>"><?php echo $remaining_sessions; ?> sessions</span></td>
+                                        <td>
+                                            <span class="source-badge <?php echo htmlspecialchars($record['source']); ?>">
+                                                <?php echo ($record['source'] == 'reservation') ? 'Reservation' : 'Walk-in'; ?>
+                                            </span>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>

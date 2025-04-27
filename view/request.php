@@ -977,7 +977,8 @@ if ($result) {
                                 // Set timeout before redirecting to allow the status update to be seen
                                 setTimeout(() => {
                                     alert(`Reservation ${action}d successfully. Redirecting to Sit-in page.`);
-                                    window.location.href = 'sit-in.php?reservation_id=' + id;
+                                    // Update redirect URL to point directly to the reservations tab
+                                    window.location.href = 'sit-in.php?reservation_id=' + id + '&tab=reservations';
                                 }, 1000);
                             } else {
                                 alert(data.message);

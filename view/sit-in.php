@@ -12,10 +12,13 @@ require_once '../config/db_connect.php';
 // Get reservation_id from URL if exists (for redirects from request.php)
 $highlight_id = isset($_GET['reservation_id']) ? intval($_GET['reservation_id']) : 0;
 
-// Fetch current sit-in students from the sit_ins table
+// Get active tab if provided in URL
+$active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'current-students';
+
+// Fetch Direct sit-in students from the sit_ins table
 $current_students = [];
 
-// Query for active sit-ins ONLY (no longer combining with reservations)
+// Query for active direct sit-ins ONLY
 $query = "SELECT 
             'sit_in' AS record_type,
             s.id,
@@ -42,7 +45,7 @@ if ($result) {
     }
 }
 
-// Get approved reservations separately
+// Get approved reservations separately (these are considered Reserved Sit-ins)
 $approved_reservations = [];
 $reservation_query = "SELECT 
                         'reservation' AS record_type,
@@ -248,6 +251,102 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
         tr.current-date {
             background-color: #f0f7ff;
         }
+
+        /* Add styling for the new type badge */
+        .type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 20px;
+            text-align: center;
+        }
+        
+        .type-badge.walkin {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid rgba(49, 130, 206, 0.2);
+        }
+        
+        .type-badge.reservation {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid rgba(217, 119, 6, 0.2);
+        }
+        
+        /* Ensure table header accommodates the new column */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .modern-table th, .modern-table td {
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        
+        /* Enhanced action buttons consistency */
+        .action-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            border: none;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        .action-button i {
+            font-size: 1rem;
+        }
+        
+        .action-button.primary {
+            background-color: #3182ce;
+        }
+        
+        .action-button.primary:hover {
+            background-color: #2c5282;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .action-button.danger {
+            background-color: #e53e3e;
+        }
+        
+        .action-button.danger:hover {
+            background-color: #c53030;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Ensure all action buttons have consistent width and height */
+        td .action-button {
+            min-width: 120px;
+            height: 36px;
+        }
+        
+        /* Fix for table cell containing action buttons */
+        table.modern-table td:last-child {
+            width: 140px;
+            min-width: 140px;
+            max-width: 140px;
+            padding: 0.75rem 1rem;
+        }
     </style>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/sit-in.css">
@@ -325,12 +424,12 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
             <!-- Filter Tabs -->
             <div class="filter-tabs">
                 <div class="filter-tab" data-target="add-sitin">Add Direct Sit-in</div>
-                <div class="filter-tab active" data-target="current-students">Current Sit-in</div>
-                <div class="filter-tab" data-target="reservations">Reserved Students</div>
+                <div class="filter-tab <?php echo $active_tab === 'current-students' ? 'active' : ''; ?>" data-target="current-students">Direct Sit-in</div>
+                <div class="filter-tab <?php echo $active_tab === 'reservations' ? 'active' : ''; ?>" data-target="reservations">Reserved Sit-in</div>
             </div>
             
-            <!-- Current Students Container -->
-            <div id="current-students" class="view-container active">
+            <!-- Current Students Container (Direct Sit-ins) -->
+            <div id="current-students" class="view-container <?php echo $active_tab === 'current-students' ? 'active' : ''; ?>">
                 <div class="table-container">
                     <table class="modern-table">
                         <thead>
@@ -339,8 +438,8 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                                 <th>Full Name</th>
                                 <th>Purpose</th>
                                 <th>Laboratory</th>
-                                <th>PC Number</th>
                                 <th>Time in</th>
+                                <th>Type</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -348,10 +447,10 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                         <tbody>
                             <?php if (empty($current_students)): ?>
                                 <tr>
-                                    <td colspan="8" class="empty-state">
+                                    <td colspan="9" class="empty-state">
                                         <div class="empty-state-content">
                                             <i class="ri-computer-line"></i>
-                                            <p>No students currently sitting in</p>
+                                            <p>No students currently in direct sit-in</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -370,8 +469,10 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                                         </td>
                                         <td><span class="purpose-badge"><?php echo htmlspecialchars($student['purpose']); ?></span></td>
                                         <td>Laboratory <?php echo htmlspecialchars($student['laboratory']); ?></td>
-                                        <td><?php echo htmlspecialchars($student['pc_number']); ?></td>
                                         <td><?php echo date('h:i A', strtotime($student['time_in'])); ?></td>
+                                        <td>
+                                            <span class="type-badge walkin">Walk-in</span>
+                                        </td>
                                         <td>
                                             <span class="status-badge active">Active</span>
                                         </td>
@@ -388,8 +489,8 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                 </div>
             </div>
             
-            <!-- Reserved Students Container -->
-            <div id="reservations" class="view-container">
+            <!-- Reserved Students Container (Approved Reservations) -->
+            <div id="reservations" class="view-container <?php echo $active_tab === 'reservations' ? 'active' : ''; ?>">
                 <div class="table-container">
                     <table class="modern-table">
                         <thead>
@@ -401,13 +502,14 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                                 <th>PC Number</th>
                                 <th>Date</th>
                                 <th>Time</th>
+                                <th>Type</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($approved_reservations)): ?>
                                 <tr>
-                                    <td colspan="8" class="empty-state">
+                                    <td colspan="9" class="empty-state">
                                         <div class="empty-state-content">
                                             <i class="ri-calendar-line"></i>
                                             <p>No approved reservations</p>
@@ -433,14 +535,12 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                                         <td><?php echo htmlspecialchars($reservation['date']); ?></td>
                                         <td><?php echo date('h:i A', strtotime($reservation['time_in'])); ?></td>
                                         <td>
-                                            <div class="action-button-group">
-                                                <button class="action-button primary" onclick="convertToSitIn('<?php echo $reservation['id']; ?>')">
-                                                    <i class="ri-user-follow-line"></i> Check In
-                                                </button>
-                                                <button class="action-button danger" onclick="cancelReservation('<?php echo $reservation['id']; ?>')">
-                                                    <i class="ri-close-circle-line"></i> Cancel
-                                                </button>
-                                            </div>
+                                            <span class="type-badge reservation">Reservation</span>
+                                        </td>
+                                        <td>
+                                            <button class="action-button danger" onclick="markTimeOut('<?php echo $reservation['id']; ?>', 'reservation')">
+                                                <i class="ri-logout-box-line"></i> Time Out
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -618,24 +718,40 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
 
     <script>
     // Tab switching functionality
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Remove active class from all tabs
-            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-            // Add active class to clicked tab
-            this.classList.add('active');
-            
-            // Hide all view containers
-            document.querySelectorAll('.view-container').forEach(container => {
-                container.classList.remove('active');
-            });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if we should activate a specific tab from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabTarget = urlParams.get('tab');
+        
+        if (tabTarget) {
+            // If tab is specified in URL, activate it
+            const targetTab = document.querySelector(`.filter-tab[data-target="${tabTarget}"]`);
+            if (targetTab) {
+                // Simulate a click on the tab
+                targetTab.click();
+            }
+        }
+        
+        // Tab switching (regular code continues)
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all view containers
+                document.querySelectorAll('.view-container').forEach(container => {
+                    container.classList.remove('active');
+                });
 
-            // Show the target container
-            const targetId = this.getAttribute('data-target');
-            document.getElementById(targetId).classList.add('active');
-            
-            // Clear search input when switching tabs
-            document.getElementById('searchInput').value = '';
+                // Show the target container
+                const targetId = this.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+                
+                // Clear search input when switching tabs
+                document.getElementById('searchInput').value = '';
+            });
         });
     });
     
@@ -745,15 +861,32 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
     }
 
     function markTimeOut(id, recordType) {
-        showConfirmModal("Are you sure you want to mark this student as timed out?", "Confirm Time Out", (confirmed) => {
+        let confirmMessage = "Are you sure you want to mark this student as timed out?";
+        let confirmTitle = "Confirm Time Out";
+        
+        if (recordType === 'reservation') {
+            confirmMessage = "Are you sure you want to time out this reservation?";
+            confirmTitle = "Confirm Reservation Time Out";
+        } else {
+            confirmMessage = "Are you sure you want to time out this direct sit-in?";
+            confirmTitle = "Confirm Direct Sit-in Time Out";
+        }
+        
+        showConfirmModal(confirmMessage, confirmTitle, (confirmed) => {
             if (confirmed) {
-                console.log("Timing out sit-in ID: " + id); // Debug log
+                console.log(`Timing out ${recordType} ID: ${id}`); // Debug log
                 
                 // Create form data to send
                 const formData = new FormData();
-                formData.append('sit_in_id', id);
                 
-                // Explicitly add the current time in Manila/GMT+8 timezone
+                // Add the correct ID field based on the record type
+                if (recordType === 'sit_in') {
+                    formData.append('sit_in_id', id);
+                } else if (recordType === 'reservation') {
+                    formData.append('reservation_id', id);
+                }
+                
+                // Explicitly add the current time in Manila/GMT+8 timezone with consistent format
                 const now = new Date();
                 const manilaTime = now.toLocaleTimeString('en-US', {
                     hour: '2-digit',
@@ -763,11 +896,14 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                     timeZone: 'Asia/Manila'
                 });
                 
-                // Send the Manila timezone with the request
-                formData.append('time_out', manilaTime);
-                formData.append('timezone', 'Asia/Manila');
+                // Format time consistently as HH:MM:SS
+                const timeParts = manilaTime.split(':');
+                const formattedTime = timeParts.join(':');
                 
-                // Add admin_timeout flag to indicate this is an admin timeout
+                // Add record type to the form data for proper processing
+                formData.append('record_type', recordType);
+                formData.append('time_out', formattedTime);
+                formData.append('timezone', 'Asia/Manila');
                 formData.append('admin_timeout', 'true');
                 
                 // Send AJAX request to process time out

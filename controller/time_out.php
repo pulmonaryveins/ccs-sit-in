@@ -2,89 +2,130 @@
 session_start();
 require_once '../config/db_connect.php';
 
-// Set timezone for PHP to Asia/Manila (GMT+8)
-date_default_timezone_set('Asia/Manila');
+// Set headers for JSON response
+header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-$response = array('success' => false, 'message' => '', 'remaining_sessions' => 0);
+// Check if the user is logged in
+if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin_logged_in'])) {
+    echo json_encode(['success' => false, 'message' => 'User not logged in']);
+    exit;
+}
 
-// Validate inputs
-if (empty($_POST['sit_in_id'])) {
-$response['message'] = 'Missing sit-in ID';
+// Initialize response
+$response = ['success' => false, 'message' => 'Invalid request'];
+
+// Get record type (sit_in or reservation)
+$record_type = isset($_POST['record_type']) ? $_POST['record_type'] : 'sit_in';
+
+// Determine which ID to use based on record type
+if ($record_type === 'sit_in') {
+    // Handle sit_in timeout
+    if (isset($_POST['sit_in_id'])) {
+        $sit_in_id = intval($_POST['sit_in_id']);
+        $time_out = isset($_POST['time_out']) ? $_POST['time_out'] : date('H:i:s');
+        $admin_timeout = isset($_POST['admin_timeout']) && $_POST['admin_timeout'] === 'true';
+        
+        // First, get the student's ID number to update remaining sessions
+        $query = "SELECT idno FROM sit_ins WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('i', $sit_in_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($row = $result->fetch_assoc()) {
+            $idno = $row['idno'];
+            
+            // Update the sit_in record
+            $update_query = "UPDATE sit_ins SET time_out = ?, status = 'completed' WHERE id = ?";
+            $update_stmt = $conn->prepare($update_query);
+            $update_stmt->bind_param('si', $time_out, $sit_in_id);
+            
+            if ($update_stmt->execute()) {
+                // Decrement remaining sessions for the student
+                $sessions_query = "UPDATE users SET remaining_sessions = GREATEST(0, remaining_sessions - 1) WHERE idno = ?";
+                $sessions_stmt = $conn->prepare($sessions_query);
+                $sessions_stmt->bind_param('s', $idno);
+                $sessions_stmt->execute();
+                
+                // Get the updated number of remaining sessions
+                $remaining_query = "SELECT remaining_sessions FROM users WHERE idno = ?";
+                $remaining_stmt = $conn->prepare($remaining_query);
+                $remaining_stmt->bind_param('s', $idno);
+                $remaining_stmt->execute();
+                $remaining_result = $remaining_stmt->get_result();
+                $remaining_sessions = 0;
+                
+                if ($remaining_row = $remaining_result->fetch_assoc()) {
+                    $remaining_sessions = (int)$remaining_row['remaining_sessions'];
+                }
+                
+                $response = [
+                    'success' => true,
+                    'message' => 'Walk-in sit-in timed out successfully',
+                    'remaining_sessions' => $remaining_sessions
+                ];
+            } else {
+                $response = ['success' => false, 'message' => 'Failed to update walk-in sit-in record: ' . $conn->error];
+            }
+        } else {
+            $response = ['success' => false, 'message' => 'Sit-in record not found'];
+        }
+    }
+} else if ($record_type === 'reservation') {
+    // Handle reservation timeout
+    if (isset($_POST['reservation_id'])) {
+        $reservation_id = intval($_POST['reservation_id']);
+        $time_out = isset($_POST['time_out']) ? $_POST['time_out'] : date('H:i:s');
+        $admin_timeout = isset($_POST['admin_timeout']) && $_POST['admin_timeout'] === 'true';
+        
+        // First, get the student's ID number to update remaining sessions
+        $query = "SELECT idno FROM reservations WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('i', $reservation_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($row = $result->fetch_assoc()) {
+            $idno = $row['idno'];
+            
+            // Update the reservation record
+            $update_query = "UPDATE reservations SET time_out = ?, status = 'completed' WHERE id = ?";
+            $update_stmt = $conn->prepare($update_query);
+            $update_stmt->bind_param('si', $time_out, $reservation_id);
+            
+            if ($update_stmt->execute()) {
+                // Decrement remaining sessions for the student
+                $sessions_query = "UPDATE users SET remaining_sessions = GREATEST(0, remaining_sessions - 1) WHERE idno = ?";
+                $sessions_stmt = $conn->prepare($sessions_query);
+                $sessions_stmt->bind_param('s', $idno);
+                $sessions_stmt->execute();
+                
+                // Get the updated number of remaining sessions
+                $remaining_query = "SELECT remaining_sessions FROM users WHERE idno = ?";
+                $remaining_stmt = $conn->prepare($remaining_query);
+                $remaining_stmt->bind_param('s', $idno);
+                $remaining_stmt->execute();
+                $remaining_result = $remaining_stmt->get_result();
+                $remaining_sessions = 0;
+                
+                if ($remaining_row = $remaining_result->fetch_assoc()) {
+                    $remaining_sessions = (int)$remaining_row['remaining_sessions'];
+                }
+                
+                $response = [
+                    'success' => true,
+                    'message' => 'Reservation timed out successfully',
+                    'remaining_sessions' => $remaining_sessions
+                ];
+            } else {
+                $response = ['success' => false, 'message' => 'Failed to update reservation record: ' . $conn->error];
+            }
+        } else {
+            $response = ['success' => false, 'message' => 'Reservation record not found'];
+        }
+    }
+}
+
+// Return the response
 echo json_encode($response);
-exit;
-}
-
-$sit_in_id = $_POST['sit_in_id'];
-
-// Use the client-provided time if available, otherwise generate server time
-if (!empty($_POST['time_out'])) {
-$time_out = $_POST['time_out'];
-} else {
-// Get current time in Asia/Manila timezone
-$time_out = date('H:i:s'); // 24-hour format
-}
-
-// Start transaction to ensure data consistency
-$conn->begin_transaction();
-
-try {
-// 1. Get the student's ID number to update their remaining_sessions later
-$query = "SELECT idno FROM sit_ins WHERE id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $sit_in_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-throw new Exception('Sit-in record not found');
-}
-
-$row = $result->fetch_assoc();
-$idno = $row['idno'];
-
-// 2. Update the sit_in record with the time_out and set status to 'completed'
-$query = "UPDATE sit_ins SET time_out = ?, status = 'completed' WHERE id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("si", $time_out, $sit_in_id);
-$stmt->execute();
-
-if ($stmt->affected_rows === 0) {
-throw new Exception('Failed to update sit-in record');
-}
-
-// 3. Decrement the remaining_sessions for the student
-$query = "UPDATE users SET remaining_sessions = remaining_sessions - 1 WHERE idno = ? AND remaining_sessions > 0";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("s", $idno);
-$stmt->execute();
-
-// 4. Get the updated remaining_sessions for returning in the response
-$query = "SELECT remaining_sessions FROM users WHERE idno = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("s", $idno);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
-$remaining_sessions = $row['remaining_sessions'];
-
-// Commit the transaction
-$conn->commit();
-
-// Return success response with remaining sessions
-$response['success'] = true;
-$response['message'] = 'Student timed out successfully';
-$response['remaining_sessions'] = $remaining_sessions;
-
-} catch (Exception $e) {
-// Roll back the transaction if any operation fails
-$conn->rollback();
-$response['message'] = 'Error: ' . $e->getMessage();
-}
-
-echo json_encode($response);
-} else {
-header("HTTP/1.1 405 Method Not Allowed");
-echo json_encode(array('success' => false, 'message' => 'Method not allowed'));
-}
 ?>
