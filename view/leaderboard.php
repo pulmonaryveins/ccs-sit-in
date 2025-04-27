@@ -224,7 +224,11 @@ function formatYearLevel($year) {
                 </a>
                 <a href="leaderboard.php" class="nav-link active">
                     <i class="ri-trophy-line"></i>
-                    <span>Leaderboards</span>
+                    <span>Leaderboard</span>
+                </a>
+                <a href="laboratories.php" class="nav-link">
+                    <i class="ri-computer-line"></i>
+                    <span>Laboratory</span>
                 </a>
                 <a href="request.php" class="nav-link">
                     <i class="ri-mail-check-line"></i>
@@ -243,6 +247,7 @@ function formatYearLevel($year) {
                     <span>Reports</span>
                 </a>
             </nav>
+
             <!-- Right side - Actions -->
             <div class="nav-actions">
                 <a href="#" class="action-link">

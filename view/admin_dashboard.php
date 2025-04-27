@@ -667,7 +667,11 @@ if (empty($feedback_data['recent_feedback'])) {
                 </a>
                 <a href="leaderboard.php" class="nav-link">
                     <i class="ri-trophy-line"></i>
-                    <span>Leaderboards</span>
+                    <span>Leaderboard</span>
+                </a>
+                <a href="laboratories.php" class="nav-link">
+                    <i class="ri-computer-line"></i>
+                    <span>Laboratory</span>
                 </a>
                 <a href="request.php" class="nav-link">
                     <i class="ri-mail-check-line"></i>
@@ -686,6 +690,7 @@ if (empty($feedback_data['recent_feedback'])) {
                     <span>Reports</span>
                 </a>
             </nav>
+
             <!-- Right side - Actions -->
             <div class="nav-actions">
                 <a href="#" class="action-link">

@@ -371,13 +371,17 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
 
             <!-- Center - Navigation -->
             <nav class="nav-links">
-                <a href="admin_dashboard.php" class="nav-link ">
+                <a href="admin_dashboard.php" class="nav-link">
                     <i class="ri-dashboard-line"></i>
                     <span>Dashboard</span>
                 </a>
                 <a href="leaderboard.php" class="nav-link">
                     <i class="ri-trophy-line"></i>
                     <span>Leaderboard</span>
+                </a>
+                <a href="laboratories.php" class="nav-link">
+                    <i class="ri-computer-line"></i>
+                    <span>Laboratory</span>
                 </a>
                 <a href="request.php" class="nav-link">
                     <i class="ri-mail-check-line"></i>

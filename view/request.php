@@ -112,6 +112,10 @@ if ($result) {
                     <i class="ri-trophy-line"></i>
                     <span>Leaderboard</span>
                 </a>
+                <a href="laboratories.php" class="nav-link">
+                    <i class="ri-computer-line"></i>
+                    <span>Laboratory</span>
+                </a>
                 <a href="request.php" class="nav-link active">
                     <i class="ri-mail-check-line"></i>
                     <span>Request</span>
