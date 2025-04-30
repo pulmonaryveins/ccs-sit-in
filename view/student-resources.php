@@ -484,7 +484,7 @@ if ($result) {
                     <i class="ri-trophy-line"></i>
                     <span>Leaderboard</span>
                 </a>
-                <a href="student_laboratories.php" class="nav-link ">
+                <a href="student_laboratories.php" class="nav-link">
                     <i class="ri-computer-line"></i>
                     <span>Laboratories</span>
                 </a>
@@ -497,7 +497,7 @@ if ($result) {
                     <span>History</span>
                 </a>
                 <a href="student-resources.php" class="nav-link active">
-                <i class="ri-links-line"></i>
+                    <i class="ri-links-line"></i>
                     <span>Resources</span>
                 </a>
                 <a href="profile.php" class="nav-link">

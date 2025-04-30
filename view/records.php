@@ -232,6 +232,10 @@ function getYearLevelDisplay($yearLevel) {
                     <i class="ri-map-pin-user-line"></i>
                     <span>Sit-in</span>
                 </a>
+                <a href="resources.php" class="nav-link">
+                    <i class="ri-links-line"></i>
+                    <span>Resources</span>
+                </a>
                 <a href="records.php" class="nav-link active">
                     <i class="ri-bar-chart-line"></i>
                     <span>Records</span>

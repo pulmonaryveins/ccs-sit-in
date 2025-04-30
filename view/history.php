@@ -294,6 +294,7 @@ $conn->close();
                     <i class="ri-trophy-line"></i>
                     <span>Leaderboard</span>
                 </a>
+                
                 <a href="reservation.php" class="nav-link">
                     <i class="ri-calendar-line"></i>
                     <span>Reservation</span>
@@ -301,6 +302,10 @@ $conn->close();
                 <a href="history.php" class="nav-link active">
                     <i class="ri-history-line"></i>
                     <span>History</span>
+                </a>
+                <a href="student-resources.php" class="nav-link">
+                    <i class="ri-links-line"></i>
+                    <span>Resources</span>
                 </a>
                 <a href="profile.php" class="nav-link">
                     <i class="ri-user-3-line"></i>

@@ -757,6 +757,10 @@ if ($result) {
                     <i class="ri-history-line"></i>
                     <span>History</span>
                 </a>
+                <a href="student-resources.php" class="nav-link">
+                    <i class="ri-links-line"></i>
+                    <span>Resources</span>
+                </a>
                 <a href="profile.php" class="nav-link">
                     <i class="ri-user-3-line"></i>
                     <span>Profile</span>

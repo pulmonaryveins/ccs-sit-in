@@ -188,6 +188,17 @@ if ($result) {
                 transform: translateY(0);
             }
         }
+        .nav-container {
+            margin: 0 auto;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            background: linear-gradient(135deg, #7556cc 0%, #9556cc 100%);
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                        0 8px 30px -5px rgba(0, 0, 0, 0.1);
+        }
         
         .content-wrapper {
             animation: fadeIn 0.5s ease-out forwards;
@@ -1007,6 +1018,10 @@ if ($result) {
                 <a href="sit-in.php" class="nav-link">
                     <i class="ri-map-pin-user-line"></i>
                     <span>Sit-in</span>
+                </a>
+                <a href="resources.php" class="nav-link">
+                    <i class="ri-links-line"></i>
+                    <span>Resources</span>
                 </a>
                 <a href="records.php" class="nav-link">
                     <i class="ri-bar-chart-line"></i>
