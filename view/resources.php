@@ -959,6 +959,114 @@ if ($result) {
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
                         0 8px 30px -5px rgba(0, 0, 0, 0.1);
         }
+
+        /* Notification system styles - Updated to match the other pages */
+        #notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+            max-width: 90vw;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .notification {
+            display: flex;
+            align-items: flex-start;
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 10px;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border-left: 4px solid #7556cc;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification.info {
+            border-left-color: #3b82f6;
+        }
+        
+        .notification.success {
+            border-left-color: #10b981;
+        }
+        
+        .notification.warning {
+            border-left-color: #f59e0b;
+        }
+        
+        .notification.error {
+            border-left-color: #ef4444;
+        }
+        
+        .notification-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        
+        .notification-icon i {
+            font-size: 24px;
+        }
+        
+        .notification.info .notification-icon i {
+            color: #3b82f6;
+        }
+        
+        .notification.success .notification-icon i {
+            color: #10b981;
+        }
+        
+        .notification.warning .notification-icon i {
+            color: #f59e0b;
+        }
+        
+        .notification.error .notification-icon i {
+            color: #ef4444;
+        }
+        
+        .notification-content {
+            flex-grow: 1;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #111827;
+        }
+        
+        .notification-message {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        
+        .notification-close {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #9ca3af;
+            margin-left: 12px;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .notification-close:hover {
+            color: #4b5563;
+        }
     </style>
 </head>
 <body>
@@ -1225,18 +1333,21 @@ if ($result) {
     </div>
 
     <script>
-        // Enhanced Notification System
+        // Enhanced Notification System with Consistent Styling
         function showNotification(title, message, type = 'info', duration = 5000) {
             const notificationContainer = document.getElementById('notification-container');
             
+            // Create notification
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             
+            // Set icon based on notification type
             let icon = 'information-line';
             if (type === 'success') icon = 'check-line';
             if (type === 'error') icon = 'error-warning-line';
             if (type === 'warning') icon = 'alert-line';
             
+            // Build notification HTML with consistent structure matching other pages
             notification.innerHTML = `
                 <div class="notification-icon">
                     <i class="ri-${icon}"></i>
@@ -1248,12 +1359,14 @@ if ($result) {
                 <button class="notification-close" onclick="closeNotification(this)">&times;</button>
             `;
             
+            // Add to container
             notificationContainer.appendChild(notification);
             
             // Force reflow to enable animation
             notification.getBoundingClientRect();
             notification.classList.add('show');
             
+            // Auto-close if duration is specified
             if (duration > 0) {
                 setTimeout(() => closeNotification(notification), duration);
             }
@@ -1264,28 +1377,34 @@ if ($result) {
         function closeNotification(notification) {
             if (!notification) return;
             
+            // If notification is a close button, get parent
             if (notification.tagName === 'BUTTON') {
                 notification = notification.closest('.notification');
             }
             
+            // Animate out and remove
             notification.classList.remove('show');
             
             setTimeout(() => {
                 if (notification.parentElement) {
                     notification.parentElement.removeChild(notification);
                 }
-            }, 400);
+            }, 300);
         }
 
         // Initial setup
         document.addEventListener('DOMContentLoaded', function() {
-            // Success message handling
+            // Success message handling with enhanced animation
             <?php if (isset($_GET['success'])): ?>
-            showNotification('Success', '<?php echo htmlspecialchars($_GET['success']); ?>', 'success');
+            setTimeout(() => {
+                showNotification('Success', '<?php echo htmlspecialchars($_GET['success']); ?>', 'success');
+            }, 300);
             <?php endif; ?>
             
             <?php if (isset($error_message)): ?>
-            showNotification('Error', '<?php echo htmlspecialchars($error_message); ?>', 'error');
+            setTimeout(() => {
+                showNotification('Error', '<?php echo htmlspecialchars($error_message); ?>', 'error');
+            }, 300);
             <?php endif; ?>
             
             // Enhanced search functionality
@@ -1352,6 +1471,10 @@ if ($result) {
 
             addResourceBtn.addEventListener('click', () => {
                 addResourceModal.classList.add('active');
+                // Apply consistent animation
+                const modal = addResourceModal.querySelector('.modal');
+                modal.style.animation = 'fadeInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                
                 // Focus on name field after a short delay
                 setTimeout(() => {
                     document.getElementById('name').focus();
@@ -1359,11 +1482,20 @@ if ($result) {
             });
 
             closeAddModal.addEventListener('click', () => {
-                addResourceModal.classList.remove('active');
+                const modal = addResourceModal.querySelector('.modal');
+                modal.style.opacity = 0;
+                modal.style.transform = 'translateY(30px) scale(0.95)';
+                setTimeout(() => {
+                    addResourceModal.classList.remove('active');
+                    // Reset animation for next open
+                    modal.style.animation = '';
+                    modal.style.opacity = '';
+                    modal.style.transform = '';
+                }, 300);
             });
 
             cancelAddBtn.addEventListener('click', () => {
-                addResourceModal.classList.remove('active');
+                closeAddModal.click();
             });
 
             imagePreview.addEventListener('click', () => {
@@ -1388,7 +1520,7 @@ if ($result) {
                 const form = document.getElementById('addResourceForm');
                 
                 if (form.checkValidity()) {
-                    // Show processing notification
+                    // Show consistent processing notification
                     const notification = showNotification('Processing', 'Adding resource...', 'info', 0);
                     
                     // Submit form with animation
@@ -1401,6 +1533,7 @@ if ($result) {
                     }, 500);
                 } else {
                     form.reportValidity();
+                    showNotification('Validation Error', 'Please fill in all required fields correctly', 'error');
                 }
             });
 
@@ -1441,15 +1574,28 @@ if ($result) {
                     }
                     
                     editResourceModal.classList.add('active');
+                    
+                    // Apply consistent animation
+                    const modal = editResourceModal.querySelector('.modal');
+                    modal.style.animation = 'fadeInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
                 });
             });
 
             closeEditModal.addEventListener('click', () => {
-                editResourceModal.classList.remove('active');
+                const modal = editResourceModal.querySelector('.modal');
+                modal.style.opacity = 0;
+                modal.style.transform = 'translateY(30px) scale(0.95)';
+                setTimeout(() => {
+                    editResourceModal.classList.remove('active');
+                    // Reset animation for next open
+                    modal.style.animation = '';
+                    modal.style.opacity = '';
+                    modal.style.transform = '';
+                }, 300);
             });
 
             cancelEditBtn.addEventListener('click', () => {
-                editResourceModal.classList.remove('active');
+                closeEditModal.click();
             });
 
             editImagePreview.addEventListener('click', () => {
@@ -1474,7 +1620,7 @@ if ($result) {
                 const form = document.getElementById('editResourceForm');
                 
                 if (form.checkValidity()) {
-                    // Show processing notification
+                    // Show consistent processing notification
                     const notification = showNotification('Processing', 'Updating resource...', 'info', 0);
                     
                     // Submit form with animation
@@ -1487,6 +1633,7 @@ if ($result) {
                     }, 500);
                 } else {
                     form.reportValidity();
+                    showNotification('Validation Error', 'Please fill in all required fields correctly', 'error');
                 }
             });
 
@@ -1504,19 +1651,32 @@ if ($result) {
                     document.getElementById('delete_resource_id').value = id;
                     
                     deleteModal.classList.add('active');
+                    
+                    // Apply consistent animation
+                    const modal = deleteModal.querySelector('.modal');
+                    modal.style.animation = 'fadeInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
                 });
             });
 
             closeDeleteModal.addEventListener('click', () => {
-                deleteModal.classList.remove('active');
+                const modal = deleteModal.querySelector('.modal');
+                modal.style.opacity = 0;
+                modal.style.transform = 'translateY(30px) scale(0.95)';
+                setTimeout(() => {
+                    deleteModal.classList.remove('active');
+                    // Reset animation for next open
+                    modal.style.animation = '';
+                    modal.style.opacity = '';
+                    modal.style.transform = '';
+                }, 300);
             });
 
             cancelDeleteBtn.addEventListener('click', () => {
-                deleteModal.classList.remove('active');
+                closeDeleteModal.click();
             });
 
             confirmDeleteBtn.addEventListener('click', () => {
-                // Show processing notification
+                // Show consistent processing notification
                 const notification = showNotification('Processing', 'Deleting resource...', 'info', 0);
                 
                 // Submit form with animation
@@ -1529,21 +1689,39 @@ if ($result) {
                 }, 500);
             });
             
-            // Close modals when clicking outside
+            // Close modals when clicking outside with consistent animation
             document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
                 backdrop.addEventListener('click', (e) => {
                     if (e.target === backdrop) {
-                        backdrop.classList.remove('active');
+                        const modal = backdrop.querySelector('.modal');
+                        modal.style.opacity = 0;
+                        modal.style.transform = 'translateY(30px) scale(0.95)';
+                        setTimeout(() => {
+                            backdrop.classList.remove('active');
+                            // Reset animation for next open
+                            modal.style.animation = '';
+                            modal.style.opacity = '';
+                            modal.style.transform = '';
+                        }, 300);
                     }
                 });
             });
             
             // Add keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                // Escape key to close modals
+                // Escape key to close modals with animation
                 if (e.key === 'Escape') {
-                    document.querySelectorAll('.modal-backdrop.active').forEach(modal => {
-                        modal.classList.remove('active');
+                    document.querySelectorAll('.modal-backdrop.active').forEach(backdrop => {
+                        const modal = backdrop.querySelector('.modal');
+                        modal.style.opacity = 0;
+                        modal.style.transform = 'translateY(30px) scale(0.95)';
+                        setTimeout(() => {
+                            backdrop.classList.remove('active');
+                            // Reset animation for next open
+                            modal.style.animation = '';
+                            modal.style.opacity = '';
+                            modal.style.transform = '';
+                        }, 300);
                     });
                 }
                 
