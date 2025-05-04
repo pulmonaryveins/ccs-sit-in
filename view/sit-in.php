@@ -894,15 +894,8 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
             confirmMessage = "Are you sure you want to time out this direct sit-in?";
             confirmTitle = "Confirm Direct Sit-in Time Out";
             
-            // For direct sit-ins, get laboratory and PC number from the row if available
-            const rowSelector = `tr:has(button[onclick*="markTimeOut('${id}', '${recordType}')"]) td`;
-            const laboratoryElement = document.querySelector(`${rowSelector}:nth-child(4)`);
-            const pcNumberElement = document.querySelector(`${rowSelector}:nth-child(5)`);
-            
-            if (laboratoryElement && pcNumberElement) {
-                laboratory = laboratoryElement.textContent.replace('Laboratory ', '').trim();
-                pcNumber = pcNumberElement.textContent.trim();
-            }
+            // For direct sit-ins, we don't need to get laboratory and PC number
+            // as we don't want to show the computer update notification
         }
         
         showConfirmModal(confirmMessage, confirmTitle, (confirmed) => {
@@ -915,9 +908,6 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                 // Add the correct ID field based on the record type
                 if (recordType === 'sit_in') {
                     formData.append('sit_in_id', id);
-                    // Include laboratory and PC number for updating computer status
-                    if (laboratory) formData.append('laboratory', laboratory);
-                    if (pcNumber) formData.append('pc_number', pcNumber);
                 } else if (recordType === 'reservation') {
                     formData.append('reservation_id', id);
                     
@@ -959,8 +949,8 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                         const message = `Student has been marked as timed out successfully. \nRemaining sessions: ${data.remaining_sessions}`;
                         showNotification("Success", message, 'success');
                         
-                        // If computer status was updated, show additional notification
-                        if (data.computer_updated) {
+                        // Only show computer update notification for reservations, not for direct sit-ins
+                        if (data.computer_updated && recordType === 'reservation') {
                             const computerMessage = `Computer ${data.pc_number} in Laboratory ${data.laboratory} has been set to available.`;
                             showNotification("Computer Updated", computerMessage, 'info');
                             

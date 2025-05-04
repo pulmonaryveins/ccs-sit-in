@@ -353,9 +353,6 @@ if ($result) {
                 <span class="close-modal">&times;</span>
             </div>
             <div class="confirmation-body">
-                <div class="confirmation-icon">
-                    <i id="confirmationIcon" class="ri-question-line"></i>
-                </div>
                 <div class="confirmation-message">
                     <p id="confirmationMessage">Are you sure you want to proceed with this action?</p>
                     <div id="reservationDetails" class="reservation-details">
@@ -947,36 +944,11 @@ if ($result) {
 
         .confirmation-body {
             padding: 25px;
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-        }
-
-        .confirmation-icon {
-            flex-shrink: 0;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-color: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .confirmation-icon i {
-            font-size: 24px;
-        }
-
-        .confirmation-icon.approve i {
-            color: #38a169;
-        }
-
-        .confirmation-icon.reject i {
-            color: #e53e3e;
+            text-align: center;
         }
 
         .confirmation-message {
-            flex-grow: 1;
+            width: 100%;
         }
 
         .confirmation-message p {
@@ -993,6 +965,7 @@ if ($result) {
             padding: 15px;
             margin-top: 15px;
             font-size: 0.9rem;
+            text-align: left;
         }
 
         .reservation-detail-item {
@@ -1019,7 +992,7 @@ if ($result) {
         .confirmation-footer {
             padding: 15px 25px;
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
             gap: 10px;
             border-top: 1px solid #f0f0f0;
         }
@@ -1031,6 +1004,7 @@ if ($result) {
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-width: 100px;
         }
 
         .modal-button.cancel {
@@ -1065,7 +1039,7 @@ if ($result) {
         /* Toast Notification Styles */
         .toast-container {
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             right: 20px;
             z-index: 9999;
         }
@@ -1372,20 +1346,15 @@ if ($result) {
             // Set modal content based on action
             const modalTitle = document.getElementById('confirmationTitle');
             const modalMessage = document.getElementById('confirmationMessage');
-            const modalIcon = document.getElementById('confirmationIcon');
             const reservationDetailsContainer = document.getElementById('reservationDetails');
             
             if (action === 'approve') {
                 modalTitle.textContent = 'Approve Reservation';
                 modalMessage.textContent = `Are you sure you want to approve the reservation for ${studentName}?`;
-                modalIcon.className = 'ri-check-line';
-                document.querySelector('.confirmation-icon').className = 'confirmation-icon approve';
                 confirmBtn.className = 'modal-button confirm';
             } else {
                 modalTitle.textContent = 'Reject Reservation';
                 modalMessage.textContent = `Are you sure you want to reject the reservation for ${studentName}?`;
-                modalIcon.className = 'ri-close-line';
-                document.querySelector('.confirmation-icon').className = 'confirmation-icon reject';
                 confirmBtn.className = 'modal-button confirm reject';
             }
             
