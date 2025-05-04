@@ -345,6 +345,34 @@ if ($result) {
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="confirmation-content">
+            <div class="confirmation-header">
+                <h3 id="confirmationTitle">Confirm Action</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="confirmation-body">
+                <div class="confirmation-icon">
+                    <i id="confirmationIcon" class="ri-question-line"></i>
+                </div>
+                <div class="confirmation-message">
+                    <p id="confirmationMessage">Are you sure you want to proceed with this action?</p>
+                    <div id="reservationDetails" class="reservation-details">
+                        <!-- Reservation details will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            <div class="confirmation-footer">
+                <button id="cancelButton" class="modal-button cancel">Cancel</button>
+                <button id="confirmButton" class="modal-button confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <style>
         .nav-container {
             margin: 0 auto;
@@ -854,6 +882,306 @@ if ($result) {
             letter-spacing: 0.02em;
             opacity: 0.9;
         }
+
+        /* Confirmation Modal Styles */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .confirmation-content {
+            position: relative;
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 0;
+            width: 450px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .confirmation-header {
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .confirmation-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #555;
+        }
+
+        .confirmation-body {
+            padding: 25px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .confirmation-icon {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirmation-icon i {
+            font-size: 24px;
+        }
+
+        .confirmation-icon.approve i {
+            color: #38a169;
+        }
+
+        .confirmation-icon.reject i {
+            color: #e53e3e;
+        }
+
+        .confirmation-message {
+            flex-grow: 1;
+        }
+
+        .confirmation-message p {
+            margin: 0 0 15px;
+            font-size: 1rem;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .reservation-details {
+            background-color: #f8fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .reservation-detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        .reservation-detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #718096;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .confirmation-footer {
+            padding: 15px 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .modal-button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-button.cancel {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+
+        .modal-button.cancel:hover {
+            background: #cbd5e0;
+        }
+
+        .modal-button.confirm {
+            background: #7556cc;
+            color: white;
+            border: 1px solid #7556cc;
+        }
+
+        .modal-button.confirm:hover {
+            background: #6345bb;
+        }
+
+        .modal-button.confirm.reject {
+            background: #e53e3e;
+            border-color: #e53e3e;
+        }
+
+        .modal-button.confirm.reject:hover {
+            background: #c53030;
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 350px;
+            max-width: calc(100vw - 40px);
+            transform: translateX(100%);
+            opacity: 0;
+            animation: slideInToast 0.3s forwards;
+            border-left: 4px solid #7556cc;
+        }
+
+        @keyframes slideInToast {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.hide {
+            animation: slideOutToast 0.3s forwards;
+        }
+
+        @keyframes slideOutToast {
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-icon i {
+            font-size: 24px;
+        }
+
+        .toast.success {
+            border-left-color: #38a169;
+        }
+
+        .toast.success .toast-icon i {
+            color: #38a169;
+        }
+
+        .toast.error {
+            border-left-color: #e53e3e;
+        }
+
+        .toast.error .toast-icon i {
+            color: #e53e3e;
+        }
+
+        .toast.warning {
+            border-left-color: #dd6b20;
+        }
+
+        .toast.warning .toast-icon i {
+            color: #dd6b20;
+        }
+
+        .toast.info {
+            border-left-color: #3182ce;
+        }
+
+        .toast.info .toast-icon i {
+            color: #3182ce;
+        }
+
+        .toast-content {
+            flex-grow: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1a202c;
+            margin: 0 0 4px;
+            line-height: 1.4;
+        }
+
+        .toast-message {
+            font-size: 0.875rem;
+            color: #4a5568;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .toast-close {
+            color: #a0aec0;
+            font-size: 18px;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #718096;
+        }
     </style>
 
     <script>
@@ -945,12 +1273,169 @@ if ($result) {
             });
         }
 
+        // Confirmation modal functions
+        const modal = document.getElementById('confirmationModal');
+        const closeBtn = document.querySelector('.close-modal');
+        const cancelBtn = document.getElementById('cancelButton');
+        const confirmBtn = document.getElementById('confirmButton');
+
+        // Close modal when clicking the X or Cancel button
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside the modal content
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            modal.style.display = 'none';
+            // Reset confirmation button
+            confirmBtn.className = 'modal-button confirm';
+            confirmBtn.removeAttribute('data-reservation-id');
+            confirmBtn.removeAttribute('data-action');
+        }
+
+        // Toast notification functions
+        function showToast(title, message, type = 'info', duration = 5000) {
+            const toastContainer = document.getElementById('toast-container');
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Set icon based on type
+            let iconClass = 'ri-information-line';
+            if (type === 'success') iconClass = 'ri-check-line';
+            if (type === 'error') iconClass = 'ri-error-warning-line';
+            if (type === 'warning') iconClass = 'ri-alert-line';
+            
+            // Create toast content
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="${iconClass}"></i>
+                </div>
+                <div class="toast-content">
+                    <h4 class="toast-title">${title}</h4>
+                    <p class="toast-message">${message}</p>
+                </div>
+                <button class="toast-close">&times;</button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Handle close button click
+            const closeToastBtn = toast.querySelector('.toast-close');
+            closeToastBtn.addEventListener('click', () => {
+                closeToast(toast);
+            });
+            
+            // Auto-close after duration
+            if (duration > 0) {
+                setTimeout(() => closeToast(toast), duration);
+            }
+            
+            return toast;
+        }
+
+        function closeToast(toast) {
+            toast.classList.add('hide');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }
+
         function processReservation(id, action) {
-            if (!confirm(`Are you sure you want to ${action} this reservation?`)) {
+            // Get reservation details for the confirmation modal
+            const reservationItem = document.querySelector(`.request-item:has(button[onclick*="processReservation(${id}, '${action}')"])`);
+            
+            if (!reservationItem) {
+                showToast('Error', 'Could not find reservation details', 'error');
                 return;
             }
+            
+            // Extract reservation details
+            const studentName = reservationItem.querySelector('.student-name').textContent;
+            const detailRows = reservationItem.querySelectorAll('.detail-row');
+            let reservationDetails = {};
+            
+            detailRows.forEach(row => {
+                const label = row.querySelector('.label').textContent.replace(':', '').trim();
+                const value = row.querySelector('.value').textContent.trim();
+                reservationDetails[label] = value;
+            });
+            
+            // Set modal content based on action
+            const modalTitle = document.getElementById('confirmationTitle');
+            const modalMessage = document.getElementById('confirmationMessage');
+            const modalIcon = document.getElementById('confirmationIcon');
+            const reservationDetailsContainer = document.getElementById('reservationDetails');
+            
+            if (action === 'approve') {
+                modalTitle.textContent = 'Approve Reservation';
+                modalMessage.textContent = `Are you sure you want to approve the reservation for ${studentName}?`;
+                modalIcon.className = 'ri-check-line';
+                document.querySelector('.confirmation-icon').className = 'confirmation-icon approve';
+                confirmBtn.className = 'modal-button confirm';
+            } else {
+                modalTitle.textContent = 'Reject Reservation';
+                modalMessage.textContent = `Are you sure you want to reject the reservation for ${studentName}?`;
+                modalIcon.className = 'ri-close-line';
+                document.querySelector('.confirmation-icon').className = 'confirmation-icon reject';
+                confirmBtn.className = 'modal-button confirm reject';
+            }
+            
+            // Populate reservation details
+            reservationDetailsContainer.innerHTML = '';
+            const detailsToShow = [
+                { key: 'ID Number', value: reservationDetails['ID Number'] },
+                { key: 'Laboratory', value: reservationDetails['Laboratory'] },
+                { key: 'PC Number', value: reservationDetails['PC Number'] },
+                { key: 'Date', value: reservationDetails['Date'] },
+                { key: 'Time', value: reservationDetails['Time'] },
+                { key: 'Purpose', value: reservationDetails['Purpose'] }
+            ];
+            
+            detailsToShow.forEach(detail => {
+                if (detail.value) {
+                    const detailItem = document.createElement('div');
+                    detailItem.className = 'reservation-detail-item';
+                    detailItem.innerHTML = `
+                        <span class="detail-label">${detail.key}:</span>
+                        <span class="detail-value">${detail.value}</span>
+                    `;
+                    reservationDetailsContainer.appendChild(detailItem);
+                }
+            });
+            
+            // Set data attributes for the confirm button
+            confirmBtn.setAttribute('data-reservation-id', id);
+            confirmBtn.setAttribute('data-action', action);
+            
+            // Setup confirmation action
+            confirmBtn.onclick = function() {
+                closeModal();
+                submitReservationAction(id, action);
+            };
+            
+            // Show modal
+            modal.style.display = 'block';
+        }
 
-            // Show loading indicator or disable buttons
+        function submitReservationAction(id, action) {
+            // Show loading toast
+            const loadingToast = showToast(
+                `Processing ${action}...`, 
+                'Please wait while we process your request.', 
+                'info', 
+                0
+            );
+            
+            // Disable all action buttons
             const buttons = document.querySelectorAll('.action-btn');
             buttons.forEach(btn => {
                 btn.disabled = true;
@@ -968,36 +1453,54 @@ if ($result) {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                return response.text(); // Get as text first to check for errors
+                return response.text();
             })
             .then(text => {
-                // Try to parse the response as JSON
+                // Close loading toast
+                closeToast(loadingToast);
+                
                 try {
                     const data = JSON.parse(text);
-                    console.log("Received response:", data); // Debug log
+                    console.log("Received response:", data);
                     
                     if (data.success) {
-                        // If approved, update the PC status in the UI and redirect
+                        // Show success toast
                         if (action === 'approve') {
-                            // Update the computer status if we have the needed data
+                            showToast(
+                                'Reservation Approved', 
+                                `The reservation has been successfully approved. ${data.reservation ? 'The computer status has been updated.' : ''}`, 
+                                'success'
+                            );
+                            
+                            // If we have reservation data, update computer status
                             if (data.reservation) {
                                 updateComputerStatusFromReservation(data.reservation);
-                                // Set timeout before redirecting to allow the status update to be seen
+                                
+                                // Redirect to sit-in page after a delay
                                 setTimeout(() => {
-                                    alert(`Reservation ${action}d successfully. Redirecting to Sit-in page.`);
-                                    // Update redirect URL to point directly to the reservations tab
                                     window.location.href = 'sit-in.php?reservation_id=' + id + '&tab=reservations';
-                                }, 1000);
+                                }, 2500);
                             } else {
-                                alert(data.message);
-                                location.reload();
+                                // Reload the page after a delay if no reservation data
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1500);
                             }
                         } else {
-                            alert(data.message);
-                            location.reload();
+                            showToast(
+                                'Reservation Rejected', 
+                                'The reservation has been rejected successfully.', 
+                                'info'
+                            );
+                            
+                            // Reload the page after a delay
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1500);
                         }
                     } else {
-                        alert('Error: ' + data.message);
+                        showToast('Error', data.message, 'error');
+                        
                         // Re-enable buttons
                         buttons.forEach(btn => {
                             btn.disabled = false;
@@ -1006,7 +1509,12 @@ if ($result) {
                     }
                 } catch (parseError) {
                     console.error('Error parsing response:', text);
-                    alert('Error: The server returned an invalid response. Please check the console for details.');
+                    showToast(
+                        'Server Error', 
+                        'The server returned an invalid response. Please check the console for details.', 
+                        'error'
+                    );
+                    
                     // Re-enable buttons
                     buttons.forEach(btn => {
                         btn.disabled = false;
@@ -1015,8 +1523,16 @@ if ($result) {
                 }
             })
             .catch(error => {
+                // Close loading toast
+                closeToast(loadingToast);
+                
                 console.error('Error processing request:', error);
-                alert('Error processing request: ' + error.message);
+                showToast(
+                    'Request Failed', 
+                    'Error processing request: ' + error.message, 
+                    'error'
+                );
+                
                 // Re-enable buttons
                 buttons.forEach(btn => {
                     btn.disabled = false;
