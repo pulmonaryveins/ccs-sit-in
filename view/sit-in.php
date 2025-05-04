@@ -872,12 +872,37 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
         let confirmMessage = "Are you sure you want to mark this student as timed out?";
         let confirmTitle = "Confirm Time Out";
         
+        // Variables to store laboratory and PC number
+        let laboratory = null;
+        let pcNumber = null;
+        
         if (recordType === 'reservation') {
             confirmMessage = "Are you sure you want to time out this reservation?";
             confirmTitle = "Confirm Reservation Time Out";
+            
+            // Get laboratory and PC number directly from the row
+            const rowSelector = `tr:has(button[onclick*="markTimeOut('${id}', '${recordType}')"]) td`;
+            const laboratoryElement = document.querySelector(`${rowSelector}:nth-child(4)`);
+            const pcNumberElement = document.querySelector(`${rowSelector}:nth-child(5)`);
+            
+            if (laboratoryElement && pcNumberElement) {
+                laboratory = laboratoryElement.textContent.replace('Laboratory ', '').trim();
+                pcNumber = pcNumberElement.textContent.trim();
+                console.log(`Retrieved from row: Lab ${laboratory}, PC ${pcNumber}`);
+            }
         } else {
             confirmMessage = "Are you sure you want to time out this direct sit-in?";
             confirmTitle = "Confirm Direct Sit-in Time Out";
+            
+            // For direct sit-ins, get laboratory and PC number from the row if available
+            const rowSelector = `tr:has(button[onclick*="markTimeOut('${id}', '${recordType}')"]) td`;
+            const laboratoryElement = document.querySelector(`${rowSelector}:nth-child(4)`);
+            const pcNumberElement = document.querySelector(`${rowSelector}:nth-child(5)`);
+            
+            if (laboratoryElement && pcNumberElement) {
+                laboratory = laboratoryElement.textContent.replace('Laboratory ', '').trim();
+                pcNumber = pcNumberElement.textContent.trim();
+            }
         }
         
         showConfirmModal(confirmMessage, confirmTitle, (confirmed) => {
@@ -890,8 +915,15 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                 // Add the correct ID field based on the record type
                 if (recordType === 'sit_in') {
                     formData.append('sit_in_id', id);
+                    // Include laboratory and PC number for updating computer status
+                    if (laboratory) formData.append('laboratory', laboratory);
+                    if (pcNumber) formData.append('pc_number', pcNumber);
                 } else if (recordType === 'reservation') {
                     formData.append('reservation_id', id);
+                    
+                    // Include laboratory and PC number for updating computer status
+                    if (laboratory) formData.append('laboratory', laboratory);
+                    if (pcNumber) formData.append('pc_number', pcNumber);
                 }
                 
                 // Explicitly add the current time in Manila/GMT+8 timezone with consistent format
@@ -927,6 +959,22 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
                         const message = `Student has been marked as timed out successfully. \nRemaining sessions: ${data.remaining_sessions}`;
                         showNotification("Success", message, 'success');
                         
+                        // If computer status was updated, show additional notification
+                        if (data.computer_updated) {
+                            const computerMessage = `Computer ${data.pc_number} in Laboratory ${data.laboratory} has been set to available.`;
+                            showNotification("Computer Updated", computerMessage, 'info');
+                            
+                            // Dispatch a custom event that request.php can listen for
+                            const event = new CustomEvent('computerStatusUpdated', { 
+                                detail: {
+                                    laboratory: data.laboratory,
+                                    pcNumber: data.pc_number,
+                                    status: 'available'
+                                }
+                            });
+                            document.dispatchEvent(event);
+                        }
+                        
                         // Reload the page to reflect changes after a short delay
                         setTimeout(() => location.reload(), 2000);
                     } else {
@@ -940,7 +988,7 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
             }
         });
     }
-    
+
     function convertToSitIn(reservationId) {
         showConfirmModal("Are you sure you want to check in this student?", "Confirm Check In", (confirmed) => {
             if (confirmed) {

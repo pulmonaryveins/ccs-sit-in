@@ -26,7 +26,7 @@ if ($record_type === 'sit_in') {
         $admin_timeout = isset($_POST['admin_timeout']) && $_POST['admin_timeout'] === 'true';
         
         // First, get the student's ID number to update remaining sessions
-        $query = "SELECT idno FROM sit_ins WHERE id = ?";
+        $query = "SELECT idno, laboratory, pc_number FROM sit_ins WHERE id = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param('i', $sit_in_id);
         $stmt->execute();
@@ -34,6 +34,8 @@ if ($record_type === 'sit_in') {
         
         if ($row = $result->fetch_assoc()) {
             $idno = $row['idno'];
+            $laboratory = $row['laboratory'];
+            $pc_number = $row['pc_number'];
             
             // Update the sit_in record
             $update_query = "UPDATE sit_ins SET time_out = ?, status = 'completed' WHERE id = ?";
@@ -59,11 +61,30 @@ if ($record_type === 'sit_in') {
                     $remaining_sessions = (int)$remaining_row['remaining_sessions'];
                 }
                 
-                $response = [
-                    'success' => true,
-                    'message' => 'Walk-in sit-in timed out successfully',
-                    'remaining_sessions' => $remaining_sessions
-                ];
+                // Update the computer status to 'available'
+                if (!empty($laboratory) && !empty($pc_number)) {
+                    $computer_update_query = "UPDATE computer_status SET status = 'available' WHERE laboratory = ? AND pc_number = ?";
+                    $computer_update_stmt = $conn->prepare($computer_update_query);
+                    $computer_update_stmt->bind_param('si', $laboratory, $pc_number);
+                    $computer_update_stmt->execute();
+                    
+                    // Add information about updated computer to response
+                    $response = [
+                        'success' => true,
+                        'message' => 'Walk-in sit-in timed out successfully',
+                        'remaining_sessions' => $remaining_sessions,
+                        'computer_updated' => true,
+                        'laboratory' => $laboratory,
+                        'pc_number' => $pc_number
+                    ];
+                } else {
+                    $response = [
+                        'success' => true,
+                        'message' => 'Walk-in sit-in timed out successfully',
+                        'remaining_sessions' => $remaining_sessions,
+                        'computer_updated' => false
+                    ];
+                }
             } else {
                 $response = ['success' => false, 'message' => 'Failed to update walk-in sit-in record: ' . $conn->error];
             }
@@ -78,8 +99,12 @@ if ($record_type === 'sit_in') {
         $time_out = isset($_POST['time_out']) ? $_POST['time_out'] : date('H:i:s');
         $admin_timeout = isset($_POST['admin_timeout']) && $_POST['admin_timeout'] === 'true';
         
-        // First, get the student's ID number to update remaining sessions
-        $query = "SELECT idno FROM reservations WHERE id = ?";
+        // Get laboratory and PC number from form data if provided
+        $laboratory = isset($_POST['laboratory']) ? $_POST['laboratory'] : null;
+        $pc_number = isset($_POST['pc_number']) ? intval($_POST['pc_number']) : null;
+        
+        // First, get the student's ID number and reservation details to update remaining sessions
+        $query = "SELECT idno, laboratory, pc_number FROM reservations WHERE id = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param('i', $reservation_id);
         $stmt->execute();
@@ -87,6 +112,9 @@ if ($record_type === 'sit_in') {
         
         if ($row = $result->fetch_assoc()) {
             $idno = $row['idno'];
+            // Use database values if not provided in the form
+            $laboratory = $laboratory ?? $row['laboratory']; 
+            $pc_number = $pc_number ?? $row['pc_number'];
             
             // Update the reservation record
             $update_query = "UPDATE reservations SET time_out = ?, status = 'completed' WHERE id = ?";
@@ -112,11 +140,30 @@ if ($record_type === 'sit_in') {
                     $remaining_sessions = (int)$remaining_row['remaining_sessions'];
                 }
                 
-                $response = [
-                    'success' => true,
-                    'message' => 'Reservation timed out successfully',
-                    'remaining_sessions' => $remaining_sessions
-                ];
+                // Update the computer status to 'available'
+                if (!empty($laboratory) && !empty($pc_number)) {
+                    $computer_update_query = "UPDATE computer_status SET status = 'available' WHERE laboratory = ? AND pc_number = ?";
+                    $computer_update_stmt = $conn->prepare($computer_update_query);
+                    $computer_update_stmt->bind_param('si', $laboratory, $pc_number);
+                    $computer_update_result = $computer_update_stmt->execute();
+                    
+                    // Add information about updated computer to response
+                    $response = [
+                        'success' => true,
+                        'message' => 'Reservation timed out successfully',
+                        'remaining_sessions' => $remaining_sessions,
+                        'computer_updated' => $computer_update_result,
+                        'laboratory' => $laboratory,
+                        'pc_number' => $pc_number
+                    ];
+                } else {
+                    $response = [
+                        'success' => true,
+                        'message' => 'Reservation timed out successfully, but no computer information was available',
+                        'remaining_sessions' => $remaining_sessions,
+                        'computer_updated' => false
+                    ];
+                }
             } else {
                 $response = ['success' => false, 'message' => 'Failed to update reservation record: ' . $conn->error];
             }

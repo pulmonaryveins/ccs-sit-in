@@ -1139,7 +1139,62 @@ if ($result) {
                     document.getElementById(this.dataset.filter + '-logs').classList.add('active');
                 });
             });
+
+            // Listen for computer status update events from sit-in.php
+            document.addEventListener('computerStatusUpdated', function(event) {
+                console.log('Received computer status update:', event.detail);
+                const { laboratory, pcNumber, status } = event.detail;
+                
+                // Update the UI if the laboratory is currently selected
+                if (document.getElementById('labSelect').value === laboratory) {
+                    const computerUnit = document.querySelector(`.computer-unit[data-pc="${pcNumber}"]`);
+                    if (computerUnit) {
+                        const statusElement = computerUnit.querySelector('.status');
+                        if (statusElement) {
+                            // Update status class and text
+                            statusElement.classList.remove('in-use', 'available');
+                            statusElement.classList.add(status === 'available' ? 'available' : 'in-use');
+                            statusElement.textContent = status === 'available' ? 'Available' : 'In Use';
+                            
+                            // Remove student assignment indicator if it exists
+                            computerUnit.classList.remove('student-assigned', 'just-approved');
+                            computerUnit.removeAttribute('title');
+                            
+                            // Add visual feedback
+                            computerUnit.classList.add('just-updated');
+                            setTimeout(() => {
+                                computerUnit.classList.remove('just-updated');
+                            }, 2000);
+                        }
+                    }
+                } else {
+                    // If the lab isn't currently selected, show a notification
+                    // that prompts the user to switch to the lab to see the change
+                    const labSelectElement = document.getElementById('labSelect');
+                    const option = new Option(`Laboratory ${laboratory}`, laboratory);
+                    
+                    // Update the lab select to highlight the change
+                    if (confirm(`Computer ${pcNumber} in Laboratory ${laboratory} has been updated to ${status}. Would you like to view this laboratory?`)) {
+                        labSelectElement.value = laboratory;
+                        loadComputerStatus(laboratory);
+                    }
+                }
+            });
         });
+
+        // Add styling for the updated computer status
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .computer-unit.just-updated {
+                    animation: flash 1.5s;
+                }
+                
+                @keyframes flash {
+                    0%, 100% { background-color: transparent; }
+                    50% { background-color: rgba(56, 161, 105, 0.3); }
+                }
+            </style>
+        `);
     </script>
 
 </body>
