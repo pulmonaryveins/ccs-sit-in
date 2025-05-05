@@ -44,11 +44,6 @@ body {
     color: white;
 }
 
-.nav-container a[aria-current="page"] {
-    color: white;
-    border-bottom-color: white;
-}
-
 .nav-container svg {
     stroke: currentColor;
 }
@@ -145,16 +140,16 @@ body {
 
 .nav-link:hover {
     color: white;
-    border-bottom-color: rgba(255, 255, 255, 0.5);
+    
 }
 
 .nav-link.active {
     color: white;
-    border-bottom-color: white;
+    
 }
 
 .nav-link i {
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .nav-actions {

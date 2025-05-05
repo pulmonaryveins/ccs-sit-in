@@ -168,9 +168,11 @@ if ($result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratory Management</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/nav.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="../assets/javascript/nav.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -984,70 +986,9 @@ if ($result) {
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <div class="nav-container">
-        <div class="nav-wrapper">
-            <!-- Left side - Profile -->
-            <div class="nav-profile">
-                <div class="profile-trigger" id="profile-trigger">
-                    <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : '../assets/images/logo/AVATAR.png'; ?>" 
-                         alt="Profile">
-                    <span class="username"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-            </div>
-
-            <!-- Center - Navigation -->
-            <nav class="nav-links">
-                <a href="admin_dashboard.php" class="nav-link">
-                    <i class="ri-dashboard-line"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="leaderboard.php" class="nav-link">
-                    <i class="ri-trophy-line"></i>
-                    <span>Leaderboard</span>
-                </a>
-                <a href="laboratories.php" class="nav-link active">
-                    <i class="ri-computer-line active"></i>
-                    <span>Laboratory</span>
-                </a>
-                <a href="request.php" class="nav-link">
-                    <i class="ri-mail-check-line"></i>
-                    <span>Request</span>
-                </a>
-                <a href="sit-in.php" class="nav-link">
-                    <i class="ri-map-pin-user-line"></i>
-                    <span>Sit-in</span>
-                </a>
-                <a href="resources.php" class="nav-link">
-                    <i class="ri-links-line"></i>
-                    <span>Resources</span>
-                </a>
-                <a href="records.php" class="nav-link">
-                    <i class="ri-bar-chart-line"></i>
-                    <span>Records</span>
-                </a>
-                <a href="reports.php" class="nav-link">
-                    <i class="ri-file-text-line"></i>
-                    <span>Reports</span>
-                </a>
-            </nav>
-
-            <!-- Right side - Actions -->
-            <div class="nav-actions">
-                <a href="#" class="action-link">
-                    <i class="fas fa-bell"></i>
-                </a>
-                <a href="../auth/logout.php" class="action-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification System -->
     <div id="notification-container"></div>
-
+    
+    <?php include '../view/nav.php'; ?>
     <div class="content-wrapper">
         <!-- Dashboard Header -->
         <div class="dashboard-header">
