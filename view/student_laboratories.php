@@ -58,9 +58,11 @@ if ($result) {
     <title>Laboratory Schedules</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="../assets/css/student_nav.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="../assets/javascript/nav.js" defer></script>
     <style>
         body {
             opacity: 0;
@@ -719,69 +721,97 @@ if ($result) {
     </style>
 </head>
 <body>
-    <!-- Notification Container -->
-    <div id="notification-container"></div>
-    
-    <!-- Navigation Bar (from dashboard.php) -->
+<div id="notification-container"></div>
     <div class="nav-container">
-        <div class="nav-wrapper">
-            <!-- Left side - Profile -->
-            <div class="nav-profile">
-                <div class="profile-trigger" id="profile-trigger">
-                    <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : '../assets/images/logo/AVATAR.png'; ?>" 
-                         alt="Profile">
-                    <span class="username"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-            </div>
-
-            <!-- Center - Navigation -->
-            <nav class="nav-links">
-                <a href="dashboard.php" class="nav-link">
-                    <i class="ri-dashboard-line"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="student_leaderboard.php" class="nav-link">
-                    <i class="ri-trophy-line"></i>
-                    <span>Leaderboard</span>
-                </a>
-                <a href="student_laboratories.php" class="nav-link active">
-                    <i class="ri-computer-line"></i>
-                    <span>Laboratories</span>
-                </a>
-                <a href="reservation.php" class="nav-link">
-                    <i class="ri-calendar-line"></i>
-                    <span>Reservation</span>
-                </a>
-                <a href="history.php" class="nav-link">
-                    <i class="ri-history-line"></i>
-                    <span>History</span>
-                </a>
-                <a href="student-resources.php" class="nav-link">
-                    <i class="ri-links-line"></i>
-                    <span>Resources</span>
-                </a>
-                <a href="profile.php" class="nav-link">
-                    <i class="ri-user-3-line"></i>
-                    <span>Profile</span>
-                </a>
-            </nav>
-
-            <!-- Right side - Actions -->
-            <div class="nav-actions">
-                <!-- Notification Icon with Badge -->
-                <div class="notification-icon">
-                    <a href="#" class="action-link" id="notification-toggle">
-                        <i class="fas fa-bell"></i>
-                    </a>
-                    <span class="notification-badge" id="notification-badge">0</span>
-                </div>
-                <a href="../auth/logout.php" class="action-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+    <div class="nav-wrapper">
+        <!-- Left side - Profile -->
+        <div class="nav-profile">
+            <div class="profile-trigger" id="profile-trigger">
+                <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : '../assets/images/logo/AVATAR.png'; ?>" 
+                     alt="Profile">
+                <span class="username"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                <i class="fas fa-chevron-down"></i>
             </div>
         </div>
+        <!-- Center - Navigation -->
+        <nav class="nav-links">
+            <a href="dashboard.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'dashboard.php' ? 'active' : ''; ?>">
+                <i class="ri-dashboard-line"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <div class="nav-dropdown">
+                <div class="nav-link dropdown-toggle <?php echo in_array(basename($_SERVER['PHP_SELF']), ['student_laboratories.php', 'student_resources.php']) ? 'active' : ''; ?>">
+                    <i class="ri-computer-line"></i>
+                    <span>Laboratory</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="student_laboratories.php" class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'student_laboratories.php' ? 'active' : ''; ?>">
+                        <i class="ri-calendar-line"></i>
+                        <span>Schedules</span>
+                    </a>
+                    <a href="student-resources.php" class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'student-resources.php' ? 'active' : ''; ?>">
+                        <i class="ri-links-line"></i>
+                        <span>Resources</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-dropdown">
+                <div class="nav-link dropdown-toggle <?php echo in_array(basename($_SERVER['PHP_SELF']), ['sit-in.php', 'reservation.php', 'history.php']) ? 'active' : ''; ?>">
+                    <i class="ri-map-pin-user-line"></i>
+                    <span>Sit-In</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <a href="reservation.php" class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'reservation.php' ? 'active' : ''; ?>">
+                        <i class="ri-calendar-check-line"></i>
+                        <span>Reservations</span>
+                    </a>
+                    <a href="history.php" class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'history.php' ? 'active' : ''; ?>">
+                        <i class="ri-history-line"></i>
+                        <span>History</span>
+                    </a>
+                </div>
+            </div>
+            
+            <a href="student_leaderboard.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'student_leaderboard.php' ? 'active' : ''; ?>">
+                <i class="ri-trophy-line"></i>
+                <span>Leaderboard</span>
+            </a>
+            <a href="profile.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : ''; ?>">
+            <i class="ri-user-3-line"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+
+        <!-- Right side - Actions -->
+        <div class="nav-actions">
+            <div class="notification-icon" id="notification-toggle">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notification-badge"></span>
+                
+                <!-- Notification Dropdown -->
+                <div class="notification-dropdown" id="notification-dropdown">
+                    <div class="notification-header">
+                        <h3>Notifications</h3>
+                        <button id="mark-all-read">Mark all as read</button>
+                    </div>
+                    <div class="notification-list" id="notification-list">
+                        <!-- Notifications will be loaded here -->
+                        <div class="notification-empty">
+                            Loading notifications...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="../auth/logout.php" class="action-link">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
     </div>
+</div> 
 
     <!-- Backdrop -->
     <div class="backdrop" id="backdrop"></div>
