@@ -72,8 +72,10 @@ function formatYearLevel($year) {
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="../assets/css/board.css">
+    <link rel="stylesheet" href="../assets/css/nav.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
+    <script src="../assets/javascript/nav.js" defer></script>
     <style>
         body {
             opacity: 0;
@@ -200,69 +202,9 @@ function formatYearLevel($year) {
     </style>
 </head>
 <body>
-
-<!-- Add notification container after body tag -->
 <div id="notification-container"></div>
     
-    <!-- Navigation Bar -->
-    <div class="nav-container">
-        <div class="nav-wrapper">
-            <!-- Left side - Profile -->
-            <div class="nav-profile">
-                <div class="profile-trigger" id="profile-trigger">
-                <img src="<?php echo isset($_SESSION['profile_image']) ? htmlspecialchars($_SESSION['profile_image']) : '../assets/images/logo/AVATAR.png'; ?>" 
-                alt="Profile">
-                    <span class="username"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-            </div>
-            <!-- Center - Navigation -->
-            <nav class="nav-links">
-                <a href="admin_dashboard.php" class="nav-link">
-                    <i class="ri-dashboard-line"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="leaderboard.php" class="nav-link active">
-                    <i class="ri-trophy-line"></i>
-                    <span>Leaderboard</span>
-                </a>
-                <a href="laboratories.php" class="nav-link">
-                    <i class="ri-computer-line"></i>
-                    <span>Laboratory</span>
-                </a>
-                <a href="request.php" class="nav-link">
-                    <i class="ri-mail-check-line"></i>
-                    <span>Request</span>
-                </a>
-                <a href="sit-in.php" class="nav-link">
-                    <i class="ri-map-pin-user-line"></i>
-                    <span>Sit-in</span>
-                </a>
-                <a href="resources.php" class="nav-link">
-                    <i class="ri-links-line"></i>
-                    <span>Resources</span>
-                </a>
-                <a href="records.php" class="nav-link">
-                    <i class="ri-bar-chart-line"></i>
-                    <span>Records</span>
-                </a>
-                <a href="reports.php" class="nav-link">
-                    <i class="ri-file-text-line"></i>
-                    <span>Reports</span>
-                </a>
-            </nav>
-
-            <!-- Right side - Actions -->
-            <div class="nav-actions">
-                <a href="#" class="action-link">
-                    <i class="fas fa-bell"></i>
-                </a>
-                <a href="../auth/logout.php" class="action-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
-            </div>
-        </div>
-    </div>
+    <?php include '../view/nav.php'; ?>
 
     <div class="content-wrapper">
         <!-- Leaderboard Header -->
@@ -803,193 +745,6 @@ function formatYearLevel($year) {
                     }
                 });
             });
-
-            // Add notification styles
-            document.head.insertAdjacentHTML('beforeend', `
-                <style>
-                    #notification-container {
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        z-index: 9999;
-                        width: 350px;
-                        max-width: 90vw;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 10px;
-                    }
-                    
-                    .notification {
-                        display: flex;
-                        align-items: flex-start;
-                        background: white;
-                        border-radius: 0.5rem;
-                        padding: 1rem;
-                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-                        border-left: 4px solid #7556cc;
-                        animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-                    }
-                    
-                    .notification.removing {
-                        animation: slideOut 0.4s forwards;
-                    }
-                    
-                    @keyframes slideIn {
-                        0% {
-                            transform: translateX(120%);
-                            opacity: 0;
-                        }
-                        100% {
-                            transform: translateX(0);
-                            opacity: 1;
-                        }
-                    }
-                    
-                    @keyframes slideOut {
-                        0% {
-                            transform: translateX(0);
-                            opacity: 1;
-                        }
-                        100% {
-                            transform: translateX(120%);
-                            opacity: 0;
-                        }
-                    }
-                    
-                    .notification-icon {
-                        flex-shrink: 0;
-                        width: 24px;
-                        height: 24px;
-                        margin-right: 12px;
-                        margin-top: 2px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    
-                    .notification-content {
-                        flex-grow: 1;
-                    }
-                    
-                    .notification-title {
-                        font-weight: 600;
-                        font-size: 1rem;
-                        margin-bottom: 0.25rem;
-                        color: #1e293b;
-                    }
-                    
-                    .notification-message {
-                        font-size: 0.875rem;
-                        color: #64748b;
-                        line-height: 1.4;
-                    }
-                    
-                    .notification-close {
-                        background: none;
-                        border: none;
-                        cursor: pointer;
-                        color: #9ca3af;
-                        margin-left: 12px;
-                        padding: 0;
-                        line-height: 1;
-                        font-size: 18px;
-                    }
-                    
-                    .notification-close:hover {
-                        color: #4b5563;
-                    }
-                    
-                    .notification.success {
-                        border-left-color: #10b981;
-                    }
-                    
-                    .notification.error {
-                        border-left-color: #ef4444;
-                    }
-                    
-                    .notification.warning {
-                        border-left-color: #f59e0b;
-                    }
-                    
-                    .notification.info {
-                        border-left-color: #3b82f6;
-                    }
-                    
-                    .notification.success .notification-icon {
-                        color: #10b981;
-                    }
-                    
-                    .notification.error .notification-icon {
-                        color: #ef4444;
-                    }
-                    
-                    .notification.warning .notification-icon {
-                        color: #f59e0b;
-                    }
-                    
-                    .notification.info .notification-icon {
-                        color: #3b82f6;
-                    }
-                    
-                    .view-section {
-                        display: none;
-                    }
-                    
-                    .view-section.active {
-                        display: block;
-                    }
-                    
-                    /* Container headers */
-                    .container-header {
-                        margin-bottom: 1.5rem;
-                        padding: 1.25rem;
-                        background: white;
-                        border-radius: 12px;
-                    }
-                    
-                    .container-header h2 {
-                        color: #1e293b;
-                        font-size: 1.3rem;
-                        font-weight: 600;
-                        margin-bottom: 0.5rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                    }
-                    
-                    .container-header h2 i {
-                        color: #7556cc;
-                    }
-                    
-                    .container-header p {
-                        color: #64748b;
-                        font-size: 0.9rem;
-                        margin: 0;
-                    }
-                    
-                    /* Sit-ins badge */
-                    .sitin-badge {
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                        min-width: 50px;
-                        height: 24px;
-                        background: rgba(59, 130, 246, 0.1);
-                        color: #3b82f6;
-                        border-radius: 12px;
-                        font-weight: 500;
-                        font-size: 0.8rem;
-                        border: 1px solid rgba(59, 130, 246, 0.2);
-                        padding: 0 8px;
-                        transition: all 0.2s ease;
-                    }
-                    
-                    .sitin-badge:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
-                    }
-                </style>
-            `);
 
             // Add search functionality for the leaderboard
             const studentSearchAll = document.getElementById('studentSearchAll');

@@ -82,6 +82,7 @@
 }
 
 .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
     scale: 1.05;
 }
 
@@ -131,6 +132,8 @@
 }
 
 .dropdown-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
 }
 
 .dropdown-icon {
