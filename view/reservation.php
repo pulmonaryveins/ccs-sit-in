@@ -58,6 +58,23 @@ if ($row = $result->fetch_assoc()) {
 }
 
 $stmt->close();
+
+// Check if student has an active or pending reservation
+$hasActiveReservation = false;
+$activeReservation = null;
+
+$check_sql = "SELECT * FROM reservations WHERE idno = ? AND (status = 'pending' OR status = 'approved' AND time_out IS NULL)";
+$check_stmt = $conn->prepare($check_sql);
+$check_stmt->bind_param("s", $_SESSION['idno']);
+$check_stmt->execute();
+$check_result = $check_stmt->get_result();
+
+if($check_result->num_rows > 0) {
+    $hasActiveReservation = true;
+    $activeReservation = $check_result->fetch_assoc();
+}
+$check_stmt->close();
+
 $conn->close();
 ?>
 
@@ -179,6 +196,40 @@ $conn->close();
                     <h3>Make a Reservation</h3>
                 </div>
                 <div class="profile-content" style="padding: 0;">
+                    <?php if ($hasActiveReservation): ?>
+                    <div class="active-reservation-notice">
+                        <div class="reservation-icon">
+                            <i class="ri-alarm-warning-line"></i>
+                        </div>
+                        <div class="reservation-details">
+                            <h4>You have an active reservation</h4>
+                            <p>You cannot make a new reservation until your current reservation is completed.</p>
+                            
+                            <div class="active-reservation-info">
+                                <div class="info-row">
+                                    <span class="info-label">Laboratory:</span>
+                                    <span class="info-value"><?php echo htmlspecialchars($activeReservation['laboratory']); ?></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">PC Number:</span>
+                                    <span class="info-value"><?php echo htmlspecialchars($activeReservation['pc_number']); ?></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Date:</span>
+                                    <span class="info-value"><?php echo date('F j, Y', strtotime($activeReservation['date'])); ?></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Time:</span>
+                                    <span class="info-value"><?php echo date('g:i A', strtotime($activeReservation['time_in'])); ?></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Status:</span>
+                                    <span class="info-value status-badge <?php echo $activeReservation['status']; ?>"><?php echo ucfirst(htmlspecialchars($activeReservation['status'])); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php else: ?>
                     <form action="../controllers/process_reservation.php" method="POST" class="reservation-form">
                         <div class="student-info-grid">
                             <!-- ID Number -->
@@ -303,6 +354,7 @@ $conn->close();
                             </div>
                         </div>
                     </form>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -312,7 +364,7 @@ $conn->close();
             <div class="profile-card">
                 <div class="profile-header">
                     <h3>Select a PC</h3>
-                    <select id="labSelect" class="lab-select" name="laboratory">
+                    <select id="labSelect" class="lab-select" name="laboratory" <?php echo $hasActiveReservation ? 'disabled' : ''; ?>>
                         <option value="">Select Laboratory</option>
                         <option value="517">Laboratory 517</option>
                         <option value="524">Laboratory 524</option>
@@ -324,9 +376,15 @@ $conn->close();
                 </div>
                 <div class="profile-content">
                     <div class="computer-grid" id="computerGrid">
+                        <?php if ($hasActiveReservation): ?>
+                        <div class="initial-message">
+                            PC selection is disabled while you have an active reservation
+                        </div>
+                        <?php else: ?>
                         <div class="initial-message">
                             Please select a laboratory to view available PCs
                         </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -430,6 +488,105 @@ $conn->close();
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
                         0 8px 30px -5px rgba(0, 0, 0, 0.1);
         }
+        
+        /* Active reservation notice styles */
+        .active-reservation-notice {
+            display: flex;
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+            margin: 1rem;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        
+        .reservation-icon {
+            background: #ebe5ff;
+            color: #7556cc;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+        
+        .reservation-details {
+            flex: 1;
+        }
+        
+        .reservation-details h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        
+        .reservation-details p {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+        
+        .active-reservation-info {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+        
+        .info-value {
+            color: #0f172a;
+            font-size: 0.9rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-badge.pending {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+        
+        .status-badge.approved {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-badge.rejected {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        /* Existing styles... */
         .lab-select {
             background: white;
             padding: 0.6rem 1rem;
@@ -445,11 +602,12 @@ $conn->close();
             margin-left: 1rem;
         }
         
-        .lab-select:hover, .lab-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 2px 5px rgba(117, 86, 204, 0.15);
+        .lab-select:disabled {
+            background-color: #f1f5f9;
+            opacity: 0.7;
+            cursor: not-allowed;
         }
-
+        
         .computer-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -704,6 +862,7 @@ $conn->close();
         setInterval(loadNotifications, 30000);
         
         // Lab selection functionality
+        <?php if (!$hasActiveReservation): ?>
         document.getElementById('labSelect').addEventListener('change', function() {
             loadComputerStatus(this.value);
             // Update the laboratory field in the form
@@ -717,6 +876,7 @@ $conn->close();
             // Load the computer status for the selected laboratory
             loadComputerStatus(this.value);
         });
+        <?php endif; ?>
 
         function loadComputerStatus(laboratory) {
             if (!laboratory) {

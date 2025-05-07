@@ -105,11 +105,15 @@ try {
         $username = $username_row['username'];
         $username_stmt->close();
         
+        // Format date and time in the requested format
+        $formatted_datetime = date('F j, Y \a\t g:i A', strtotime($reservation['date'] . ' ' . $reservation['time_in']));
+        
         // Create notification for student
         $notification_title = "Reservation Approved";
-        $notification_content = "Your reservation for Laboratory {$lab}, PC {$pc_number} on {$reservation['date']} at {$reservation['time_in']} has been approved.";
+        $notification_content = "Your reservation for Laboratory {$lab}, PC {$pc_number} on {$formatted_datetime} has been approved.";
         
-        $notification_sql = "INSERT INTO notifications (username, title, content) VALUES (?, ?, ?)";
+        // Modify notification SQL to include created_at field explicitly
+        $notification_sql = "INSERT INTO notifications (username, title, content, created_at) VALUES (?, ?, ?, NOW())";
         $notif_stmt = $conn->prepare($notification_sql);
         
         if ($notif_stmt) {
@@ -128,11 +132,15 @@ try {
         $username = $username_row['username'];
         $username_stmt->close();
         
+        // Format date and time in the requested format
+        $formatted_datetime = date('F j, Y \a\t g:i A', strtotime($reservation['date'] . ' ' . $reservation['time_in']));
+        
         // Create rejection notification
         $notification_title = "Reservation Rejected";
-        $notification_content = "Your reservation for Laboratory {$reservation['laboratory']}, PC {$reservation['pc_number']} on {$reservation['date']} at {$reservation['time_in']} has been rejected.";
+        $notification_content = "Your reservation for Laboratory {$reservation['laboratory']}, PC {$reservation['pc_number']} on {$formatted_datetime} has been rejected.";
         
-        $notification_sql = "INSERT INTO notifications (username, title, content) VALUES (?, ?, ?)";
+        // Modify notification SQL to include created_at field explicitly
+        $notification_sql = "INSERT INTO notifications (username, title, content, created_at) VALUES (?, ?, ?, NOW())";
         $notif_stmt = $conn->prepare($notification_sql);
         
         if ($notif_stmt) {
