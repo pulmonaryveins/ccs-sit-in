@@ -55,8 +55,13 @@ if ($result) {
     }
 }
 
-// Get approved reservations
-$sql = "SELECT *, TIME_FORMAT(time_in, '%h:%i %p') as formatted_time FROM reservations WHERE status = 'approved' ORDER BY created_at DESC LIMIT 20";
+// Get approved reservations - Modified to include all approved reservations regardless of active status
+$sql = "SELECT *, 
+        TIME_FORMAT(time_in, '%h:%i %p') as formatted_time, 
+        DATE_FORMAT(updated_at, '%m/%d/%Y %h:%i %p') as formatted_updated_at 
+        FROM reservations 
+        WHERE status = 'approved' 
+        ORDER BY created_at DESC LIMIT 50";
 $result = $conn->query($sql);
 $approved_reservations = [];
 if ($result) {
@@ -65,8 +70,13 @@ if ($result) {
     }
 }
 
-// Get rejected reservations
-$sql = "SELECT *, TIME_FORMAT(time_in, '%h:%i %p') as formatted_time FROM reservations WHERE status = 'rejected' ORDER BY created_at DESC LIMIT 20";
+// Get rejected reservations - Modified to include all rejected reservations
+$sql = "SELECT *, 
+        TIME_FORMAT(time_in, '%h:%i %p') as formatted_time,
+        DATE_FORMAT(updated_at, '%m/%d/%Y %h:%i %p') as formatted_updated_at 
+        FROM reservations 
+        WHERE status = 'rejected' 
+        ORDER BY created_at DESC LIMIT 50";
 $result = $conn->query($sql);
 $rejected_reservations = [];
 if ($result) {
@@ -232,7 +242,7 @@ if ($result) {
                                                 </div>
                                                 <div class="detail-row timestamp">
                                                     <span class="label">Approved on:</span>
-                                                    <span class="value"><?php echo isset($reservation['updated_at']) ? htmlspecialchars($reservation['updated_at']) : htmlspecialchars($reservation['created_at']); ?></span>
+                                                    <span class="value"><?php echo isset($reservation['formatted_updated_at']) ? htmlspecialchars($reservation['formatted_updated_at']) : htmlspecialchars($reservation['created_at']); ?></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -278,7 +288,7 @@ if ($result) {
                                                 </div>
                                                 <div class="detail-row timestamp">
                                                     <span class="label">Rejected on:</span>
-                                                    <span class="value"><?php echo isset($reservation['updated_at']) ? htmlspecialchars($reservation['updated_at']) : htmlspecialchars($reservation['created_at']); ?></span>
+                                                    <span class="value"><?php echo isset($reservation['formatted_updated_at']) ? htmlspecialchars($reservation['formatted_updated_at']) : htmlspecialchars($reservation['created_at']); ?></span>
                                                 </div>
                                             </div>
                                         </div>

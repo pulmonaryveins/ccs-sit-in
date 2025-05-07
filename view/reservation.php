@@ -315,7 +315,7 @@ $conn->close();
                                 <div class="info-content">
                                     <div class="detail-label">Date</div>
                                     <div class="detail-value">
-                                        <input type="date" name="date" required min="<?php echo date('Y-m-d'); ?>">
+                                        <input type="date" name="date" required min="<?php echo date('Y-m-d'); ?>" id="reservationDate">
                                     </div>
                                 </div>
                             </div>
@@ -326,7 +326,8 @@ $conn->close();
                                 <div class="info-content">
                                     <div class="detail-label">Time In</div>
                                     <div class="detail-value">
-                                        <input type="time" name="time_in" required min="07:00" max="17:00">
+                                        <input type="time" name="time_in" required min="08:30" max="20:30" id="timeInField">
+                                        <small class="time-info">Available time: 8:30 AM - 8:30 PM</small>
                                     </div>
                                 </div>
                             </div>
@@ -712,6 +713,29 @@ $conn->close();
             font-weight: 600;
         }
         
+        .time-info {
+            display: block;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        
+        input:invalid {
+            border-color: #e53e3e;
+            background-color: #fff5f5;
+        }
+        
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .error-message.active {
+            display: block;
+        }
+        
     </style>
 
     <script>
@@ -1020,6 +1044,130 @@ $conn->close();
 
         function updateScheduleDisplay(scheduleData) {
             // Update display logic here
+        }
+        
+        // Date and Time validation
+        const dateInput = document.getElementById('reservationDate');
+        const timeInput = document.getElementById('timeInField');
+        
+        // Function to disable Sundays
+        dateInput.addEventListener('input', function() {
+            const selectedDate = new Date(this.value);
+            // Check if the selected day is Sunday (0)
+            if (selectedDate.getDay() === 0) {
+                this.setCustomValidity('Reservations are not allowed on Sundays');
+                showNotification(
+                    "Invalid Date", 
+                    "Reservations are not allowed on Sundays. Please select another day.",
+                    "error",
+                    5000
+                );
+                this.value = ''; // Clear the input
+            } else {
+                this.setCustomValidity('');
+            }
+            validateForm();
+        });
+        
+        // Set min date to today, but prevent selecting Sundays
+        function setMinDate() {
+            const today = new Date();
+            let minDate = new Date(today);
+            
+            // If today is Sunday, set min date to tomorrow (Monday)
+            if (today.getDay() === 0) {
+                minDate.setDate(today.getDate() + 1);
+            }
+            
+            // Format the date as YYYY-MM-DD
+            const formattedDate = minDate.toISOString().split('T')[0];
+            dateInput.setAttribute('min', formattedDate);
+        }
+        
+        // Initialize date constraints
+        setMinDate();
+        
+        // Time restrictions (8:30 AM - 8:30 PM)
+        timeInput.addEventListener('input', function() {
+            const selectedTime = this.value;
+            const [hours, minutes] = selectedTime.split(':').map(Number);
+            
+            // Convert to minutes for easy comparison
+            const totalMinutes = hours * 60 + minutes;
+            const earliestTime = 8 * 60 + 30; // 8:30 AM
+            const latestTime = 20 * 60 + 30;  // 8:30 PM
+            
+            if (totalMinutes < earliestTime || totalMinutes > latestTime) {
+                this.setCustomValidity(`Time must be between 8:30 AM and 8:30 PM`);
+                
+                // Show a notification if the time is outside allowed range
+                showNotification(
+                    "Invalid Time", 
+                    "Please select a time between 8:30 AM and 8:30 PM",
+                    "error",
+                    5000
+                );
+            } else {
+                this.setCustomValidity('');
+            }
+            validateForm();
+        });
+        
+        // Custom validation function to ensure Sundays are not selectable
+        function disableSundays() {
+            // This creates a mutationObserver to catch dynamically created date pickers
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                        for (let node of mutation.addedNodes) {
+                            if (node.nodeType === 1 && node.tagName === 'INPUT' && node.type === 'date') {
+                                // Attach our date validation
+                                node.addEventListener('input', function() {
+                                    const selectedDate = new Date(this.value);
+                                    if (selectedDate.getDay() === 0) {
+                                        this.setCustomValidity('Reservations are not allowed on Sundays');
+                                        this.value = '';
+                                    } else {
+                                        this.setCustomValidity('');
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+        
+        // Initialize the Sunday restriction
+        disableSundays();
+        
+        // Add validation function   
+        function validateForm() {
+            const requiredFields = [
+                'purpose',
+                'laboratory',
+                'date',
+                'time_in'
+            ];
+            
+            // Check if PC is selected
+            const pcSelected = document.querySelector('.computer-unit.selected') !== null;
+            const pcInput = document.querySelector('input[name="pc_number"]');
+            
+            const submitButton = document.querySelector('.edit-btn');
+            const allFieldsFilled = requiredFields.every(field => {
+                const element = document.querySelector(`[name="${field}"]`);
+                return element && element.value && element.validity.valid;
+            });
+            
+            // Make sure we have a valid PC selection
+            const validPcSelection = pcSelected && pcInput && pcInput.value;
+            
+            // Enable/disable the submit button based on form validity
+            submitButton.disabled = !(allFieldsFilled && validPcSelection);
+            submitButton.style.opacity = (allFieldsFilled && validPcSelection) ? '1' : '0.5';
         }
     </script>
 </body>
