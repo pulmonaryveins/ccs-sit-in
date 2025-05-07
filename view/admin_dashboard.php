@@ -739,10 +739,12 @@ if (empty($feedback_data['recent_feedback'])) {
                                     <div class="announcement-header">
                                         <h3><?php echo htmlspecialchars($announcement['title']); ?></h3>
                                         <div class="announcement-actions">
-                                            <button class="edit-announcement" onclick="editAnnouncement(<?php echo $announcement['id']; ?>, '<?php echo addslashes(htmlspecialchars($announcement['title'])); ?>', '<?php echo addslashes(htmlspecialchars($announcement['content'])); ?>')">
+                                            <button class="edit-announcement" data-id="<?php echo $announcement['id']; ?>" 
+                                                    data-title="<?php echo htmlspecialchars($announcement['title']); ?>" 
+                                                    data-content="<?php echo htmlspecialchars($announcement['content']); ?>">
                                                 <i class="ri-edit-line"></i>
                                             </button>
-                                            <button class="delete-announcement" onclick="deleteAnnouncement(<?php echo $announcement['id']; ?>)">
+                                            <button class="delete-announcement" data-id="<?php echo $announcement['id']; ?>">
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>
                                         </div>
@@ -913,7 +915,7 @@ if (empty($feedback_data['recent_feedback'])) {
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Edit Announcement</h3>
-                    <span class="close" onclick="closeModal()">&times;</span>
+                    <span class="close" onclick="closeEditModal()">&times;</span>
                 </div>
                 <form id="editAnnouncementForm">
                     <input type="hidden" id="edit_id" name="id">
@@ -923,7 +925,7 @@ if (empty($feedback_data['recent_feedback'])) {
                         <textarea id="edit_content" name="content" rows="4" required></textarea>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="cancel-btn" onclick="closeEditModal()">Cancel</button>
                         <button type="submit" class="edit-btn2">
                             <i class="ri-save-line"></i>
                             <span>Update Announcement</span>
@@ -1619,7 +1621,7 @@ if (empty($feedback_data['recent_feedback'])) {
                 // Reload the page after a short delay to show the new announcement
                 setTimeout(() => location.reload(), 2000);
             } else {
-                showNotification("Error", "Error posting announcement", "error");
+                showNotification("Error", result.message || "Error posting announcement", "error");
             }
         } catch (error) {
             console.error('Error:', error);
@@ -1627,17 +1629,43 @@ if (empty($feedback_data['recent_feedback'])) {
         }
     });
 
-    // Delete Announcement Handler - Updated to use modal
-    function deleteAnnouncement(id) {
-        document.getElementById('delete_id').value = id;
-        document.getElementById('deleteModal').style.display = 'block';
+    // Delete Announcement Button Event Handlers
+    document.querySelectorAll('.delete-announcement').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            document.getElementById('delete_id').value = id;
+            document.getElementById('deleteModal').style.display = 'block';
+        });
+    });
+    
+    // Edit Announcement Button Event Handlers
+    document.querySelectorAll('.edit-announcement').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const title = this.getAttribute('data-title');
+            const content = this.getAttribute('data-content');
+            
+            // Populate the form
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_content').value = content;
+            
+            // Show the modal
+            document.getElementById('editModal').style.display = 'block';
+        });
+    });
+
+    // Close Edit Modal
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
     }
     
+    // Close Delete Modal
     function closeDeleteModal() {
         document.getElementById('deleteModal').style.display = 'none';
     }
-    
-    async function confirmDeleteAnnouncement() {
+
+    // Confirm and process delete announcement
+    window.confirmDeleteAnnouncement = async function() {
         const id = document.getElementById('delete_id').value;
         
         try {
@@ -1652,34 +1680,26 @@ if (empty($feedback_data['recent_feedback'])) {
             const result = await response.json();
             if (result.success) {
                 closeDeleteModal();
-                document.querySelector(`[data-id="${id}"]`).remove();
+                // Remove the announcement from DOM
+                const announcementElement = document.querySelector(`.announcement-item[data-id="${id}"]`);
+                if (announcementElement) {
+                    announcementElement.remove();
+                }
                 showNotification("Success", "Announcement deleted successfully", "success");
             } else {
-                showNotification("Error", "Error deleting announcement", "error");
+                showNotification("Error", result.message || "Error deleting announcement", "error");
             }
         } catch (error) {
             console.error('Error:', error);
             showNotification("Error", "An error occurred while deleting the announcement", "error");
         }
-    }
+    };
 
-    // Modal Functions - Edit Modal
-    function closeModal() {
-        document.getElementById('editModal').style.display = 'none';
-    }
-    
-    function editAnnouncement(id, title, content) {
-        // Populate the form
-        document.getElementById('edit_id').value = id;
-        document.getElementById('edit_content').value = content;
-        // Show the modal
-        document.getElementById('editModal').style.display = 'block';
-    }
-
-    // Edit Announcement Form Handler - Updated to use notifications
-    document.getElementById('editAnnouncementForm').addEventListener('submit', async (e) => {
+    // Edit Announcement Form Handler
+    document.getElementById('editAnnouncementForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const formData = new FormData(e.target);
+        const formData = new FormData(this);
+        
         const data = {
             id: formData.get('id'),
             title: formData.get('title'),
@@ -1697,12 +1717,22 @@ if (empty($feedback_data['recent_feedback'])) {
             
             const result = await response.json();
             if (result.success) {
-                closeModal();
+                document.getElementById('editModal').style.display = 'none';
                 showNotification("Success", "Announcement updated successfully", "success");
-                // Reload the page after a short delay to show updated content
-                setTimeout(() => location.reload(), 2000);
+                
+                // Update the announcement content in DOM
+                const announcementElement = document.querySelector(`.announcement-item[data-id="${data.id}"]`);
+                if (announcementElement) {
+                    const contentElement = announcementElement.querySelector('p');
+                    if (contentElement) {
+                        contentElement.textContent = data.content;
+                    }
+                } else {
+                    // If we can't find the element to update, just reload the page
+                    setTimeout(() => location.reload(), 2000);
+                }
             } else {
-                showNotification("Error", "Error updating announcement", "error");
+                showNotification("Error", result.message || "Error updating announcement", "error");
             }
         } catch (error) {
             console.error('Error:', error);
@@ -1710,19 +1740,28 @@ if (empty($feedback_data['recent_feedback'])) {
         }
     });
 
-    // Close modal when clicking outside
-        window.onclick = function(event) {
-            const editModal = document.getElementById('editModal');
-            const deleteModal = document.getElementById('deleteModal');
-            
-            if (event.target == editModal) {
-                closeModal();
-            }
-            
-            if (event.target == deleteModal) {
-                closeDeleteModal();
-            }
+    // Make the close modal functions globally accessible
+    window.closeEditModal = function() {
+        document.getElementById('editModal').style.display = 'none';
+    };
+    
+    window.closeDeleteModal = function() {
+        document.getElementById('deleteModal').style.display = 'none';
+    };
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const editModal = document.getElementById('editModal');
+        const deleteModal = document.getElementById('deleteModal');
+        
+        if (event.target === editModal) {
+            closeEditModal();
         }
+        
+        if (event.target === deleteModal) {
+            closeDeleteModal();
+        }
+    };
     });
     </script>
 </body>

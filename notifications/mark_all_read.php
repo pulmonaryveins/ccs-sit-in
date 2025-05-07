@@ -9,37 +9,17 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Get the user ID from the session
 $username = $_SESSION['username'];
 
-// Get user ID from username
-$query = "SELECT id FROM users WHERE username = ?";
+// Update all notifications to read for this user
+$query = "UPDATE notifications SET is_read = 1 WHERE username = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $username);
-$stmt->execute();
-$result = $stmt->get_result();
+$success = $stmt->execute();
+$stmt->close();
 
-if ($result->num_rows === 0) {
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'User not found']);
-    exit;
-}
-
-$user_id = $result->fetch_assoc()['id'];
-
-// Mark all notifications as read
-$query = "UPDATE notifications SET is_read = 1 WHERE user_id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $user_id);
-$result = $stmt->execute();
-
-if ($result) {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => true]);
-} else {
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Failed to update notifications']);
-}
-
+// Return result
+header('Content-Type: application/json');
+echo json_encode(['success' => $success]);
 $conn->close();
 ?>

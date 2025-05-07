@@ -19,10 +19,11 @@ if (!$notification_id) {
     exit;
 }
 
-// Mark the notification as read
-$query = "UPDATE notifications SET is_read = 1 WHERE id = ?";
+// Make sure the notification belongs to this user
+$username = $_SESSION['username'];
+$query = "UPDATE notifications SET is_read = 1 WHERE id = ? AND username = ?";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("i", $notification_id);
+$stmt->bind_param("is", $notification_id, $username);
 $result = $stmt->execute();
 
 if ($result) {
@@ -32,6 +33,6 @@ if ($result) {
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Failed to update notification']);
 }
-
+$stmt->close();
 $conn->close();
 ?>

@@ -95,61 +95,50 @@ try {
             $pc_stmt->close();
         }
 
-        // If the username field is null, make sure to use idno to identify the student in notifications
-        $student_identifier = !empty($reservation['username']) ? $reservation['username'] : $reservation['idno'];
+        // Get the username based on idno
+        $get_username_sql = "SELECT username FROM users WHERE idno = ?";
+        $username_stmt = $conn->prepare($get_username_sql);
+        $username_stmt->bind_param("s", $reservation['idno']);
+        $username_stmt->execute();
+        $username_result = $username_stmt->get_result();
+        $username_row = $username_result->fetch_assoc();
+        $username = $username_row['username'];
+        $username_stmt->close();
         
-        // Try to send notifications
-        try {
-            // Check if notifications table exists before attempting to insert
-            $check_table_sql = "SHOW TABLES LIKE 'notifications'";
-            $table_result = $conn->query($check_table_sql);
-            
-            if ($table_result && $table_result->num_rows > 0) {
-                // Create notification for student
-                $notification_title = "Reservation Approved";
-                $notification_content = "Your reservation for Laboratory {$lab}, PC {$pc_number} on {$reservation['date']} at {$reservation['time_in']} has been approved.";
-                
-                $notification_sql = "INSERT INTO notifications (username, title, content) VALUES (?, ?, ?)";
-                $notif_stmt = $conn->prepare($notification_sql);
-                
-                if ($notif_stmt) {
-                    $notif_stmt->bind_param("sss", $student_identifier, $notification_title, $notification_content);
-                    $notif_stmt->execute();
-                    $notif_stmt->close();
-                }
-            }
-        } catch (Exception $e) {
-            // Ignore notification errors - don't let them stop the process
-            error_log("Notification error: " . $e->getMessage());
+        // Create notification for student
+        $notification_title = "Reservation Approved";
+        $notification_content = "Your reservation for Laboratory {$lab}, PC {$pc_number} on {$reservation['date']} at {$reservation['time_in']} has been approved.";
+        
+        $notification_sql = "INSERT INTO notifications (username, title, content) VALUES (?, ?, ?)";
+        $notif_stmt = $conn->prepare($notification_sql);
+        
+        if ($notif_stmt) {
+            $notif_stmt->bind_param("sss", $username, $notification_title, $notification_content);
+            $notif_stmt->execute();
+            $notif_stmt->close();
         }
     } elseif ($action === 'reject') {
-        // Try to send rejection notification
-        try {
-            // Check if notifications table exists before attempting to insert
-            $check_table_sql = "SHOW TABLES LIKE 'notifications'";
-            $table_result = $conn->query($check_table_sql);
-            
-            if ($table_result && $table_result->num_rows > 0) {
-                // Create rejection notification
-                $student_username = $reservation['username'] ?? '';
-                
-                if (!empty($student_username)) {
-                    $notification_title = "Reservation Rejected";
-                    $notification_content = "Your reservation for Laboratory {$reservation['laboratory']}, PC {$reservation['pc_number']} on {$reservation['date']} has been rejected.";
-                    
-                    $notification_sql = "INSERT INTO notifications (username, title, content) VALUES (?, ?, ?)";
-                    $notif_stmt = $conn->prepare($notification_sql);
-                    
-                    if ($notif_stmt) {
-                        $notif_stmt->bind_param("sss", $student_username, $notification_title, $notification_content);
-                        $notif_stmt->execute();
-                        $notif_stmt->close();
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            // Ignore notification errors
-            error_log("Notification error: " . $e->getMessage());
+        // Get the username based on idno
+        $get_username_sql = "SELECT username FROM users WHERE idno = ?";
+        $username_stmt = $conn->prepare($get_username_sql);
+        $username_stmt->bind_param("s", $reservation['idno']);
+        $username_stmt->execute();
+        $username_result = $username_stmt->get_result();
+        $username_row = $username_result->fetch_assoc();
+        $username = $username_row['username'];
+        $username_stmt->close();
+        
+        // Create rejection notification
+        $notification_title = "Reservation Rejected";
+        $notification_content = "Your reservation for Laboratory {$reservation['laboratory']}, PC {$reservation['pc_number']} on {$reservation['date']} at {$reservation['time_in']} has been rejected.";
+        
+        $notification_sql = "INSERT INTO notifications (username, title, content) VALUES (?, ?, ?)";
+        $notif_stmt = $conn->prepare($notification_sql);
+        
+        if ($notif_stmt) {
+            $notif_stmt->bind_param("sss", $username, $notification_title, $notification_content);
+            $notif_stmt->execute();
+            $notif_stmt->close();
         }
     }
     
@@ -161,6 +150,7 @@ try {
             $stmt->bind_param("i", $reservation_id);
             $stmt->execute();
             $result = $stmt->get_result();
+            
             if ($row = $result->fetch_assoc()) {
                 $reservation['updated_at'] = $row['updated_at'];
             }
