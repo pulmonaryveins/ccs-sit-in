@@ -353,11 +353,17 @@ function formatYearLevel($year) {
                                             <?php echo $student['remaining_sessions']; ?> sessions
                                         </span>
                                     </td>
-                                    <td class="text-center">                                        <div class="points-progress">
-                                            <span class="points-progress-text">(<?php echo $student['points_until_next_session']; ?> points until next session)</span>
+                                    <td class="text-center">
+                                        <div class="points-progress-container">
+                                            <div class="points-progress-bar">
+                                                <div class="points-progress-fill" style="width: <?php echo ($student['points'] % 3 == 0 && $student['points'] > 0) ? '100' : (($student['points'] % 3) / 3 * 100); ?>%">
+                                                </div>
+                                            </div>
+                                            <div class="points-progress-text">
+                                                <?php echo $student['points'] % 3; ?>/3 points
+                                            </div>
                                         </div>
                                     </td>
-                                    
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -450,8 +456,16 @@ function formatYearLevel($year) {
                                             <?php echo $student['remaining_sessions']; ?> sessions
                                         </span>
                                     </td>
-                                    <td class="text-center">                                        <div class="points-progress">
-                                            <span class="points-progress-text">(<?php echo $student['points_until_next_session']; ?> points until next session)</span>
+                                    <td class="text-center">
+                                        <div class="points-progress-container">
+                                            <div class="points-progress-bar">
+                                                <div class="points-progress-fill" style="width: <?php echo ($student['points'] % 3 == 0 && $student['points'] > 0) ? '100' : (($student['points'] % 3) / 3 * 100); ?>%">
+                                                </div>
+                                            </div>
+                                            <div class="points-progress-text">
+                                                <?php echo $student['points'] % 3; ?>/3 points
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="text-center action-buttons">
                                         <button class="action-btn primary" onclick="addPoint('<?php echo $student['idno']; ?>', '<?php echo htmlspecialchars($student['firstname'] . ' ' . $student['lastname']); ?>')">
@@ -497,9 +511,6 @@ function formatYearLevel($year) {
         <?php endif; ?>
     </div>
 
-    <!-- Notification Container -->
-    <div id="notification-container"></div>
-
     <!-- Confirmation Modal -->
     <div class="confirm-modal-backdrop" id="confirmModal" style="display: none;">
         <div class="confirm-modal">
@@ -517,9 +528,13 @@ function formatYearLevel($year) {
     </div>
 
     <script>
-        // Make notification functions globally available (not inside DOMContentLoaded)
+        // Improved notification functions (not inside DOMContentLoaded)
         function showNotification(title, message, type = 'info', duration = 5000) {
             const notificationContainer = document.getElementById('notification-container');
+            if (!notificationContainer) {
+                console.error('Notification container not found');
+                return;
+            }
             
             // Create notification element
             const notification = document.createElement('div');
@@ -545,6 +560,10 @@ function formatYearLevel($year) {
             // Add to container
             notificationContainer.appendChild(notification);
             
+            // Force reflow to enable animation
+            notification.getBoundingClientRect();
+            notification.classList.add('show');
+            
             // Auto-remove after duration
             if (duration > 0) {
                 setTimeout(() => closeNotification(notification), duration);
@@ -561,7 +580,7 @@ function formatYearLevel($year) {
                 notification = notification.closest('.notification');
             }
             
-            notification.classList.add('removing');
+            notification.classList.remove('show');
             
             setTimeout(() => {
                 if (notification.parentNode) {
@@ -588,7 +607,7 @@ function formatYearLevel($year) {
             document.getElementById('confirmModal').style.display = 'none';
         }
         
-        // Make point functions globally available
+        // Improved point functions
         function addPoint(idno, studentName) {
             showConfirmModal(
                 `Are you sure you want to add 1 point to ${studentName}?`,
@@ -1340,7 +1359,305 @@ function formatYearLevel($year) {
                     }
                 });
             });
+
+            // Add CSS for the improved progression bar
+            document.head.insertAdjacentHTML('beforeend', `
+                <style>
+                    // ...existing styles...
+                    
+                    /* Improved Points progression bar styles */
+                    .points-progress-container {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 6px;
+                        width: 100%;
+                        padding: 5px 0;
+                    }
+                    
+                    .points-progress-bar {
+                        width: 100%;
+                        max-width: 100px;
+                        height: 6px;
+                        background: #edf2f7;
+                        border-radius: 10px;
+                        overflow: hidden;
+                        position: relative;
+                        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+                    }
+                    
+                    .points-progress-fill {
+                        height: 100%;
+                        background: linear-gradient(90deg, #a78bfa, #7556cc);
+                        border-radius: 10px;
+                        transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+                        position: relative;
+                        box-shadow: 0 1px 2px rgba(117, 86, 204, 0.3);
+                    }
+                    
+                    .points-progress-fill.complete {
+                        background: linear-gradient(90deg, #10b981, #34d399);
+                        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+                    }
+                    
+                    .points-progress-text {
+                        font-size: 0.7rem;
+                        color: #64748b;
+                        font-weight: 600;
+                        letter-spacing: 0.03em;
+                        opacity: 0.8;
+                        transition: opacity 0.3s ease;
+                        display: flex;
+                        align-items: center;
+                        gap: 3px;
+                    }
+                    
+                    .points-progress-text i {
+                        font-size: 0.75rem;
+                        color: #7556cc;
+                    }
+                    
+                    tr:hover .points-progress-text {
+                        opacity: 1;
+                    }
+                    
+                    /* Points markers to show progress segments */
+                    .points-progress-bar::before,
+                    .points-progress-bar::after {
+                        content: '';
+                        position: absolute;
+                        width: 1px;
+                        height: 4px;
+                        background-color: rgba(255, 255, 255, 0.5);
+                        top: 1px;
+                    }
+                    
+                    .points-progress-bar::before {
+                        left: 33.33%;
+                    }
+                    
+                    .points-progress-bar::after {
+                        left: 66.66%;
+                    }
+                    
+                    /* Shimmer effect on hover */
+                    tr:hover .points-progress-fill::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: -100%;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(
+                            90deg,
+                            transparent,
+                            rgba(255, 255, 255, 0.2),
+                            transparent
+                        );
+                        animation: shimmer 1.5s infinite;
+                    }
+                    
+                    @keyframes shimmer {
+                        100% {
+                            left: 100%;
+                        }
+                    }
+                    
+                    /* Responsive adjustments */
+                    @media (max-width: 768px) {
+                        .points-progress-bar {
+                            max-width: 80px;
+                        }
+                    }
+                </style>
+            `);
+
+            // Replace the points-progress-container elements with improved design
+            document.querySelectorAll('.points-progress-container').forEach(container => {
+                const progressFill = container.querySelector('.points-progress-fill');
+                const progressText = container.querySelector('.points-progress-text');
+                
+                if (progressFill && progressText) {
+                    // Extract current points value
+                    const pointsText = progressText.textContent.trim();
+                    const [current, total] = pointsText.split('/').map(num => parseInt(num));
+                    
+                    // Check if it's a complete segment
+                    if (current === 0 && parseInt(progressFill.style.width) > 0) {
+                        progressFill.classList.add('complete');
+                    }
+                    
+                    // Update the text with icon
+                    progressText.innerHTML = `<i class="ri-star-line"></i> ${pointsText}`;
+                }
+            });
+            
+            // Add animation for progress bars when they come into view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const progressBars = entry.target.querySelectorAll('.points-progress-fill');
+                        progressBars.forEach(bar => {
+                            // Force reflow for animation
+                            const currentWidth = bar.style.width;
+                            bar.style.width = '0';
+                            setTimeout(() => {
+                                bar.style.width = currentWidth;
+                            }, 50);
+                        });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            // Observe tables
+            document.querySelectorAll('.modern-table').forEach(table => {
+                observer.observe(table);
+            });
+
+            // Add CSS for the improved headers
+            document.head.insertAdjacentHTML('beforeend', `
+                <style>
+                    /* ...existing styles... */
+                    
+                    /* Container header styles consistency */
+                    .container-header {
+                        margin-bottom: 1.5rem;
+                        padding: 1.25rem;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                    }
+                    
+                    .header-content {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 1rem;
+                    }
+                    
+                    .header-left {
+                        flex: 1;
+                        min-width: 250px;
+                    }
+                    
+                    .header-right {
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                    }
+                    
+                    .header-left h2 {
+                        color: #1e293b;
+                        font-size: 1.3rem;
+                        font-weight: 600;
+                        margin-bottom: 0.5rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                    }
+                    
+                    .header-left h2 i {
+                        color: #7556cc;
+                    }
+                    
+                    .header-left p {
+                        color: #64748b;
+                        font-size: 0.9rem;
+                        margin: 0;
+                    }
+                    
+                    /* ...existing styles... */
+                </style>
+            `);
         });
     </script>
+    <style>
+        /* Points progression bar styles */
+        .points-progress-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+        }
+        
+        .points-progress-bar {
+            width: 100%;
+            max-width: 120px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .points-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7556cc, #9556cc);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .points-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg, 
+                rgba(255,255,255,0.15) 25%, 
+                transparent 25%, 
+                transparent 50%, 
+                rgba(255,255,255,0.15) 50%, 
+                rgba(255,255,255,0.15) 75%, 
+                transparent 75%, 
+                transparent
+            );
+            background-size: 10px 10px;
+            animation: progress-animation 1s linear infinite;
+            border-radius: 4px;
+        }
+        
+        @keyframes progress-animation {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 10px 0;
+            }
+        }
+        
+        .points-progress-fill.complete {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+        
+        .points-progress-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        /* Add hover effect to rows */
+        .modern-table tbody tr:hover .points-progress-fill::after {
+            animation-duration: 0.5s;
+        }
+        
+        /* Responsive adjustments for progress bar */
+        @media (max-width: 768px) {
+            .points-progress-bar {
+                max-width: 80px;
+            }
+            
+            .points-progress-text {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
 </body>
 </html>

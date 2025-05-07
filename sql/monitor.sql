@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2025 at 05:13 PM
+-- Generation Time: May 07, 2025 at 06:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,7 +47,8 @@ INSERT INTO `admin_notifications` (`id`, `title`, `content`, `is_read`, `related
 (3, 'New Reservation Request', 'Tormis, Francine requested to use PC #16 in Laboratory 517 on May 8, 2025 at 12:00 PM', 1, 26, 'reservation', '2025-05-07 12:47:07'),
 (4, 'New Reservation Request', 'Cabunilas, Vince Bryant N. requested to use PC #1 in Laboratory 517 on May 8, 2025 at 3:00 PM', 0, 27, 'reservation', '2025-05-07 14:38:24'),
 (5, 'New Reservation Request', 'Cabunilas, Vince Bryant N. requested to use PC #2 in Laboratory 524 on May 8, 2025 at 1:00 PM', 0, 28, 'reservation', '2025-05-07 14:40:31'),
-(6, 'New Reservation Request', 'Monreal, Jeff requested to use PC #13 in Laboratory 524 on May 8, 2025 at 4:00 PM', 0, 29, 'reservation', '2025-05-07 14:46:02');
+(6, 'New Reservation Request', 'Monreal, Jeff requested to use PC #13 in Laboratory 524 on May 8, 2025 at 4:00 PM', 0, 29, 'reservation', '2025-05-07 14:46:02'),
+(7, 'New Reservation Request', 'Monreal, Jeff requested to use PC #1 in Laboratory 526 on May 9, 2025 at 3:00 PM', 0, 30, 'reservation', '2025-05-07 16:33:43');
 
 -- --------------------------------------------------------
 
@@ -307,35 +308,35 @@ CREATE TABLE `lab_schedules` (
 -- Dumping data for table `lab_schedules`
 --
 
-INSERT INTO `lab_schedules` (`id`, `day`, `laboratory`, `time_start`, `time_end`, `subject`, `professor`, `created_at`, `updated_at`) VALUES
-(9, 'Monday', 'Laboratory 517', '07:30:00', '10:30:00', 'Systems-Architecture', 'Mr. Jeff Salimbangon', '2025-05-07 14:50:01', '2025-05-07 14:58:32'),
-(10, 'Monday', 'Laboratory 517', '10:30:00', '12:30:00', 'Information-Security', 'Mr. Huebert Ferolino', '2025-05-07 14:52:04', '2025-05-07 14:54:59'),
-(11, 'Monday', 'Laboratory 517', '12:30:00', '14:30:00', 'Python', 'Mr. Dennis Durano', '2025-05-07 14:54:04', '2025-05-07 14:55:32'),
-(12, 'Monday', 'Laboratory 517', '14:30:00', '16:30:00', 'Integrated Programming', 'Mr. Willson Gayo', '2025-05-07 14:54:47', '2025-05-07 14:55:40'),
-(13, 'Monday', 'Laboratory 517', '16:30:00', '18:30:00', '.Net', 'Mr. Leo Bermudez', '2025-05-07 14:57:09', '2025-05-07 14:57:09'),
-(14, 'Monday', 'Laboratory 517', '18:30:00', '20:00:00', 'OOP', 'Mr. Carlsan Kim', '2025-05-07 14:58:02', '2025-05-07 14:58:10'),
-(15, 'Monday', 'Laboratory 517', '20:00:00', '21:30:00', 'Quality Assurance Testing', 'Mr. Noel Anthony Mirambel', '2025-05-07 15:01:26', '2025-05-07 15:01:26'),
-(16, 'Tuesday', 'Laboratory 517', '07:30:00', '10:30:00', 'Systems-Architecture', 'Mr. Jeff Salimbangon', '2025-05-07 06:50:01', '2025-05-07 06:58:32'),
-(17, 'Tuesday', 'Laboratory 517', '10:30:00', '12:30:00', 'Information-Security', 'Mr. Huebert Ferolino', '2025-05-07 06:52:04', '2025-05-07 06:54:59'),
-(18, 'Tuesday', 'Laboratory 517', '12:30:00', '14:30:00', 'Python', 'Mr. Dennis Durano', '2025-05-07 06:54:04', '2025-05-07 06:55:32'),
-(19, 'Tuesday', 'Laboratory 517', '14:30:00', '16:30:00', 'Integrated Programming', 'Mr. Willson Gayo', '2025-05-07 06:54:47', '2025-05-07 06:55:40'),
-(20, 'Tuesday', 'Laboratory 517', '16:30:00', '18:30:00', '.Net', 'Mr. Leo Bermudez', '2025-05-07 06:57:09', '2025-05-07 06:57:09'),
-(21, 'Tuesday', 'Laboratory 517', '18:30:00', '20:00:00', 'OOP', 'Mr. Carlsan Kim', '2025-05-07 06:58:02', '2025-05-07 06:58:10'),
-(22, 'Tuesday', 'Laboratory 517', '20:00:00', '21:30:00', 'Quality Assurance Testing', 'Mr. Noel Anthony Mirambel', '2025-05-07 07:01:26', '2025-05-07 07:01:26'),
-(23, 'Monday', 'Laboratory 524', '07:30:00', '10:30:00', 'Systems-Architecture', 'Mr. Jeff Salimbangon', '2025-05-07 06:50:01', '2025-05-07 06:58:32'),
-(24, 'Monday', 'Laboratory 524', '10:30:00', '12:30:00', 'Information-Security', 'Mr. Huebert Ferolino', '2025-05-07 06:52:04', '2025-05-07 06:54:59'),
-(25, 'Monday', 'Laboratory 524', '12:30:00', '14:30:00', 'Python', 'Mr. Dennis Durano', '2025-05-07 06:54:04', '2025-05-07 06:55:32'),
-(26, 'Monday', 'Laboratory 524', '14:30:00', '16:30:00', 'Integrated Programming', 'Mr. Willson Gayo', '2025-05-07 06:54:47', '2025-05-07 06:55:40'),
-(27, 'Monday', 'Laboratory 524', '16:30:00', '18:30:00', '.Net', 'Mr. Leo Bermudez', '2025-05-07 06:57:09', '2025-05-07 06:57:09'),
-(28, 'Monday', 'Laboratory 524', '18:30:00', '20:00:00', 'OOP', 'Mr. Carlsan Kim', '2025-05-07 06:58:02', '2025-05-07 06:58:10'),
-(29, 'Monday', 'Laboratory 524', '20:00:00', '21:30:00', 'Quality Assurance Testing', 'Mr. Noel Anthony Mirambel', '2025-05-07 07:01:26', '2025-05-07 07:01:26'),
-(30, 'Monday', 'Laboratory 526', '07:30:00', '10:30:00', 'Systems-Architecture', 'Mr. Jeff Salimbangon', '2025-05-07 06:50:01', '2025-05-07 06:58:32'),
-(31, 'Monday', 'Laboratory 526', '10:30:00', '12:30:00', 'Information-Security', 'Mr. Huebert Ferolino', '2025-05-07 06:52:04', '2025-05-07 06:54:59'),
-(32, 'Monday', 'Laboratory 526', '12:30:00', '14:30:00', 'Python', 'Mr. Dennis Durano', '2025-05-07 06:54:04', '2025-05-07 06:55:32'),
-(33, 'Monday', 'Laboratory 526', '14:30:00', '16:30:00', 'Integrated Programming', 'Mr. Willson Gayo', '2025-05-07 06:54:47', '2025-05-07 06:55:40'),
-(34, 'Monday', 'Laboratory 526', '16:30:00', '18:30:00', '.Net', 'Mr. Leo Bermudez', '2025-05-07 06:57:09', '2025-05-07 06:57:09'),
-(35, 'Monday', 'Laboratory 526', '18:30:00', '20:00:00', 'OOP', 'Mr. Carlsan Kim', '2025-05-07 06:58:02', '2025-05-07 06:58:10'),
-(36, 'Monday', 'Laboratory 526', '20:00:00', '21:30:00', 'Quality Assurance Testing', 'Mr. Noel Anthony Mirambel', '2025-05-07 07:01:26', '2025-05-07 07:01:26');
+INSERT INTO `lab_schedules` (`id`, `day`, `laboratory`, `time_start`, `time_end`, `subject`, `professor`, `created_at`, `updated_at`, `status`) VALUES
+(9, 'Monday', 'Laboratory 517', '07:30:00', '10:30:00', 'Systems-Architecture', 'Mr. Jeff Salimbangon', '2025-05-07 14:50:01', '2025-05-07 15:55:13', 'In-Class'),
+(10, 'Monday', 'Laboratory 517', '10:30:00', '12:30:00', 'Information-Security', 'Mr. Huebert Ferolino', '2025-05-07 14:52:04', '2025-05-07 14:54:59', 'Available'),
+(11, 'Monday', 'Laboratory 517', '12:30:00', '14:30:00', 'Python', 'Mr. Dennis Durano', '2025-05-07 14:54:04', '2025-05-07 14:55:32', 'Available'),
+(12, 'Monday', 'Laboratory 517', '14:30:00', '16:30:00', 'Integrated Programming', 'Mr. Willson Gayo', '2025-05-07 14:54:47', '2025-05-07 14:55:40', 'Available'),
+(13, 'Monday', 'Laboratory 517', '16:30:00', '18:30:00', '.Net', 'Mr. Leo Bermudez', '2025-05-07 14:57:09', '2025-05-07 14:57:09', 'Available'),
+(14, 'Monday', 'Laboratory 517', '18:30:00', '20:00:00', 'OOP', 'Mr. Carlsan Kim', '2025-05-07 14:58:02', '2025-05-07 14:58:10', 'Available'),
+(15, 'Monday', 'Laboratory 517', '20:00:00', '21:30:00', 'Quality Assurance Testing', 'Mr. Noel Anthony Mirambel', '2025-05-07 15:01:26', '2025-05-07 15:01:26', 'Available'),
+(16, 'Tuesday', 'Laboratory 517', '07:30:00', '10:30:00', 'Systems-Architecture', 'Mr. Jeff Salimbangon', '2025-05-07 06:50:01', '2025-05-07 06:58:32', 'Available'),
+(17, 'Tuesday', 'Laboratory 517', '10:30:00', '12:30:00', 'Information-Security', 'Mr. Huebert Ferolino', '2025-05-07 06:52:04', '2025-05-07 06:54:59', 'Available'),
+(18, 'Tuesday', 'Laboratory 517', '12:30:00', '14:30:00', 'Python', 'Mr. Dennis Durano', '2025-05-07 06:54:04', '2025-05-07 06:55:32', 'Available'),
+(19, 'Tuesday', 'Laboratory 517', '14:30:00', '16:30:00', 'Integrated Programming', 'Mr. Willson Gayo', '2025-05-07 06:54:47', '2025-05-07 06:55:40', 'Available'),
+(20, 'Tuesday', 'Laboratory 517', '16:30:00', '18:30:00', '.Net', 'Mr. Leo Bermudez', '2025-05-07 06:57:09', '2025-05-07 06:57:09', 'Available'),
+(21, 'Tuesday', 'Laboratory 517', '18:30:00', '20:00:00', 'OOP', 'Mr. Carlsan Kim', '2025-05-07 06:58:02', '2025-05-07 06:58:10', 'Available'),
+(22, 'Tuesday', 'Laboratory 517', '20:00:00', '21:30:00', 'Quality Assurance Testing', 'Mr. Noel Anthony Mirambel', '2025-05-07 07:01:26', '2025-05-07 07:01:26', 'Available'),
+(23, 'Monday', 'Laboratory 524', '07:30:00', '10:30:00', 'Systems-Architecture', 'Mr. Jeff Salimbangon', '2025-05-07 06:50:01', '2025-05-07 06:58:32', 'Available'),
+(24, 'Monday', 'Laboratory 524', '10:30:00', '12:30:00', 'Information-Security', 'Mr. Huebert Ferolino', '2025-05-07 06:52:04', '2025-05-07 06:54:59', 'Available'),
+(25, 'Monday', 'Laboratory 524', '12:30:00', '14:30:00', 'Python', 'Mr. Dennis Durano', '2025-05-07 06:54:04', '2025-05-07 06:55:32', 'Available'),
+(26, 'Monday', 'Laboratory 524', '14:30:00', '16:30:00', 'Integrated Programming', 'Mr. Willson Gayo', '2025-05-07 06:54:47', '2025-05-07 06:55:40', 'Available'),
+(27, 'Monday', 'Laboratory 524', '16:30:00', '18:30:00', '.Net', 'Mr. Leo Bermudez', '2025-05-07 06:57:09', '2025-05-07 06:57:09', 'Available'),
+(28, 'Monday', 'Laboratory 524', '18:30:00', '20:00:00', 'OOP', 'Mr. Carlsan Kim', '2025-05-07 06:58:02', '2025-05-07 06:58:10', 'Available'),
+(29, 'Monday', 'Laboratory 524', '20:00:00', '21:30:00', 'Quality Assurance Testing', 'Mr. Noel Anthony Mirambel', '2025-05-07 07:01:26', '2025-05-07 07:01:26', 'Available'),
+(30, 'Monday', 'Laboratory 526', '07:30:00', '10:30:00', 'Systems-Architecture', 'Mr. Jeff Salimbangon', '2025-05-07 06:50:01', '2025-05-07 06:58:32', 'Available'),
+(31, 'Monday', 'Laboratory 526', '10:30:00', '12:30:00', 'Information-Security', 'Mr. Huebert Ferolino', '2025-05-07 06:52:04', '2025-05-07 06:54:59', 'Available'),
+(32, 'Monday', 'Laboratory 526', '12:30:00', '14:30:00', 'Python', 'Mr. Dennis Durano', '2025-05-07 06:54:04', '2025-05-07 06:55:32', 'Available'),
+(33, 'Monday', 'Laboratory 526', '14:30:00', '16:30:00', 'Integrated Programming', 'Mr. Willson Gayo', '2025-05-07 06:54:47', '2025-05-07 06:55:40', 'Available'),
+(34, 'Monday', 'Laboratory 526', '16:30:00', '18:30:00', '.Net', 'Mr. Leo Bermudez', '2025-05-07 06:57:09', '2025-05-07 06:57:09', 'Available'),
+(35, 'Monday', 'Laboratory 526', '18:30:00', '20:00:00', 'OOP', 'Mr. Carlsan Kim', '2025-05-07 06:58:02', '2025-05-07 06:58:10', 'Available'),
+(36, 'Monday', 'Laboratory 526', '20:00:00', '21:30:00', 'Quality Assurance Testing', 'Mr. Noel Anthony Mirambel', '2025-05-07 07:01:26', '2025-05-07 07:01:26', 'Available');
 
 -- --------------------------------------------------------
 
@@ -357,7 +358,8 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `username`, `title`, `content`, `is_read`, `created_at`) VALUES
-(1, 'Jeffrey', 'Reservation Approved', 'Your reservation for Laboratory 524, PC 13 on May 8, 2025 at 4:00 PM has been approved.', 1, '2025-05-07 14:46:20');
+(1, 'Jeffrey', 'Reservation Approved', 'Your reservation for Laboratory 524, PC 13 on May 8, 2025 at 4:00 PM has been approved.', 1, '2025-05-07 14:46:20'),
+(2, 'Jeffrey', 'Reservation Rejected', 'Your reservation for Laboratory 526, PC 1 on May 9, 2025 at 3:00 PM has been rejected.', 0, '2025-05-07 16:34:08');
 
 -- --------------------------------------------------------
 
@@ -398,7 +400,8 @@ INSERT INTO `reservations` (`id`, `idno`, `fullname`, `purpose`, `laboratory`, `
 (26, '20983134', 'Tormis, Francine', 'Java Programming', '517', 16, '12:00:00', '22:36:42', '2025-05-08', '2025-05-07 12:47:07', '2025-05-07 14:09:22', 'completed'),
 (27, '20952503', 'Cabunilas, Vince Bryant N.', 'Java Programming', '517', 1, '15:00:00', '22:42:55', '2025-05-08', '2025-05-07 14:38:24', '2025-05-07 14:38:40', 'completed'),
 (28, '20952503', 'Cabunilas, Vince Bryant N.', 'PHP', '524', 2, '13:00:00', NULL, '2025-05-08', '2025-05-07 14:40:31', '2025-05-07 14:41:44', 'rejected'),
-(29, '20183201', 'Monreal, Jeff', 'Java Programming', '524', 13, '16:00:00', '23:07:28', '2025-05-08', '2025-05-07 14:46:02', '2025-05-07 14:46:20', 'completed');
+(29, '20183201', 'Monreal, Jeff', 'Java Programming', '524', 13, '16:00:00', '23:07:28', '2025-05-08', '2025-05-07 14:46:02', '2025-05-07 14:46:20', 'completed'),
+(30, '20183201', 'Monreal, Jeff', 'C Programming', '526', 1, '15:00:00', NULL, '2025-05-09', '2025-05-07 16:33:43', '2025-05-07 16:34:08', 'rejected');
 
 -- --------------------------------------------------------
 
@@ -421,7 +424,15 @@ CREATE TABLE `resources` (
 --
 
 INSERT INTO `resources` (`id`, `name`, `description`, `image`, `link`, `created_at`, `updated_at`) VALUES
-(7, 'TEAB B', 'dwad', 'assets/images/resources/1746001755_800x600_Wallpaper_Blue_Sky.png', 'https://docs.google.com/forms/d/e/1FAIpQLSdrOO4QMDuyXZoFn0Ysh-r-9zxvZrB-HOO2LegMfNA-EtjAFA/formResponse', '2025-04-30 08:29:15', NULL);
+(8, 'Python', 'Python is a popular programming language. It was created by Guido van Rossum, and released in 1991.', 'assets/images/resources/1746632654_9d2e8896750899.5eb54f3381452.png', 'https://www.w3schools.com/python/', '2025-05-07 15:44:14', NULL),
+(9, 'Java Programming', 'Java is a popular programming language, created in 1995.', 'assets/images/resources/1746632702_java.png', 'https://www.w3schools.com/java/java_intro.asp', '2025-05-07 15:45:02', NULL),
+(10, 'PHP', 'It is powerful enough to be at the core of the biggest blogging system on the web (WordPress)!', 'assets/images/resources/1746632736_php.jpg', 'https://www.w3schools.com/php/php_intro.asp', '2025-05-07 15:45:36', NULL),
+(11, 'HTML', 'HTML is the standard markup language for creating Web pages', 'assets/images/resources/1746632769_html.jpg', 'https://www.w3schools.com/html/html_intro.asp', '2025-05-07 15:46:09', NULL),
+(12, 'CSS', 'CSS describes how HTML elements are to be displayed on screen, paper, or in other media', 'assets/images/resources/1746632789_css.png', 'https://www.w3schools.com/css/css_intro.asp', '2025-05-07 15:46:29', NULL),
+(13, 'JavaScript', 'JavaScript is the programming language of the web.\r\n\r\n', 'assets/images/resources/1746632815_js.png', 'https://www.w3schools.com/js/js_intro.asp', '2025-05-07 15:46:55', NULL),
+(14, 'Machine Learning', 'Machine Learning is making the computer learn from studying data and statistics.', 'assets/images/resources/1746632876_Machine-Learning-5.jpeg', 'https://www.w3schools.com/python/python_ml_getting_started.asp', '2025-05-07 15:47:56', NULL),
+(15, 'Cyber Security', 'The rise in digital cyberattacks has made cybersecurity a priority for businesses and individuals.', 'assets/images/resources/1746633065_cybersecuirty.png', 'https://www.cisco.com/site/us/en/learn/topics/security/what-is-cybersecurity.html', '2025-05-07 15:51:05', NULL),
+(16, 'Internet of Things (IoT)', 'It refers to the interconnectedness of physical devices, such as appliances and vehicles, that are embedded with software, sensors, and connectivity which enables these objects to connect and exchange data.', 'assets/images/resources/1746633133_what-is-iot.jpeg', 'https://www.ibm.com/think/topics/internet-of-things', '2025-05-07 15:52:13', '2025-05-07 15:54:38');
 
 -- --------------------------------------------------------
 
@@ -483,8 +494,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `idno`, `lastname`, `firstname`, `middlename`, `course`, `year`, `username`, `password`, `email`, `address`, `remaining_sessions`, `points`, `role`, `profile_image`, `created_at`) VALUES
 (1, '20183201', 'Monreal', 'Jeff', '', 'BS-Information Techn', 3, 'Jeffrey', '$2y$10$lBOdbK0MqdTvgzVKMUnSEOdzCo7Ai8fmIr8IyE76OJ8pe5coHy8J.', NULL, NULL, 29, 0, '', 'uploads/profile_67ad71220ee12.jpg', '2025-02-13 04:10:38'),
-(2, '20952503', 'Cabunilas', 'Vince Bryant', 'N.', 'BS-Information Techn', 3, 'vince', '$2y$10$twPu7cUcwWDXkPE3SlQR6.NLRybSZvvfEo2nBG6mGXx9NqxaXmmR6', 'vincebryant42@gmail.com', 'Cebu, City', 15, 0, '', '../uploads/profile_67c6ec0d2164c.png', '2025-02-13 04:14:38'),
-(3, '20934721', 'Escoton', 'Julius', '', 'BS-Information Techn', 2, 'Joboy', '$2y$10$Ebzkn9jgH7A70vxKyJyyjuSkRgyHc49YsRl0AQaZinQCDmMnnWfLW', NULL, NULL, 25, 0, '', 'uploads/profile_67ad7301f18d0.jpg', '2025-02-13 04:20:03'),
+(2, '20952503', 'Cabunilas', 'Vince Bryant', 'N.', 'BS-Information Techn', 3, 'vince', '$2y$10$twPu7cUcwWDXkPE3SlQR6.NLRybSZvvfEo2nBG6mGXx9NqxaXmmR6', 'vincebryant42@gmail.com', 'Cebu, City', 16, 0, '', '../uploads/profile_67c6ec0d2164c.png', '2025-02-13 04:14:38'),
+(3, '20934721', 'Escoton', 'Julius', '', 'BS-Information Techn', 2, 'Joboy', '$2y$10$Ebzkn9jgH7A70vxKyJyyjuSkRgyHc49YsRl0AQaZinQCDmMnnWfLW', NULL, NULL, 27, 0, '', 'uploads/profile_67ad7301f18d0.jpg', '2025-02-13 04:20:03'),
 (4, '20983134', 'Tormis', 'Francine', '', 'CHM', 3, 'pransin_noob', '$2y$10$hkZsRiyxNGlIGIbjTVNfVO6be.T1LStWe1qlOgvVWxasbTLHqvREm', 'pransin@gmail.com', 'Digos noob', 29, 0, '', '../uploads/profile_680269559cabe.png', '2025-02-13 14:08:20'),
 (5, '20010012', 'Tudtud', 'Daphne', '', 'BS-Computer Science', 1, 'Sashimi', '$2y$10$Jad4spx3QyWBnw2WaeICReNb1ERgN9xC2qIDPV7ZtgVeQZkt7iDnW', 'sashimi@gmail.com', 'Tisa noob', 30, 0, '', '../uploads/profile_67c7261dbfbda.jpg', '2025-02-14 02:44:15'),
 (6, '20914241', 'McArthur', 'Newbie', '', 'College of Education', 4, 'Newbie', '$2y$10$TZyAGn9J4LT1hQRFkhMaCueHcRkgqu2nD6K0y9pK5peHVqasjS1VG', '', '', 29, 0, '', 'uploads/profile_67b602449f3d5.jpg', '2025-02-19 16:09:03'),
@@ -492,7 +503,7 @@ INSERT INTO `users` (`id`, `idno`, `lastname`, `firstname`, `middlename`, `cours
 (8, '11111111', 'Putin', 'Vladimir', '', 'BS-Computer Science', 4, 'Vodka', '$2y$10$unQMQb8AwVxwBnl92N1eU.WVpKCGimKEPothWhQWkP/BrFFshQqVy', '', '', 30, 0, '', 'uploads/profile_67c65840c9f6c.png', '2025-03-04 01:12:13'),
 (10, '29892812', 'Musk', 'Elon', '', 'BS-Computer Science', 2, 'tesla', '$2y$10$mPVy4vWCndHRim5pLLgWz.qIi/DUfIrlaalhvSDKlR9gqQNUtZK7i', NULL, NULL, 29, 0, '', NULL, '2025-03-09 08:59:45'),
 (11, '28617809', 'Graham', 'Micro', NULL, 'CCJ', 4, 'tidet', '$2y$10$KFBy5hvEaRYRrkfSux3vGeD3fGaA0yoZAwDzrL53keO.H2HdvUAHu', '', '', 30, 0, 'student', '../assets/images/logo/AVATAR.png', '2025-03-20 12:49:15'),
-(12, '08726712', 'Turner', 'Jimmy', NULL, 'COE', 3, 'minecraft', '$2y$10$hPeFf6qgU0dImsMz5B856.l6yojAnltVWNCrscyW.Cc9j3XGN0KMS', NULL, NULL, 30, 4, 'student', '../assets/images/logo/AVATAR.png', '2025-03-20 13:28:16'),
+(12, '08726712', 'Turner', 'Jimmy', NULL, 'COE', 3, 'minecraft', '$2y$10$hPeFf6qgU0dImsMz5B856.l6yojAnltVWNCrscyW.Cc9j3XGN0KMS', NULL, NULL, 30, 0, 'student', '../assets/images/logo/AVATAR.png', '2025-03-20 13:28:16'),
 (13, '92863763', 'Bean', 'Ms', NULL, 'CON', 1, 'beans', '$2y$10$6D/wMUExrTwLja/QHQr3UeaEZxXKSWt1rAetQWB.Em83RJX4zhBS.', NULL, NULL, 30, 0, 'student', '../assets/images/logo/AVATAR.png', '2025-03-20 14:00:22'),
 (14, '21387321', 'Chill', 'Mc', NULL, 'BS-Computer Science', 2, 'epic', '$2y$10$GcSZYlVRYMy2DiYpfiUGA.KMzbhpcNv5n2Q.5v8ddKHXLQFWKYvS.', NULL, NULL, 30, 0, 'student', '../assets/images/logo/AVATAR.png', '2025-03-20 14:26:33'),
 (15, '28763712', 'Cat', 'Meow', NULL, 'CAS', 2, 'memo', '$2y$10$nWTI3PEUv4lvVZhY/B0q/eTrqAhkZyRyx4JS55WViI5FWWXcKriry', NULL, NULL, 30, 0, 'student', '../assets/images/logo/AVATAR.png', '2025-03-20 14:36:31'),
@@ -607,7 +618,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `admin_notifications`
 --
 ALTER TABLE `admin_notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `admin_users`
@@ -655,19 +666,19 @@ ALTER TABLE `lab_schedules`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `resources`
 --
 ALTER TABLE `resources`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `sit_ins`
@@ -691,15 +702,6 @@ ALTER TABLE `users`
 ALTER TABLE `feedback`
   ADD CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `feedback_ibfk_2` FOREIGN KEY (`sit_in_id`) REFERENCES `sit_ins` (`id`) ON DELETE CASCADE;
-
--- Add status column to lab_schedules table if it doesn't exist
-ALTER TABLE `lab_schedules` 
-ADD COLUMN `status` enum('Available','In-Class') NOT NULL DEFAULT 'Available' 
-AFTER `professor`;
-
--- Update existing records to have 'Available' status
-UPDATE `lab_schedules` SET `status` = 'Available' WHERE `status` IS NULL;
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
