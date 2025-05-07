@@ -347,15 +347,23 @@ if (isset($_GET['debug']) && $_GET['debug'] == 1) {
             max-width: 140px;
             padding: 0.75rem 1rem;
         }
+
+        .notification-icon i {
+            font-size: 18px;
+            padding-top: 14px;
+        }
     </style>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/sit-in.css">
     <link rel="stylesheet" href="../assets/css/nav.css">
+    <link rel="stylesheet" href="../assets/css/notification.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../assets/javascript/nav.js" defer></script>
+    <script src="../assets/javascript/notification.js" defer></script>
+    <script src="../assets/javascript/admin_notifications.js" defer></script>
 </head>
 <body>
 <div id="notification-container"></div>

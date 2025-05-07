@@ -2,60 +2,73 @@
 session_start();
 require_once '../config/db_connect.php';
 
+// Check if user is logged in
+if (!isset($_SESSION['username'])) {
+    header('Location: ../auth/login.php');
+    exit;
+}
+
+// Check if form was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validate PC selection
-    if (!isset($_POST['pc_number']) || empty($_POST['pc_number'])) {
-        $_SESSION['message'] = "Please select a PC.";
-        $_SESSION['message_type'] = "error";
-        header("Location: ../view/reservation.php");
-        exit();
+    // Get form data
+    $idno = $_POST['idno'] ?? '';
+    $fullname = $_POST['fullname'] ?? '';
+    $purpose = $_POST['purpose'] ?? '';
+    $laboratory = $_POST['laboratory'] ?? '';
+    $date = $_POST['date'] ?? '';
+    $time_in = $_POST['time_in'] ?? '';
+    $pc_number = $_POST['pc_number'] ?? null;
+    
+    // Validate required fields
+    if (empty($idno) || empty($fullname) || empty($purpose) || 
+        empty($laboratory) || empty($date) || empty($time_in)) {
+        $_SESSION['error_message'] = "All fields are required.";
+        header('Location: ../view/reservation.php');
+        exit;
     }
-
-    // Check if PC is still available
-    $lab = $_POST['laboratory'];
-    $pc = $_POST['pc_number'];
-    $sql = "SELECT status FROM computer_status WHERE laboratory = ? AND pc_number = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $lab, $pc);
-    $stmt->execute();
-    $result = $stmt->get_result();
     
-    if ($result->num_rows > 0) {
-        $status = $result->fetch_assoc()['status'];
-        if ($status !== 'available') {
-            $_SESSION['message'] = "Selected PC is no longer available. Please choose another PC.";
-            $_SESSION['message_type'] = "error";
-            header("Location: ../view/reservation.php");
-            exit();
-        }
-    }
-
-    $idno = $_POST['idno'];
-    $fullname = $_POST['fullname'];
-    $purpose = $_POST['purpose'];
-    $laboratory = $_POST['laboratory'];
-    $pc_number = $_POST['pc_number'];
-    $date = $_POST['date'];
-    $time_in = $_POST['time_in'];
-    $status = 'pending'; // Default status
-
-    $sql = "INSERT INTO reservations (idno, fullname, purpose, laboratory, pc_number, date, time_in, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    // Prepare SQL statement
+    $stmt = $conn->prepare("INSERT INTO reservations 
+                          (idno, fullname, purpose, laboratory, date, time_in, pc_number, status) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
     
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssssss", $idno, $fullname, $purpose, $laboratory, $pc_number, $date, $time_in, $status);
+    $stmt->bind_param("ssssssi", $idno, $fullname, $purpose, $laboratory, $date, $time_in, $pc_number);
     
+    // Execute the statement
     if ($stmt->execute()) {
-        $_SESSION['message'] = "Reservation request submitted successfully! Waiting for admin approval.";
-        $_SESSION['message_type'] = "success";
+        // Get the ID of the inserted reservation
+        $reservation_id = $conn->insert_id;
+        
+        // Create a notification for admins
+        $title = "New Reservation Request";
+        $content = "$fullname requested to use PC #$pc_number in Laboratory $laboratory on " . 
+                  date('F j, Y', strtotime($date)) . " at " . date('g:i A', strtotime($time_in));
+        
+        $admin_notification_sql = "INSERT INTO admin_notifications 
+                                  (title, content, related_id, related_type, is_read) 
+                                  VALUES (?, ?, ?, 'reservation', 0)";
+        
+        $notify = $conn->prepare($admin_notification_sql);
+        $notify->bind_param("ssi", $title, $content, $reservation_id);
+        $notify->execute();
+        $notify->close();
+        
+        // Set success message
+        $_SESSION['success_message'] = "Reservation submitted successfully!";
     } else {
-        $_SESSION['message'] = "Error submitting reservation request.";
-        $_SESSION['message_type'] = "error";
+        // Set error message
+        $_SESSION['error_message'] = "Error: " . $conn->error;
     }
-
+    
     $stmt->close();
     $conn->close();
-
-    header("Location: ../view/history.php");
-    exit();
+    
+    // Redirect back to the reservation page
+    header('Location: ../view/reservation.php');
+    exit;
+} else {
+    // Redirect if accessed directly without POST data
+    header('Location: ../view/reservation.php');
+    exit;
 }
+?>

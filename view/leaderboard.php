@@ -73,9 +73,12 @@ function formatYearLevel($year) {
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="../assets/css/board.css">
     <link rel="stylesheet" href="../assets/css/nav.css">
+    <link rel="stylesheet" href="../assets/css/notification.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="../assets/javascript/nav.js" defer></script>
+    <script src="../assets/javascript/notification.js" defer></script>
+    <script src="../assets/javascript/admin_notifications.js" defer></script>
     <style>
         body {
             opacity: 0;
@@ -91,6 +94,11 @@ function formatYearLevel($year) {
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        .notification-icon i {
+            font-size: 18px;
+            padding-top: 14px;
         }
         
         .content-wrapper {

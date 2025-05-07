@@ -146,17 +146,22 @@ function getYearLevelDisplay($yearLevel) {
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/records.css">
     <link rel="stylesheet" href="../assets/css/nav.css">
+    <link rel="stylesheet" href="../assets/css/notification.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../assets/javascript/nav.js" defer></script>
+    <script src="../assets/javascript/notification.js" defer></script>
+    <script src="../assets/javascript/admin_notifications.js" defer></script>
     <style>
         /* Add page opening animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        
         
         .content-wrapper {
             animation: fadeIn 0.5s ease-out forwards;
@@ -745,7 +750,8 @@ function getYearLevelDisplay($yearLevel) {
             }
             
             .notification-icon i {
-                font-size: 24px;
+                font-size: 18px;
+                padding-top: 14px;
             }
             
             .notification.info .notification-icon i {

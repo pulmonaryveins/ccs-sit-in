@@ -77,9 +77,25 @@
 
         <!-- Right side - Actions -->
         <div class="nav-actions">
-            <a href="#" class="action-link">
+            <!-- Notification icon with dropdown -->
+            <div class="notification-icon" id="notification-toggle">
                 <i class="fas fa-bell"></i>
-            </a>
+                <span class="notification-badge" id="notification-badge"></span>
+                
+                <!-- Notification Dropdown -->
+                <div class="notification-dropdown" id="notification-dropdown">
+                    <div class="notification-header">
+                        <h3>Notifications</h3>
+                        <button id="mark-all-read">Mark all as read</button>
+                    </div>
+                    <div class="notification-list" id="notification-list">
+                        <!-- Notifications will be loaded here -->
+                        <div class="notification-empty">
+                            Loading notifications...
+                        </div>
+                    </div>
+                </div>
+            </div>
             <a href="../auth/logout.php" class="action-link">
                 <i class="fas fa-sign-out-alt"></i>
             </a>

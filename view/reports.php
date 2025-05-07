@@ -94,6 +94,7 @@ if ($feedback_table_exists) {
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="../assets/css/reports.css">
     <link rel="stylesheet" href="../assets/css/nav.css">
+    <link rel="stylesheet" href="../assets/css/notification.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
@@ -102,6 +103,8 @@ if ($feedback_table_exists) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="../assets/javascript/nav.js" defer></script>
+    <script src="../assets/javascript/notification.js" defer></script>
+    <script src="../assets/javascript/admin_notifications.js" defer></script>
     <style>
         /* Add page opening animation */
         @keyframes fadeIn {
@@ -111,6 +114,11 @@ if ($feedback_table_exists) {
         
         .content-wrapper {
             animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .notification-icon i {
+            font-size: 18px;
+            padding-top: 14px;
         }
         
         .table-wrapper {
