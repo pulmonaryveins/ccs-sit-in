@@ -396,7 +396,17 @@ if ($result) {
             border: 1px solid rgba(185, 28, 28, 0.1);
         }
         
+        .status-badge.available {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+            border: 1px solid rgba(22, 101, 52, 0.1);
+        }
         
+        .status-badge.in-class {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid rgba(146, 64, 14, 0.1);
+        }
         
         /* Navigation Styles from Dashboard */
         .nav-container {
@@ -781,14 +791,19 @@ if ($result) {
                                     // Check if the current time is within the class schedule
                                     $now = new DateTime();
                                     $is_current = ($now >= $time_start && $now <= $time_end && date('l') == $selected_day);
+                                    $status = isset($schedule['status']) ? $schedule['status'] : 'Available';
                                     
                                     if ($is_current): 
                                     ?>
                                         <span class="status-badge occupied">
                                             <i class="ri-user-line mr-1"></i> Occupied
                                         </span>
+                                    <?php elseif ($status == 'In-Class'): ?>
+                                        <span class="status-badge in-class">
+                                            <i class="ri-time-line mr-1"></i> In-Class
+                                        </span>
                                     <?php else: ?>
-                                        <span class="status-badge open">
+                                        <span class="status-badge available">
                                             <i class="ri-checkbox-circle-line mr-1"></i> Available
                                         </span>
                                     <?php endif; ?>

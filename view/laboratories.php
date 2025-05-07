@@ -52,6 +52,25 @@ if ($result) {
     }
 }
 
+// Handle AJAX status toggle request
+if (isset($_POST['toggle_status'])) {
+    $schedule_id = $_POST['schedule_id'];
+    $current_status = $_POST['current_status'];
+    $new_status = ($current_status == 'Available') ? 'In-Class' : 'Available';
+    
+    $update_sql = "UPDATE lab_schedules SET status = ? WHERE id = ?";
+    $update_stmt = $conn->prepare($update_sql);
+    $update_stmt->bind_param("si", $new_status, $schedule_id);
+    
+    if ($update_stmt->execute()) {
+        echo json_encode(['success' => true, 'new_status' => $new_status]);
+        exit;
+    } else {
+        echo json_encode(['success' => false, 'error' => $conn->error]);
+        exit;
+    }
+}
+
 // Handle schedule CRUD operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
@@ -63,11 +82,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $time_end = $_POST['time_end'];
             $subject = $_POST['subject'];
             $professor = $_POST['professor'];
+            $status = $_POST['status'] ?? 'Available'; // Default to Available
             
-            $sql = "INSERT INTO lab_schedules (day, laboratory, time_start, time_end, subject, professor) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO lab_schedules (day, laboratory, time_start, time_end, subject, professor, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssss", $day, $laboratory, $time_start, $time_end, $subject, $professor);
+            $stmt->bind_param("sssssss", $day, $laboratory, $time_start, $time_end, $subject, $professor, $status);
             
             if ($stmt->execute()) {
                 header("Location: laboratories.php?lab=$laboratory&day=$day&success=Schedule added successfully");
@@ -86,11 +106,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $time_end = $_POST['time_end'];
             $subject = $_POST['subject'];
             $professor = $_POST['professor'];
+            $status = $_POST['status'] ?? 'Available';
             
             $sql = "UPDATE lab_schedules SET day = ?, laboratory = ?, time_start = ?, 
-                    time_end = ?, subject = ?, professor = ? WHERE id = ?";
+                    time_end = ?, subject = ?, professor = ?, status = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssssi", $day, $laboratory, $time_start, $time_end, $subject, $professor, $id);
+            $stmt->bind_param("sssssssi", $day, $laboratory, $time_start, $time_end, $subject, $professor, $status, $id);
             
             if ($stmt->execute()) {
                 header("Location: laboratories.php?lab=$laboratory&day=$day&success=Schedule updated successfully");
@@ -987,6 +1008,90 @@ if ($result) {
         .notification-close:hover {
             color: #4b5563;
         }
+
+        /* Status toggle switch */
+        .status-toggle {
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-left: 10px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #7556cc;
+        }
+        
+        input:focus + .slider {
+            box-shadow: 0 0 1px #7556cc;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Status badges */
+        .status-badge.available {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+            border: 1px solid rgba(22, 101, 52, 0.1);
+        }
+        
+        .status-badge.in-class {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid rgba(146, 64, 14, 0.1);
+        }
+
+        /* Loading animation for toggle switch */
+        .switch.loading .slider:before {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(0.95); }
+        }
+        
+        .switch.loading .slider {
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -1050,16 +1155,17 @@ if ($result) {
                 <table class="modern-table">
                     <thead>
                         <tr>
-                            <th class="w-1/4">Time</th>
-                            <th class="w-1/4">Subject</th>
-                            <th class="w-1/4">Professor</th>
-                            <th class="w-1/4">Actions</th>
+                            <th class="w-1/5">Time</th>
+                            <th class="w-1/5">Subject</th>
+                            <th class="w-1/5">Professor</th>
+                            <th class="w-1/5">Status</th>
+                            <th class="w-1/5">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="schedule-table-body">
                         <?php if (empty($lab_schedules)): ?>
                         <tr>
-                            <td colspan="4" class="empty-state">
+                            <td colspan="5" class="empty-state">
                                 <div class="empty-state-content">
                                     <i class="ri-calendar-todo-line"></i>
                                     <p>No schedules found for <?php echo htmlspecialchars($selected_lab); ?> on <?php echo htmlspecialchars($selected_day); ?></p>
@@ -1082,6 +1188,19 @@ if ($result) {
                                 <td><?php echo htmlspecialchars($schedule['subject']); ?></td>
                                 <td><?php echo htmlspecialchars($schedule['professor']); ?></td>
                                 <td>
+                                    <div class="status-toggle">
+                                        <span class="status-badge <?php echo strtolower(str_replace('-', '', $schedule['status'] ?? 'available')); ?>">
+                                            <i class="ri-<?php echo ($schedule['status'] ?? 'Available') == 'Available' ? 'checkbox-circle-line' : 'time-line'; ?> mr-1"></i>
+                                            <?php echo htmlspecialchars($schedule['status'] ?? 'Available'); ?>
+                                        </span>
+                                        <label class="switch ml-2" data-id="<?php echo $schedule['id']; ?>">
+                                            <input type="checkbox" class="status-checkbox" 
+                                                   <?php echo ($schedule['status'] ?? 'Available') == 'In-Class' ? 'checked' : ''; ?>>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
                                     <div class="action-buttons">
                                         <button class="action-button edit edit-btn" 
                                                 data-id="<?php echo $schedule['id']; ?>"
@@ -1090,7 +1209,8 @@ if ($result) {
                                                 data-timestart="<?php echo htmlspecialchars($schedule['time_start']); ?>"
                                                 data-timeend="<?php echo htmlspecialchars($schedule['time_end']); ?>"
                                                 data-subject="<?php echo htmlspecialchars($schedule['subject']); ?>"
-                                                data-professor="<?php echo htmlspecialchars($schedule['professor']); ?>">
+                                                data-professor="<?php echo htmlspecialchars($schedule['professor']); ?>"
+                                                data-status="<?php echo htmlspecialchars($schedule['status'] ?? 'Available'); ?>">
                                             <i class="ri-edit-line"></i>
                                         </button>
                                         <button class="action-button delete delete-btn" 
@@ -1168,6 +1288,14 @@ if ($result) {
                         <label for="professor">Professor</label>
                         <input type="text" name="professor" id="professor" required>
                     </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select name="status" id="status">
+                            <option value="Available">Available</option>
+                            <option value="In-Class">In-Class</option>
+                        </select>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -1235,6 +1363,14 @@ if ($result) {
                     <div class="form-group">
                         <label for="edit_professor">Professor</label>
                         <input type="text" name="professor" id="edit_professor" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit_status">Status</label>
+                        <select name="status" id="edit_status">
+                            <option value="Available">Available</option>
+                            <option value="In-Class">In-Class</option>
+                        </select>
                     </div>
                 </form>
             </div>
@@ -1500,8 +1636,63 @@ if ($result) {
 
             // Set up modal event handlers
             setupModals();
+            
+            // Setup status toggle functionality
+            setupStatusToggle();
         });
 
+        // Status toggle functionality
+        function setupStatusToggle() {
+            document.querySelectorAll('.status-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const switchLabel = this.closest('.switch');
+                    const scheduleId = switchLabel.dataset.id;
+                    const statusBadge = switchLabel.parentElement.querySelector('.status-badge');
+                    const currentStatus = this.checked ? 'In-Class' : 'Available';
+                    const previousStatus = this.checked ? 'Available' : 'In-Class';
+                    
+                    // Show loading state
+                    switchLabel.classList.add('loading');
+                    
+                    // Send AJAX request to update status
+                    fetch('laboratories.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `toggle_status=1&schedule_id=${scheduleId}&current_status=${previousStatus}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Remove loading state
+                        switchLabel.classList.remove('loading');
+                        
+                        if (data.success) {
+                            // Update the status badge
+                            statusBadge.className = `status-badge ${data.new_status.toLowerCase().replace('-', '')}`;
+                            statusBadge.innerHTML = `<i class="ri-${data.new_status === 'Available' ? 'checkbox-circle-line' : 'time-line'} mr-1"></i> ${data.new_status}`;
+                            
+                            // Show success notification
+                            showNotification('Status Updated', `Schedule status updated to ${data.new_status}`, 'success');
+                        } else {
+                            // Revert checkbox state on error
+                            this.checked = !this.checked;
+                            showNotification('Error', data.error || 'Failed to update status', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        // Remove loading state
+                        switchLabel.classList.remove('loading');
+                        
+                        // Revert checkbox state on error
+                        this.checked = !this.checked;
+                        showNotification('Error', 'Network error occurred', 'error');
+                        console.error('Error:', error);
+                    });
+                });
+            });
+        }
+        
         // Enhanced modal handling
         function setupModals() {
             // Add Schedule Modal
@@ -1586,6 +1777,7 @@ if ($result) {
                     const timeEnd = button.getAttribute('data-timeend');
                     const subject = button.getAttribute('data-subject');
                     const professor = button.getAttribute('data-professor');
+                    const status = button.getAttribute('data-status') || 'Available';
                     
                     document.getElementById('edit_schedule_id').value = id;
                     document.getElementById('edit_day').value = day;
@@ -1594,6 +1786,7 @@ if ($result) {
                     document.getElementById('edit_time_end').value = timeEnd.substr(0, 5);
                     document.getElementById('edit_subject').value = subject;
                     document.getElementById('edit_professor').value = professor;
+                    document.getElementById('edit_status').value = status;
                     
                     editScheduleModal.classList.add('active');
                 });

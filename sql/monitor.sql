@@ -299,7 +299,8 @@ CREATE TABLE `lab_schedules` (
   `subject` varchar(100) NOT NULL,
   `professor` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `status` enum('Available','In-Class') NOT NULL DEFAULT 'Available'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -690,6 +691,15 @@ ALTER TABLE `users`
 ALTER TABLE `feedback`
   ADD CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `feedback_ibfk_2` FOREIGN KEY (`sit_in_id`) REFERENCES `sit_ins` (`id`) ON DELETE CASCADE;
+
+-- Add status column to lab_schedules table if it doesn't exist
+ALTER TABLE `lab_schedules` 
+ADD COLUMN `status` enum('Available','In-Class') NOT NULL DEFAULT 'Available' 
+AFTER `professor`;
+
+-- Update existing records to have 'Available' status
+UPDATE `lab_schedules` SET `status` = 'Available' WHERE `status` IS NULL;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
