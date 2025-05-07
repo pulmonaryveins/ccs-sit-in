@@ -97,9 +97,12 @@ foreach ($all_students as $student) {
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="../assets/css/board.css">
     <link rel="stylesheet" href="../assets/css/student_nav.css">
+    <link rel="stylesheet" href="../assets/css/notification.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css">
     <script src="../assets/javascript/nav.js" defer></script>
+    <script src="../assets/javascript/notification.js" defer></script>
+    <script src="../assets/javascript/student_notifications.js" defer></script>
     <style>
         body {
             opacity: 0;
@@ -579,6 +582,48 @@ foreach ($all_students as $student) {
                 font-size: 1rem;
                 margin-top: 1.25rem;
             }
+        }
+
+        /* Fix for notification icon alignment in navbar */
+        .nav-actions .notification-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            height: 24px;
+            width: 24px;
+        }
+
+        
+        .nav-actions .notification-icon i {
+            font-size: 18px;
+            padding-bottom: 12px;
+
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            width: 360px;
+            max-width: 90vw;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 50;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+        
+        .nav-actions .notification-badge {
+            position: absolute;
+            top: 0px;
+            right: -5px;
         }
 </style>
 </head>
@@ -2111,145 +2156,6 @@ foreach ($all_students as $student) {
         // Set interval to refresh notifications (every 30 seconds)
         setInterval(loadNotifications, 30000);
 
-        // Add notification dropdown styling
-        document.head.insertAdjacentHTML('beforeend', `
-            <style>
-                /* Notification dropdown styling */
-                .notification-dropdown {
-                    position: absolute;
-                    top: 100%;
-                    right: 0;
-                    background: white;
-                    border-radius: 8px;
-                    width: 360px;
-                    max-width: 90vw;
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-                    z-index: 50;
-                    max-height: 0;
-                    overflow: hidden;
-                    transition: max-height 0.3s ease-out;
-                    opacity: 0;
-                    transform: translateY(10px);
-                    pointer-events: none;
-                }
-                
-                .notification-dropdown.active {
-                    max-height: 500px;
-                    opacity: 1;
-                    transform: translateY(0);
-                    pointer-events: auto;
-                    transition: max-height 0.3s ease-out, opacity 0.2s ease-out, transform 0.2s ease-out;
-                }
-                
-                .notification-header {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 16px;
-                    border-bottom: 1px solid #e2e8f0;
-                }
-                
-                .notification-header h3 {
-                    font-weight: 600;
-                    font-size: 1rem;
-                    color: #1e293b;
-                    margin: 0;
-                }
-                
-                .notification-header button {
-                    background: none;
-                    border: none;
-                    color: #7556cc;
-                    font-size: 0.875rem;
-                    cursor: pointer;
-                    font-weight: 500;
-                }
-                
-                .notification-list {
-                    max-height: 350px;
-                    overflow-y: auto;
-                    scrollbar-width: thin;
-                    scrollbar-color: rgba(117, 86, 204, 0.5) transparent;
-                }
-                
-                .notification-list::-webkit-scrollbar {
-                    width: 4px;
-                }
-                
-                .notification-list::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                
-                .notification-list::-webkit-scrollbar-thumb {
-                    background-color: rgba(117, 86, 204, 0.5);
-                    border-radius: 10px;
-                }
-                
-                .notification-item {
-                    padding: 12px 16px;
-                    border-bottom: 1px solid #f1f5f9;
-                    cursor: pointer;
-                    transition: background-color 0.2s ease;
-                    display: flex;
-                    align-items: flex-start;
-                }
-                
-                .notification-item:hover {
-                    background-color: #f8fafc;
-                }
-                
-                .notification-item.unread {
-                    background-color: #f0f9ff;
-                }
-                
-                .notification-item.unread:hover {
-                    background-color: #e0f2fe;
-                }
-                
-                .notification-indicator {
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    background-color: #7556cc;
-                    margin-top: 6px;
-                    margin-right: 12px;
-                    flex-shrink: 0;
-                }
-                
-                .notification-item.unread .notification-indicator {
-                    background-color: #3b82f6;
-                }
-                
-                .notification-content {
-                    flex-grow: 1;
-                }
-                
-                .notification-content h4 {
-                    font-weight: 600;
-                    font-size: 0.9rem;
-                    margin: 0 0 4px 0;
-                    color: #334155;
-                }
-                
-                .notification-content p {
-                    font-size: 0.8rem;
-                    margin: 0 0 6px 0;
-                    color: #64748b;
-                }
-                
-                .notification-time {
-                    font-size: 0.75rem;
-                    color: #94a3b8;
-                }
-                
-                .notification-empty {
-                    padding: 24px 16px;
-                    text-align: center;
-                    color: #64748b;
-                    font-size: 0.9rem;
-                }
-            </style>
-        `);
     </script>
 </body>
 </html>
